@@ -1,0 +1,37 @@
+{
+  "name": "wtc-perspective-card",
+  "version": "1.0.0",
+  "repository": "git@github.com:wethegit/wtc-perspective-card.git",
+  "author": "Marlon Marcello <marlon.marcello@gmail.com>",
+  "license": "MIT",
+  "main": "dist/wtc-perspective-card.js",
+  "style": "dist/wtc-perspective-card.css",
+  "scripts": {
+    "prebuild-js": "babel src/ --presets @babel/preset-env --out-dir build",
+    "prebuild-css": "node-sass --output-style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
+    "minify-js": "uglifyjs build/wtc-perspective-card.js --compress --output dist/wtc-perspective-card.min.js",
+    "minify-css": "postcss build/wtc-perspective-card.css --no-map --use autoprefixer -d dist/",
+    "build": "npm run prebuild-js && npm rum prebuild-css",
+    "prepare": "npm run build && webpack --config webpack.config.js && npm run minify-js && npm run minify-css"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "autoprefixer": "^9.7.3",
+    "babel-loader": "^8.0.6",
+    "node-sass": "^4.13.0",
+    "postcss-cli": "^7.1.0",
+    "uglify-js": "^3.7.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.8.3",
+    "core-js": "^3.6.3",
+    "gsap": "2.0.1",
+    "pepjs": "^0.5.2",
+    "wtc-controller-element": "^1.1.1",
+    "wtc-utility-helpers": "^2.1.0"
+  }
+}
