@@ -243,7 +243,7 @@ class PerspectiveCard {
    * This sets the target point to a value based on the pointer's position
    *
    * @public
-	 * @param {number}  e 				The pointer event object
+	 * @param {event}  e 				The pointer event object
    * @listens pointermove
    */
   pointerMove(e) {
@@ -260,7 +260,7 @@ class PerspectiveCard {
    * zoom and adds the class `card--over` to the element.
    *
    * @public
-	 * @param {number}  e 				The pointer event object
+	 * @param {event}  e 				The pointer event object
    * @listens pointerenter
    */
   pointerEnter(e) {
@@ -275,7 +275,7 @@ class PerspectiveCard {
    * target zoom and removes the class `card--over` to the element.
    *
    * @public
-	 * @param {number}  e 				The pointer event object
+	 * @param {event}  e 				The pointer event object
    * @listens pointerleave
    */
   pointerLeave(e) {
@@ -292,7 +292,7 @@ class PerspectiveCard {
    * resizing.
    *
    * @public
-	 * @param {number}  e 				The pointer event object
+	 * @param {event}  e 				The pointer event object
    * @listens pointerleave
    * @listens scroll
    */
