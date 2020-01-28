@@ -1,47 +1,41 @@
-.perspective-card {
-  border-radius: 1em;
-  display: inline-block;
+.card {
+  height: 418px;
+  perspective: 350px;
   position: relative;
-  -webkit-tap-highlight-color: rgba(#000, 0);
   transform-style: preserve-3d;
-  transition: transform 0.2s ease-out;
-  will-change: transform;
-
-  &.is-over {
-    transform: scale3d(1.07, 1.07, 1.07);
-
-    .perspectice-card__wrapper {
-      box-shadow: 0 45px 100px rgba(0, 0, 0, 0.4);
-    }
-    .perspective-card__shine {
-      opacity: 1;
-    }
-  }
+  width: 300px;
 }
-
-.perspective-card__img {
-  display: block;
-}
-
-.perspectice-card__wrapper {
-  border-radius: inherit;
-  overflow: hidden;
-  transition: box-shadow 0.2s ease-out;
-  will-change: transform, box-shadow;
-}
-
-.perspective-card__shine {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(255, 255, 255, 0) 60%
-  );
-  bottom: 0;
-  left: 0;
-  opacity: 0;
+.card__shine {
+  border-radius: 15px;
+  left: 0px;
+  height: 100%;
   position: absolute;
-  right: 0;
+  top: 0px;
+  transform: translateZ(.5px);
+  width: 100%;
+}
+.card__transformer {
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  width: 100%;
+}
+.card__artwork {
+  position: absolute;
   top: 0;
-  transition: opacity 0.2s ease;
-  will-change: transform, opacity;
+}
+.card__artwork--front {
+}
+.card__artwork--rear {
+  transform: translateZ(-.5px) scaleX(-1);
+}
+.card img {
+  border-radius: 15px;
+  box-shadow: 5px 5px 0px rgba(0,0,0,.0);
+  display: block;
+  max-width: 100%;
+  transition: .5s linear box-shadow;
+}
+.card--over img {
+  box-shadow: 5px 5px 20px rgba(0,0,0,.4);
 }

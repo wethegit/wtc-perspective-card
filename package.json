@@ -1,6 +1,6 @@
 {
   "name": "wtc-perspective-card",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "repository": "git@github.com:wethegit/wtc-perspective-card.git",
   "author": "Marlon Marcello <marlon.marcello@gmail.com>",
   "license": "MIT",
@@ -29,9 +29,6 @@
   "dependencies": {
     "@babel/polyfill": "^7.8.3",
     "core-js": "^3.6.3",
-    "gsap": "2.0.1",
-    "pepjs": "^0.5.2",
-    "wtc-controller-element": "^1.1.1",
-    "wtc-utility-helpers": "^2.1.0"
+    "pepjs": "^0.5.2"
   }
 }
