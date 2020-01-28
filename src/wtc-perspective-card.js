@@ -77,13 +77,15 @@ const targetTo = function(eye, target, up) {
 /**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
- * > .card
- * >   .card__transformer
- * >     .card__artwork card__artwork--front
- * >       img
- * >     .card__artwork card__artwork--rear (optional)
- * >       img
- * >     .card__shine
+ * ```
+ * .card
+ *   .card__transformer
+ *     .card__artwork card__artwork--front
+ *       img
+ *     .card__artwork card__artwork--rear (optional)
+ *       img
+ *     .card__shine
+ * ```
  *
  * This class is designed to be used with a decorator function (provided by
  * the new wtc-decorator static class) or used directly like:
@@ -91,7 +93,6 @@ const targetTo = function(eye, target, up) {
  * const p = new PerspectiveCard(element);
  * ```
  *
- * @class PerspectiveCard
  * @author Liam Egan <liam@wethecollective.com>
  * @version 2.0.0
  * @created Jan 28, 2020
@@ -102,7 +103,7 @@ class PerspectiveCard {
 	 * The Vector Class constructor
 	 *
 	 * @constructor
-	 * @param {number} element 				The element that contains all of the card details
+	 * @param {HTMLElement} element 				The element that contains all of the card details
 	 */
   constructor(element) {
     // Set the element
