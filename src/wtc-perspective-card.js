@@ -1,5 +1,3 @@
-console.clear();
-
 const SUPPORTSTOUCH = "ontouchstart" in window || navigator.msMaxTouchPoints;
 const EPSILON = 0.001;
 
