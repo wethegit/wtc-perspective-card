@@ -53,3 +53,4 @@ Plain vanilla javascript with ES6 and module imports.
 ```javascript
 const card = new PerspectiveCard(document.getElementById('card'));
 ```
+

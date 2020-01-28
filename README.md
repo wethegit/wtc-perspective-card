@@ -52,7 +52,9 @@ ExecuteControllers.instanciate(document.getElementById('card'), PerspectiveCard)
 Plain vanilla javascript with ES6 and module imports.
 ```javascript
 const card = new PerspectiveCard(document.getElementById('card'));
-```## Classes
+```
+
+## Classes
 
 <dl>
 <dt><a href="#PerspectiveCard">PerspectiveCard</a></dt>
