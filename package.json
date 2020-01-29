@@ -2,7 +2,7 @@
   "name": "wtc-perspective-card",
   "version": "2.0.0",
   "repository": "git@github.com:wethegit/wtc-perspective-card.git",
-  "author": "Marlon Marcello <marlon.marcello@gmail.com>",
+  "author": "Liam Egan <liam@wethecollectibe.com>",
   "license": "MIT",
   "main": "dist/wtc-perspective-card.min.js",
   "style": "dist/wtc-perspective-card.css",
