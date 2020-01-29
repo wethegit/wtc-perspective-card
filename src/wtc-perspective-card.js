@@ -2,79 +2,6 @@ const SUPPORTSTOUCH = "ontouchstart" in window || navigator.msMaxTouchPoints;
 const EPSILON = 0.001;
 
 /**
- * Generates a matrix that makes something look at something else.
- *
- * @param {vec3} eye Position of the viewer
- * @param {vec3} center Point the viewer is looking at
- * @param {vec3} up vec3 pointing up
- * @returns {mat4} out
- */
-const targetTo = function(eye, target, up) {
-
-  if(eye.array) eye = eye.array;
-  if(target.array) target = target.array;
-  if(up.array) up = up.array;
-
-  if(
-    eye.length && eye.length >= 3 && 
-    target.length && target.length >= 3 && 
-    up.length && up.length >= 3) {
-
-    const e = { x: eye[0], y: eye[1], z: eye[2] },
-          c = { x: target[0], y: target[1], z: target[2] },
-          u = { x: up[0], y: up[1], z: up[2] };
-
-    const off = {
-      x: e.x - c.x,
-      y: e.y - c.y,
-      z: e.z - c.z
-    };
-    let l = off.x*off.x + off.y*off.y + off.z*off.z;
-    if(l>0) {
-      l = 1. / Math.sqrt(l);
-      off.x *= l;
-      off.y *= l;
-      off.z *= l;
-    }
-
-    const or = {
-      x: u.y * off.z - u.z * off.y,
-      y: u.z * off.x - u.x * off.z,
-      z: u.x * off.y - u.y * off.x
-    };
-    l = or.x*or.x + or.y*or.y + or.z*or.z;
-    if(l>0) {
-      l = 1. / Math.sqrt(l);
-      or.x *= l;
-      or.y *= l;
-      or.z *= l;
-    }
-
-    return [
-      or.x,
-      or.y,
-      or.z,
-      0,
-
-      off.y * or.z - off.z * or.y,
-      off.z * or.x - off.x * or.z,
-      off.x * or.y - off.y * or.x,
-      0,
-
-      off.x,
-      off.y,
-      off.z,
-      0,
-
-      e.x,
-      e.y,
-      e.z,
-      1
-    ];
-  }
-};
-
-/**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
  * ```
@@ -206,7 +133,7 @@ class PerspectiveCard {
     }
 
     // Find the wold matrix using the targetTo method (see above)
-    const worldMatrix = targetTo(this.center, this.lookPoint, [0, 1, 0]);
+    const worldMatrix = PerspectiveCard.targetTo(this.center, this.lookPoint, [0, 1, 0]);
 
     // Find the polar coordinates for the rendition of the gradient.
     const angle = Math.atan2(this.lookPoint[1], this.lookPoint[0]) + Math.PI*.5;
@@ -521,6 +448,84 @@ class PerspectiveCard {
   get pointerControlled() {
     return this._pointerControlled === true;
   }
+
+  /**
+   * Static classes
+   */
+
+  /**
+   * Generates a matrix that makes something look at something else.
+   *
+   * @static
+   * @param {vec3} eye Position of the viewer
+   * @param {vec3} center Point the viewer is looking at
+   * @param {vec3} up vec3 pointing up
+   * @returns {mat4} out
+   */
+  static targetTo(eye, target, up) {
+
+    if(eye.array) eye = eye.array;
+    if(target.array) target = target.array;
+    if(up.array) up = up.array;
+
+    if(
+      eye.length && eye.length >= 3 && 
+      target.length && target.length >= 3 && 
+      up.length && up.length >= 3) {
+
+      const e = { x: eye[0], y: eye[1], z: eye[2] },
+            c = { x: target[0], y: target[1], z: target[2] },
+            u = { x: up[0], y: up[1], z: up[2] };
+
+      const off = {
+        x: e.x - c.x,
+        y: e.y - c.y,
+        z: e.z - c.z
+      };
+      let l = off.x*off.x + off.y*off.y + off.z*off.z;
+      if(l>0) {
+        l = 1. / Math.sqrt(l);
+        off.x *= l;
+        off.y *= l;
+        off.z *= l;
+      }
+
+      const or = {
+        x: u.y * off.z - u.z * off.y,
+        y: u.z * off.x - u.x * off.z,
+        z: u.x * off.y - u.y * off.x
+      };
+      l = or.x*or.x + or.y*or.y + or.z*or.z;
+      if(l>0) {
+        l = 1. / Math.sqrt(l);
+        or.x *= l;
+        or.y *= l;
+        or.z *= l;
+      }
+
+      return [
+        or.x,
+        or.y,
+        or.z,
+        0,
+
+        off.y * or.z - off.z * or.y,
+        off.z * or.x - off.x * or.z,
+        off.x * or.y - off.y * or.x,
+        0,
+
+        off.x,
+        off.y,
+        off.z,
+        0,
+
+        e.x,
+        e.y,
+        e.z,
+        1
+      ];
+    }
+  };
   
 }
 
