@@ -31,8 +31,9 @@ class PerspectiveCard {
 	 *
 	 * @constructor
 	 * @param {HTMLElement} element 				The element that contains all of the card details
+	 * @param {Object}      settings 				The settings of the component
 	 */
-  constructor(element) {
+  constructor(element, settings) {
     // Set the element
     this.element = element;
     
