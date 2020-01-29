@@ -54,31 +54,6 @@ Plain vanilla javascript with ES6 and module imports.
 const card = new PerspectiveCard(document.getElementById('card'));
 ```
 
-## Classes
-
-<dl>
-<dt><a href="#PerspectiveCard">PerspectiveCard</a></dt>
-<dd><p>This sets up the basic perspective card. This class expects markup at least
-conforming to:</p>
-<pre><code>.card
-  .card__transformer
-    .card__artwork card__artwork--front
-      img
-    .card__artwork card__artwork--rear (optional)
-      img
-    .card__shine</code></pre><p>This class is designed to be used with a decorator function (provided by
-the new wtc-decorator static class) or used directly like:</p>
-<pre><code>const p = new PerspectiveCard(element);</code></pre></dd>
-</dl>
-
-## Functions
-
-<dl>
-<dt><a href="#targetTo">targetTo(eye, center, up)</a> ⇒ <code>mat4</code></dt>
-<dd><p>Generates a matrix that makes something look at something else.</p>
-</dd>
-</dl>
-
 <a name="PerspectiveCard"></a>
 
 ## PerspectiveCard
@@ -107,25 +82,28 @@ const p = new PerspectiveCard(element);
 
 * [PerspectiveCard](#PerspectiveCard)
     * [new PerspectiveCard(element)](#new_PerspectiveCard_new)
-    * [.element](#PerspectiveCard+element) : <code>HTMLElement</code>
-    * [.position](#PerspectiveCard+position) : <code>Array</code>
-    * [.tPoint](#PerspectiveCard+tPoint) : <code>Array</code>
-    * [.lookPoint](#PerspectiveCard+lookPoint) : <code>Array</code>
-    * [.center](#PerspectiveCard+center) : <code>Array</code>
-    * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
-    * [.size](#PerspectiveCard+size) : <code>Array</code>
-    * [.axis](#PerspectiveCard+axis) : <code>Array</code>
-    * [.playing](#PerspectiveCard+playing) : <code>Boolean</code>
-    * [.lastFrameTime](#PerspectiveCard+lastFrameTime) : <code>Number</code>
-    * [.delta](#PerspectiveCard+delta) : <code>Number</code>
-    * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
-    * [.play(delta, raf)](#PerspectiveCard+play)
-    * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
-    * [.pointerMove(e)](#PerspectiveCard+pointerMove)
-    * [.pointerEnter(e)](#PerspectiveCard+pointerEnter)
-    * [.pointerLeave(e)](#PerspectiveCard+pointerLeave)
-    * [.resize(e)](#PerspectiveCard+resize)
-    * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
+    * _instance_
+        * [.element](#PerspectiveCard+element) : <code>HTMLElement</code>
+        * [.position](#PerspectiveCard+position) : <code>Array</code>
+        * [.tPoint](#PerspectiveCard+tPoint) : <code>Array</code>
+        * [.lookPoint](#PerspectiveCard+lookPoint) : <code>Array</code>
+        * [.center](#PerspectiveCard+center) : <code>Array</code>
+        * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
+        * [.size](#PerspectiveCard+size) : <code>Array</code>
+        * [.axis](#PerspectiveCard+axis) : <code>Array</code>
+        * [.playing](#PerspectiveCard+playing) : <code>Boolean</code>
+        * [.lastFrameTime](#PerspectiveCard+lastFrameTime) : <code>Number</code>
+        * [.delta](#PerspectiveCard+delta) : <code>Number</code>
+        * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
+        * [.play(delta, raf)](#PerspectiveCard+play)
+        * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
+        * [.pointerMove(e)](#PerspectiveCard+pointerMove)
+        * [.pointerEnter(e)](#PerspectiveCard+pointerEnter)
+        * [.pointerLeave(e)](#PerspectiveCard+pointerLeave)
+        * [.resize(e)](#PerspectiveCard+resize)
+        * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
+    * _static_
+        * [.targetTo(eye, center, up)](#PerspectiveCard.targetTo) ⇒ <code>mat4</code>
 
 <a name="new_PerspectiveCard_new"></a>
 
@@ -324,12 +302,12 @@ Listener for the intersection observer callback
 | entries | <code>object</code> | the object that contains all of the elements being calculated by this observer |
 | observer | <code>object</code> | the observer instance itself |
 
-<a name="targetTo"></a>
+<a name="PerspectiveCard.targetTo"></a>
 
-## targetTo(eye, center, up) ⇒ <code>mat4</code>
+### PerspectiveCard.targetTo(eye, center, up) ⇒ <code>mat4</code>
 Generates a matrix that makes something look at something else.
 
-**Kind**: global function  
+**Kind**: static method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Returns**: <code>mat4</code> - out  
 
 | Param | Type | Description |
