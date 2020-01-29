@@ -35,17 +35,29 @@ Add your markup.
 You now have 2 options to initalize the component.
 
 ### Instanciating
-#### 1. Using ExecuteControllers
-##### Automatically
-If you are using [wtc-controller-element] just add **data-controller="PerspectiveCard"** to your markup.
+#### 1. Using The Decorator function
+If you are using just add **data-decorator="PerspectiveCard"** to your markup.
 ```html
-<div class="perspective-card" data-controller="PerspectiveCard">
+<div class="perspective-card" data-decorator="PerspectiveCard">
   <img class="perspective-card__img" src="path/image.jpg" />
 </div>
 ```
-##### Manually
+And then write your decorator code to take a set of DOM elements and decorate them with the class
 ```javascript
-ExecuteControllers.instanciate(document.getElementById('card'), PerspectiveCard);
+const decorate = function(decorator, nodeSet) {
+  const controllers = [];
+  Array.from(nodeSet).forEach((node) => {
+    const controller = new decorator(node, node.dataset);
+    node.data = node.data || {};
+    node.data.controller = controller;
+    controllers.push(controller);
+  });
+  return controllers;
+}
+```
+Then feed your DOM elements to the decorator code
+```javascript
+const controllers = decorate(PerspectiveCard, document.querySelectorAll('[data-decorator="PerspectiveCard"]'));
 ```
 
 #### 2. Vanilla JS
