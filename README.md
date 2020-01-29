@@ -81,7 +81,7 @@ const p = new PerspectiveCard(element);
 **Author**: Liam Egan <liam@wethecollective.com>  
 
 * [PerspectiveCard](#PerspectiveCard)
-    * [new PerspectiveCard(element)](#new_PerspectiveCard_new)
+    * [new PerspectiveCard(element, settings)](#new_PerspectiveCard_new)
     * _instance_
         * [.element](#PerspectiveCard+element) : <code>HTMLElement</code>
         * [.position](#PerspectiveCard+position) : <code>Array</code>
@@ -107,13 +107,14 @@ const p = new PerspectiveCard(element);
 
 <a name="new_PerspectiveCard_new"></a>
 
-### new PerspectiveCard(element)
+### new PerspectiveCard(element, settings)
 The PerspectiveCard constructor. Creates and initialises the perspective card component.
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | element | <code>HTMLElement</code> | The element that contains all of the card details |
+| settings | <code>Object</code> | The settings of the component |
 
 <a name="PerspectiveCard+element"></a>
 
