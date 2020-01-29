@@ -101,7 +101,7 @@ class PerspectiveCard {
       const d = this.delta * 0.0001;
       const s = Math.sin(d*2.);
       const c = Math.cos(d*.5);
-      const l = 200. * Math.cos(d * 3.542 + 1234.5);
+      const l = 200. * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
       
       this.tPoint = [
         c * l,
