@@ -108,7 +108,7 @@ const p = new PerspectiveCard(element);
 <a name="new_PerspectiveCard_new"></a>
 
 ### new PerspectiveCard(element)
-The Vector Class constructor
+The PerspectiveCard constructor. Creates and initialises the perspective card component.
 
 
 | Param | Type | Description |

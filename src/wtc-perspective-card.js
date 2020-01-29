@@ -27,7 +27,7 @@ const EPSILON = 0.001;
 class PerspectiveCard {
   
 	/**
-	 * The Vector Class constructor
+	 * The PerspectiveCard constructor. Creates and initialises the perspective card component.
 	 *
 	 * @constructor
 	 * @param {HTMLElement} element 				The element that contains all of the card details
