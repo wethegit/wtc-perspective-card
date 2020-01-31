@@ -3,6 +3,15 @@ const EPSILON = 0.001;
 
 let lastDelta = 0;
 
+// Easing functions
+const easeInOutCubic = function (time, start, change, duration) {
+  if ((time/=duration/2) < 1) return change*.5*time*time*time + start;
+  return change*.5*((time-=2)*time*time + 2) + start;
+};
+const easeInOutSine = function (time, start, change, duration) {
+    return -change/2 * (Math.cos(Math.PI*time/duration) - 1) + start;
+}
+
 /**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
@@ -532,4 +541,362 @@ class PerspectiveCard {
   
 }
 
-export { PerspectiveCard }
+/**
+ * The clickable perspective card adds functionality that allows the zooming 
+ * the card by clicking on it. In doing so the card flips and animates up to a 
+ * modal style display.
+ * 
+ * @todo Add some extra functionality here like a close button and keyboard close
+ *
+ * @author Liam Egan <liam@wethecollective.com>
+ * @version 2.0.0
+ * @created Jan 28, 2020
+ * @extends PerspectiveCard
+ */
+class ClickablePerspectiveCard extends PerspectiveCard {
+
+	/**
+	 * The ClickablePerspectiveCard constructor. Creates and initialises the perspective 
+   * card component.
+	 *
+	 * @constructor
+	 * @param {HTMLElement} element 				The element that contains all of the card details
+	 * @param {Object}      settings 				The settings of the component
+	 */
+  constructor(element, settings) {
+    // Call the superfunction
+    super(element, settings);
+    
+    // Bind the extra handlers
+    this.onClick = this.onClick.bind(this);
+    
+    // Add the listener to the pointer up event
+    this.element.addEventListener('pointerup', this.onClick);
+    
+    // Set the card's starting dimensions
+    this.startingDimensions = [this.element.offsetWidth, this.element.offsetHeight];
+    
+    // Create the matte - this is the element that will appear behind the card.
+    this.matte = document.createElement('div');
+    this.matte.className = `${this.element.classList[0]}--matte`;
+  }
+  
+  /**
+   * This is the main run-loop function.
+   * It is responsible for taking the various previously set properies
+   * and transforming the card. This can be called individually, or
+   * (more commonly) as the callback to a animation frame.
+   *
+   * @public
+	 * @param {number}  delta 				The delta of the animation
+   * @param {boolean} raf=true      This just determines whether to run the next RAF as a part of this call
+   */
+  play(delta, raf = true) {
+    // Call the superfunction
+    super.play(delta, raf);
+    
+    // If we are tweening values and our tween time is less than the duration
+    if(this.tweenTime < this.tweenDuration && this.tweening === true) {
+      // Tween the position of the card on screen
+      this.screenPosition = [
+        easeInOutCubic(
+          this.tweenTime, 
+          this.startingPosition[0],
+          this.targetPosition[0] - this.startingPosition[0],
+          this.tweenDuration ),
+        easeInOutCubic(
+          this.tweenTime, 
+          this.startingPosition[1],
+          this.targetPosition[1] - this.startingPosition[1],
+          this.tweenDuration )
+      ];
+      
+      // Tween the card scale
+      this.screenScale = easeInOutCubic(
+          this.tweenTime, 
+          this.startingScale,
+          this.targetScale - this.startingScale,
+          this.tweenDuration );
+      
+      // Tween the rotation value
+      // This is responsible for moving the look at point in a large circle 
+      // around the card and gives the illusion that the card is flipping
+      const r = easeInOutSine(
+          this.tweenTime, 
+          Math.PI*.5,
+          this.rotationAmount,
+          this.tweenDuration );
+      const t = [
+        Math.cos(r) * -800,
+        Math.sin(r) * -800
+      ];
+      this.lookPoint = [
+        t[0],
+        this.lookPoint[1],
+        t[1]
+      ];
+      
+      // Update the tween time with the last frame duration
+      this.tweenTime += this.lastFrameTime;
+
+      // Resize things so that mouse interation is sensible
+      this.resize();
+
+    // If our time has run out, but tweening is true it means that the animation has just ended
+    } else if(this.tweening === true) {
+      // Set the card's position on screen to the fixed end point
+      this.screenPosition = this.targetPosition;
+      this.tweening = false;
+
+      // Run our end function.
+      this.onEndTween();
+    }
+  }
+  
+  // Toggle the enlarged flag on click
+  onClick() {
+    this.enlarged = !this.enlarged;
+  }
+  
+  /**
+   * (getter/setter) Whether the card is enlarged or not. This is a BIG 
+   * setter and is really responsible for generating the tweening values
+   * setting up the tween and initialising it.
+   *
+   * @type {Boolean}
+   * @default false
+   */
+  set enlarged(value) {
+
+    // Whether we were enlarged already
+    const wasEnlarged = this.enlarged;
+
+    // Set the value
+    this._enlarged = value === true;
+
+    // If we're going from unenlarged to enlarged
+    if(this.enlarged === true && wasEnlarged === false) {
+      
+      // Set up the DOM for this. Basically the same as setting up a modal.
+      document.body.style.overflow = 'hidden';
+      this.element.style.position = 'fixed';
+      this.element.classList.add('modal');
+      setTimeout(() => {
+        this.matte.classList.add('modal');
+      }, 0);
+      document.body.appendChild(this.matte);
+      
+      // Initialise our tween timing variables
+      this.tweening = true;
+      this.tweenTime = 0;
+      this.tweenDuration = 1500; // 1.5 seconds
+      
+      // Set up our positional arrays
+      const viewportOffset = this.element.getBoundingClientRect();
+      // Start position
+      this.startingPosition = [
+        viewportOffset.left - window.scrollX,
+        viewportOffset.top - window.scrollY
+      ];
+      // Current position
+      this.screenPosition = [
+        viewportOffset.left,
+        viewportOffset.top
+      ];
+      // End position
+      this.targetPosition = [
+        window.innerWidth * .5 - this.startingDimensions[0] * .5,
+        window.innerHeight * .5 - this.startingDimensions[1] * .5
+      ];
+
+      // Set up our scaling properties
+      // start scale
+      this.startingScale = 1;
+      // current scale
+      this.screenScale = 1;
+      // Then we need to determine the target position based on the ratio of the screen to the card
+      // This basically ensures that we scale up to 70% width *or* 70% height. Whichever is smaller
+      const screenRatio = window.innerWidth / window.innerHeight;
+      const cardRatio = this.startingDimensions[0] / this.startingDimensions[1];
+      if(screenRatio < cardRatio) {
+        const width = window.innerWidth * .7;
+        this.targetScale = width / this.startingDimensions[0];
+      } else {
+        const height = window.innerHeight * .7;
+        this.targetScale = height / this.startingDimensions[1];
+      }
+      
+      // Set up the amount of rotation that needs to happen
+      this.rotationAmount = Math.PI * -2;
+      
+      // An empty endTween function for this tween
+      this.onEndTween = function() {};
+      
+    // If we're going from enlarged to unenlarged
+    } else if(this.enlarged === false && wasEnlarged === true) {
+
+      // Remove the modal class from the matte
+      this.matte.classList.remove('modal');
+      
+      // Initialise our tween timing variables
+      this.tweening = true;
+      this.tweenTime = 0;
+      this.tweenDuration = 1000; // 1 second
+      
+      // Set up our positional arrays. Basically just opposing the previous tween
+      const startingPosition = this.startingPosition;
+      this.startingPosition = this.targetPosition;
+      this.targetPosition = startingPosition;
+      
+      // Set up our scaling properties
+      this.startingScale = this.screenScale;
+      this.targetScale = 1;
+      
+      // Set up the amount of rotation that needs to happen
+      // We want this to be opposite to the previous one
+      this.rotationAmount = Math.PI * 2;
+      
+      // At the end of this tween we clean everything up
+      this.onEndTween = function() {
+        document.body.style.overflow = '';
+        this.element.classList.remove('modal');
+        document.body.removeChild(this.matte);
+        
+        this.element.style.position = '';
+        this.screenPosition = [
+          0,
+          0
+        ]
+        
+        this.element.style.left = '';
+        this.element.style.top = '';
+      }
+    }
+      
+  }
+  get enlarged() {
+    return this._enlarged === true;
+  }
+  
+  /**
+   * (getter/setter) Whether the card is in a tweening state. This just 
+   * enforces a boolean value.
+   *
+   * @type {Boolean}
+   * @default false
+   */
+  set tweening(value) {
+    this._tweening = value === true;
+  }
+  get tweening() {
+    return this._tweening === true;
+  }
+  
+  /**
+   * (getter/setter) The current tween time.
+   *
+   * @type {Number}
+   * @default 0
+   */
+  set tweenTime(value) {
+    if(!isNaN(value)) this._tweenTime = value;
+  }
+  get tweenTime() {
+    return this._tweenTime || 0;
+  }
+  
+  /**
+   * (getter/setter) The current tween duration.
+   *
+   * @type {Number}
+   * @default 0
+   */
+  set tweenDuration(value) {
+    if(!isNaN(value)) this._tweenDuration = value;
+  }
+  get tweenDuration() {
+    return this._tweenDuration || 0;
+  }
+  
+  /**
+   * (getter/setter) The function to call when the tween ends.
+   *
+   * @type {Function}
+   * @default null
+   */
+  set onEndTween(value) {
+    if(value instanceof Function) {
+      this._onEndTween = value.bind(this);
+    }
+  }
+  get onEndTween() {
+    return this._onEndTween || function(){};
+  }
+  
+  /**
+   * (getter/setter) The target position on-screen for the card.
+   *
+   * @type {Vec2|Array}
+   * @default [0,0]
+   */
+  set targetPosition(value) {
+    if(value instanceof Array && value.length >= 2) {
+      this._targetPosition = value;
+    }
+  }
+  get targetPosition() {
+    return this._targetPosition || [0,0];
+  }
+  
+  /**
+   * (getter/setter) The current position on-screen for the card.
+   * This also updates the element's styles left and top. So this
+   * should *only* be set during a tween.
+   *
+   * @type {Vec2|Array}
+   * @default [0,0]
+   */
+  set screenPosition(value) {
+    if(value instanceof Array && value.length >= 2) {
+      this._screenPosition = value;
+      this.element.style.left = `${value[0]}px`;
+      this.element.style.top = `${value[1]}px`;
+    }
+  }
+  get screenPosition() {
+    return this._screenPosition || [0,0];
+  }
+  
+  /**
+   * (getter/setter) The card's current scale value.
+   *
+   * @type {Number}
+   * @default 0
+   */
+  set screenScale(value) {
+    if(!isNaN(value)) {
+      this._screenScale = value;
+      this.element.style.transform = `scale(${value})`;
+    }
+  }
+  get screenScale() {
+    return this._screenScale || 1;
+  }
+  
+  /**
+   * (getter/setter) The target dimensions for the card.
+   *
+   * @type {Vec2|Array}
+   * @default [0,0]
+   */
+  set targetDimensions(value) {
+    if(value instanceof Array && value.length >= 2) {
+      this._targetDimensions = value;
+    }
+  }
+  get targetDimensions() {
+    return this._targetDimensions || [0,0];
+  }
+}
+
+export { PerspectiveCard, ClickablePerspectiveCard }
