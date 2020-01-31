@@ -1,6 +1,8 @@
 const SUPPORTSTOUCH = "ontouchstart" in window || navigator.msMaxTouchPoints;
 const EPSILON = 0.001;
 
+let lastDelta = 0;
+
 /**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
@@ -83,8 +85,8 @@ class PerspectiveCard {
     }
     
     // Set the last frame time in order to derive the sensible delta
-    this.lastFrameTime = Math.min(32, delta - this.delta);
-    if(this.delta === 0) this.delta = delta;
+    this.lastFrameTime = Math.min(32, delta - lastDelta);
+    lastDelta = delta;
     this.delta += this.lastFrameTime;
     
     // Set the divisor for animations based on the last frame time
