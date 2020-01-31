@@ -6,6 +6,9 @@ wtc-perspective-card provides a way to create a fake 3d card animation.
 $ yarn add wtc-perspective-card
 ```
 
+## Demo
+https://codepen.io/shubniggurath/pen/99df48ac9073736b0bbf5bd0e062a096?editors=0110
+
 ## Usage
 Import it into your project.
 ```javascript
