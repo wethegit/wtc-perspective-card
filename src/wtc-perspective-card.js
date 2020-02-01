@@ -679,6 +679,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '10px';
       this.element.style.position = 'fixed';
       this.element.classList.add('modal');
       setTimeout(() => {
@@ -759,6 +760,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // At the end of this tween we clean everything up
       this.onEndTween = function() {
         document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
         this.element.classList.remove('modal');
         document.body.removeChild(this.matte);
         
