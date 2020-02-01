@@ -679,7 +679,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = '10px';
+      if(['MacIntel', 'iPhone', 'iPad', 'Android'].indexOf(navigator.platform) > -1) document.body.style.paddingRight = '15px'; // Restricting this to non macs
       this.element.style.position = 'fixed';
       this.element.classList.add('modal');
       setTimeout(() => {
