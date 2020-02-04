@@ -906,4 +906,4 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
 }
 
-export { PerspectiveCard, ClickablePerspectiveCard };
+export { PerspectiveCard as default, ClickablePerspectiveCard };
