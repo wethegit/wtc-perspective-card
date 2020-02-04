@@ -692,7 +692,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
   
   onKey(e) {
-    console.log(e.keyCode);
     if (e.keyCode === 27) this.enlarged = false;
   }
 
@@ -710,8 +709,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Set the value
     this._enlarged = value === true;
-    
-    console.log(this.enlarged === false, wasEnlarged === true)
 
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
