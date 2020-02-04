@@ -44,9 +44,14 @@ class PerspectiveCard {
    * @param {HTMLElement} element 				The element that contains all of the card details
    * @param {Object}      settings 				The settings of the component
    */
-  constructor(element, settings) {
+  constructor(element, settings = {}) {
     // Set the element
     this.element = element;
+    // set settings
+    this.settings = {
+      ambient:
+        settings.ambient || this.element.hasAttribute("data-ambient") || false
+    };
 
     // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
@@ -68,12 +73,15 @@ class PerspectiveCard {
     window.addEventListener("scroll", this.resize);
     this.element.addEventListener("pointerenter", this.pointerEnter);
     this.element.addEventListener("pointerleave", this.pointerLeave);
-    // Set up and bind the intersection observer
-    this.observer = new IntersectionObserver(this.intersect, {
-      rootMargin: "0%",
-      threshold: [0.1]
-    });
-    this.observer.observe(this.element);
+
+    if (this.settings.ambient) {
+      // Set up and bind the intersection observer
+      this.observer = new IntersectionObserver(this.intersect, {
+        rootMargin: "0%",
+        threshold: [0.1]
+      });
+      this.observer.observe(this.element);
+    }
 
     // Initial resize to find the location and dimensions of the element
     this.resize();
@@ -96,12 +104,13 @@ class PerspectiveCard {
     }
 
     // Set the last frame time in order to derive the sensible delta
-    this.lastFrameTime = Math.min(32, delta - lastDelta);
+    this.lastFrameTime = Math.max(1, Math.min(32, delta - lastDelta));
     lastDelta = delta;
     this.delta += this.lastFrameTime;
 
     // Set the divisor for animations based on the last frame time
-    const divisor = 1 / this.lastFrameTime;
+    let divisor = 1 / this.lastFrameTime;
+    // if (isNaN(divisor) || divisor === Infinity) divisor = 1;
 
     // If this element is not pointer controlled then we want to animate
     // the ambient target point value around somehow. Here we use a simple
@@ -157,7 +166,8 @@ class PerspectiveCard {
     const len = Math.hypot(this.lookPoint[0], this.lookPoint[1]);
 
     // Transform the transformer element using the calculated values
-    this.transformer.style.transform = `matrix3d(${worldMatrix[0]},${worldMatrix[1]},${worldMatrix[2]},${worldMatrix[3]},${worldMatrix[4]},${worldMatrix[5]},${worldMatrix[6]},${worldMatrix[7]},${worldMatrix[8]},${worldMatrix[9]},${worldMatrix[10]},${worldMatrix[11]},${worldMatrix[12]},${worldMatrix[13]},${worldMatrix[14]},${worldMatrix[15]})`;
+    const matrix = `matrix3d(${worldMatrix[0]},${worldMatrix[1]},${worldMatrix[2]},${worldMatrix[3]},${worldMatrix[4]},${worldMatrix[5]},${worldMatrix[6]},${worldMatrix[7]},${worldMatrix[8]},${worldMatrix[9]},${worldMatrix[10]},${worldMatrix[11]},${worldMatrix[12]},${worldMatrix[13]},${worldMatrix[14]},${worldMatrix[15]})`;
+    this.transformer.style.transform = matrix;
 
     // Draw the gradient using the polar coordinates.
     this.shine.style.background = `linear-gradient(${angle}rad, rgba(255,255,255,${Math.max(
