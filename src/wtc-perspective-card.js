@@ -4,25 +4,26 @@ const EPSILON = 0.001;
 let lastDelta = 0;
 
 // Easing functions
-const easeInOutCubic = function (time, start, change, duration) {
-  if ((time/=duration/2) < 1) return change*.5*time*time*time + start;
-  return change*.5*((time-=2)*time*time + 2) + start;
+const easeInOutCubic = function(time, start, change, duration) {
+  if ((time /= duration / 2) < 1)
+    return change * 0.5 * time * time * time + start;
+  return change * 0.5 * ((time -= 2) * time * time + 2) + start;
 };
-const easeInOutSine = function (time, start, change, duration) {
-    return -change/2 * (Math.cos(Math.PI*time/duration) - 1) + start;
-}
+const easeInOutSine = function(time, start, change, duration) {
+  return (-change / 2) * (Math.cos((Math.PI * time) / duration) - 1) + start;
+};
 
 /**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
  * ```
- * .card
- *   .card__transformer
- *     .card__artwork card__artwork--front
+ * .perspective-card
+ *   .perspective-card__transformer
+ *     .perspective-card__artwork card__artwork--front
  *       img
- *     .card__artwork card__artwork--rear (optional)
+ *     .perspective-card__artwork card__artwork--rear (optional)
  *       img
- *     .card__shine
+ *     .perspective-card__shine
  * ```
  *
  * This class is designed to be used with a decorator function (provided by
@@ -36,23 +37,24 @@ const easeInOutSine = function (time, start, change, duration) {
  * @created Jan 28, 2020
  */
 class PerspectiveCard {
-  
-	/**
-	 * The PerspectiveCard constructor. Creates and initialises the perspective card component.
-	 *
-	 * @constructor
-	 * @param {HTMLElement} element 				The element that contains all of the card details
-	 * @param {Object}      settings 				The settings of the component
-	 */
+  /**
+   * The PerspectiveCard constructor. Creates and initialises the perspective card component.
+   *
+   * @constructor
+   * @param {HTMLElement} element 				The element that contains all of the card details
+   * @param {Object}      settings 				The settings of the component
+   */
   constructor(element, settings) {
     // Set the element
     this.element = element;
-    
-    // Find the transformer and shine elements. We save these so we 
+
+    // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
-    this.transformer = this.element.querySelector('.card__transformer');
-    this.shine = this.element.querySelector('.card__shine');
-    
+    this.transformer = this.element.querySelector(
+      ".perspective-card__transformer"
+    );
+    this.shine = this.element.querySelector(".perspective-card__shine");
+
     // Bind our event listeners
     this.resize = this.resize.bind(this);
     this.pointerMove = this.pointerMove.bind(this);
@@ -60,23 +62,23 @@ class PerspectiveCard {
     this.pointerLeave = this.pointerLeave.bind(this);
     this.play = this.play.bind(this);
     this.intersect = this.intersect.bind(this);
-    
+
     // Add event listeners for resize, scroll, pointer enter and leave
-    window.addEventListener('resize', this.resize);
-    window.addEventListener('scroll', this.resize);
+    window.addEventListener("resize", this.resize);
+    window.addEventListener("scroll", this.resize);
     this.element.addEventListener("pointerenter", this.pointerEnter);
     this.element.addEventListener("pointerleave", this.pointerLeave);
     // Set up and bind the intersection observer
     this.observer = new IntersectionObserver(this.intersect, {
-        rootMargin: '0%',
-        threshold: [.1]
-      });
+      rootMargin: "0%",
+      threshold: [0.1]
+    });
     this.observer.observe(this.element);
-    
+
     // Initial resize to find the location and dimensions of the element
     this.resize();
   }
-  
+
   /**
    * This is the main run-loop function.
    * It is responsible for taking the various previously set properies
@@ -84,80 +86,89 @@ class PerspectiveCard {
    * (more commonly) as the callback to a animation frame.
    *
    * @public
-	 * @param {number}  delta 				The delta of the animation
+   * @param {number}  delta 				The delta of the animation
    * @param {boolean} raf=true      This just determines whether to run the next RAF as a part of this call
    */
   play(delta, raf = true) {
     // If `playing` is true, then request the animation frame again
-    if(this.playing && raf === true) {
+    if (this.playing && raf === true) {
       requestAnimationFrame(this.play);
     }
-    
+
     // Set the last frame time in order to derive the sensible delta
     this.lastFrameTime = Math.min(32, delta - lastDelta);
     lastDelta = delta;
     this.delta += this.lastFrameTime;
-    
+
     // Set the divisor for animations based on the last frame time
-    const divisor = 1. / this.lastFrameTime;
-    
+    const divisor = 1 / this.lastFrameTime;
+
     // If this element is not pointer controlled then we want to animate
     // the ambient target point value around somehow. Here we use a simple
     // fourier simulation.
-    if(!this.pointerControlled) {
+    if (!this.pointerControlled) {
       // const d = delta * 0.0005;
       // const a = 1.8 + Math.sin(2. * d + .2) + .4 * Math.cos(4. * 2. * d);
       // const l = a * 80.;
-      
+
       const d = this.delta * 0.0001;
-      const s = Math.sin(d*2.);
-      const c = Math.cos(d*.5);
-      const l = 200. * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
-      
-      this.tPoint = [
-        c * l,
-        s * l,
-        this.tPoint[2]
-      ];
+      const s = Math.sin(d * 2);
+      const c = Math.cos(d * 0.5);
+      const l = 200 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
+
+      this.tPoint = [c * l, s * l, this.tPoint[2]];
     }
-    
-    // If our zoom differential (the different between the zoom and 
+
+    // If our zoom differential (the different between the zoom and
     // target zoom) is greater than the EPS value. We should animate it
-    if(Math.abs(this.zoom - this.center[2]) > EPSILON) {
+    if (Math.abs(this.zoom - this.center[2]) > EPSILON) {
       this.center = [
         this.center[0],
         this.center[1],
-        this.center[2] + (this.zoom - this.center[2]) * (divisor*2)
+        this.center[2] + (this.zoom - this.center[2]) * (divisor * 2)
       ];
     }
-    
+
     // If our look differential (the difference between the look
     // point and the target point) is greater than 2 then we should
-    // animate it. We use a relatively arbitrary value of 2 here 
-    // because we're using the square of the distance (to save 
+    // animate it. We use a relatively arbitrary value of 2 here
+    // because we're using the square of the distance (to save
     // unecessary calculation) here.
-    if(this._lookDifferential > 2) {
+    if (this._lookDifferential > 2) {
       this.lookPoint = [
-        this.lookPoint[0] + (this.tPoint[0] - this.lookPoint[0]) * (divisor*2),
-        this.lookPoint[1] + (this.tPoint[1] - this.lookPoint[1]) * (divisor*2),
-        this.lookPoint[2] + (this.tPoint[2] - this.lookPoint[2]) * (divisor*2)
+        this.lookPoint[0] +
+          (this.tPoint[0] - this.lookPoint[0]) * (divisor * 2),
+        this.lookPoint[1] +
+          (this.tPoint[1] - this.lookPoint[1]) * (divisor * 2),
+        this.lookPoint[2] + (this.tPoint[2] - this.lookPoint[2]) * (divisor * 2)
       ];
     }
 
     // Find the wold matrix using the targetTo method (see above)
-    const worldMatrix = PerspectiveCard.targetTo(this.center, this.lookPoint, [0, 1, 0]);
+    const worldMatrix = PerspectiveCard.targetTo(this.center, this.lookPoint, [
+      0,
+      1,
+      0
+    ]);
 
     // Find the polar coordinates for the rendition of the gradient.
-    const angle = Math.atan2(this.lookPoint[1], this.lookPoint[0]) + Math.PI*.5;
+    const angle =
+      Math.atan2(this.lookPoint[1], this.lookPoint[0]) + Math.PI * 0.5;
     const len = Math.hypot(this.lookPoint[0], this.lookPoint[1]);
 
     // Transform the transformer element using the calculated values
     this.transformer.style.transform = `matrix3d(${worldMatrix[0]},${worldMatrix[1]},${worldMatrix[2]},${worldMatrix[3]},${worldMatrix[4]},${worldMatrix[5]},${worldMatrix[6]},${worldMatrix[7]},${worldMatrix[8]},${worldMatrix[9]},${worldMatrix[10]},${worldMatrix[11]},${worldMatrix[12]},${worldMatrix[13]},${worldMatrix[14]},${worldMatrix[15]})`;
 
     // Draw the gradient using the polar coordinates.
-    this.shine.style.background = `linear-gradient(${angle}rad, rgba(255,255,255,${Math.max(.01, Math.abs(len * .002))}) 0%, rgba(255,255,255,${Math.max(.01, Math.abs(len * .002))}) 5%, rgba(255,255,255,0) 80%)`;
+    this.shine.style.background = `linear-gradient(${angle}rad, rgba(255,255,255,${Math.max(
+      0.01,
+      Math.abs(len * 0.002)
+    )}) 0%, rgba(255,255,255,${Math.max(
+      0.01,
+      Math.abs(len * 0.002)
+    )}) 5%, rgba(255,255,255,0) 80%)`;
   }
-  
+
   /**
    * Calculates the difference between the look point and the look point target
    *
@@ -171,58 +182,57 @@ class PerspectiveCard {
     ];
     this._lookDifferential = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
   }
-  
-  
+
   /**
    * Event Listeners
    */
-  
+
   /**
    * The event listener for the pointer move event.
    * This sets the target point to a value based on the pointer's position
    *
    * @public
-	 * @param {event}  e 				The pointer event object
+   * @param {event}  e 				The pointer event object
    * @listens pointermove
    */
   pointerMove(e) {
     this.tPoint = [
-      (e.clientX - this.axis[0]), 
-      (e.clientY - this.axis[1]), 
+      e.clientX - this.axis[0],
+      e.clientY - this.axis[1],
       this.tPoint[2]
     ];
   }
-  
+
   /**
    * The event listener for the pointer enter event
    * This sets the pointerControlled property to true, updates the target
-   * zoom and adds the class `card--over` to the element.
+   * zoom and adds the class `perspective-card--over` to the element.
    *
    * @public
-	 * @param {event}  e 				The pointer event object
+   * @param {event}  e 				The pointer event object
    * @listens pointerenter
    */
   pointerEnter(e) {
     this.pointerControlled = true;
     this.zoom = 40;
-    this.element.classList.add('card--over');
+    this.element.classList.add("perspective-card--over");
   }
-  
+
   /**
    * The event listener for the pointer leave event
    * This sets the pointerControlled property to false, updates the
-   * target zoom and removes the class `card--over` to the element.
+   * target zoom and removes the class `perspective-card--over` to the element.
    *
    * @public
-	 * @param {event}  e 				The pointer event object
+   * @param {event}  e 				The pointer event object
    * @listens pointerleave
    */
   pointerLeave(e) {
     this.pointerControlled = false;
     this.zoom = 0;
-    this.element.classList.remove('card--over');
+    this.element.classList.remove("perspective-card--over");
   }
-  
+
   /**
    * The event listener for the resize and scroll events
    * This updates the position and size of the element and sets the
@@ -231,7 +241,7 @@ class PerspectiveCard {
    * resizing.
    *
    * @public
-	 * @param {event}  e 				The pointer event object
+   * @param {event}  e 				The pointer event object
    * @listens pointerleave
    * @listens scroll
    */
@@ -240,14 +250,15 @@ class PerspectiveCard {
       const pos = this.element.getBoundingClientRect();
       this.position = [pos.left, pos.top];
       this.size = [this.element.offsetWidth, this.element.offsetHeight];
-      this.axis = [ 
-        this.position[0] + this.size[0] * .5,
-        this.position[1] + this.size[1] * .5 ];
-    }
+      this.axis = [
+        this.position[0] + this.size[0] * 0.5,
+        this.position[1] + this.size[1] * 0.5
+      ];
+    };
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(resize, 300);
   }
-  
+
   /**
    * Listener for the intersection observer callback
    *
@@ -259,7 +270,7 @@ class PerspectiveCard {
   intersect(entries, observer) {
     // Loop through the entries and set up the playing state based on whether the element is onscreen or not.
     entries.forEach((entry, i) => {
-      if(entry.isIntersecting) {
+      if (entry.isIntersecting) {
         this.playing = true;
       } else {
         this.playing = false;
@@ -267,11 +278,10 @@ class PerspectiveCard {
     });
   }
 
-
   /**
    * Getters and setters
    */
-  
+
   /**
    * (getter/setter) The element value
    *
@@ -279,12 +289,12 @@ class PerspectiveCard {
    * @default null
    */
   set element(value) {
-    if(value instanceof HTMLElement) this._element = value;
+    if (value instanceof HTMLElement) this._element = value;
   }
   get element() {
     return this._element || null;
   }
-  
+
   /**
    * (getter/setter) The position of the element relative to the viewport.
    *
@@ -292,14 +302,14 @@ class PerspectiveCard {
    * @default [0, 0]
    */
   set position(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._position = value;
     }
   }
   get position() {
     return this._position || [0, 0];
   }
-  
+
   /**
    * (getter/setter) The 3D target look point. This is the point that the
    * look point will animate towards.
@@ -308,7 +318,7 @@ class PerspectiveCard {
    * @default [0, 0, -800]
    */
   set tPoint(value) {
-    if(value instanceof Array && value.length >= 3) {
+    if (value instanceof Array && value.length >= 3) {
       this._tPoint = value;
       this.calculateLookDifferential();
     }
@@ -316,7 +326,7 @@ class PerspectiveCard {
   get tPoint() {
     return this._tPoint || [0, 0, -800];
   }
-  
+
   /**
    * (getter/setter) The 3D look point. This is the point that the card
    * look look at.
@@ -325,7 +335,7 @@ class PerspectiveCard {
    * @default [0, 0, -800]
    */
   set lookPoint(value) {
-    if(value instanceof Array && value.length >= 3) {
+    if (value instanceof Array && value.length >= 3) {
       this.calculateLookDifferential();
       this._lookPoint = value;
     }
@@ -333,7 +343,7 @@ class PerspectiveCard {
   get lookPoint() {
     return this._lookPoint || [0, 0, -800];
   }
-  
+
   /**
    * (getter/setter) The 3D point that the card sits at.
    *
@@ -341,14 +351,14 @@ class PerspectiveCard {
    * @default [0, 0, 0]
    */
   set center(value) {
-    if(value instanceof Array && value.length >= 3) {
+    if (value instanceof Array && value.length >= 3) {
       this._center = value;
     }
   }
   get center() {
     return this._center || [0, 0, 0];
   }
-  
+
   /**
    * (getter/setter) The target zoom value. If this is very different to the
    * Z component of the center point, the animation frame will attempt to
@@ -358,12 +368,12 @@ class PerspectiveCard {
    * @default [0, 0, 0]
    */
   set zoom(value) {
-    if(!isNaN(value)) this._zoom = value;
+    if (!isNaN(value)) this._zoom = value;
   }
   get zoom() {
     return this._zoom || 0;
   }
-  
+
   /**
    * (getter/setter) The size of the element.
    *
@@ -371,14 +381,14 @@ class PerspectiveCard {
    * @default [0, 0]
    */
   set size(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._size = value;
     }
   }
   get size() {
     return this._size || [0, 0];
   }
-  
+
   /**
    * (getter/setter) The axis of the element relative to the top-left point.
    *
@@ -386,14 +396,14 @@ class PerspectiveCard {
    * @default [0, 0]
    */
   set axis(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._axis = value;
     }
   }
   get axis() {
     return this._axis || [0, 0];
   }
-  
+
   /**
    * (getter/setter) Whether the simulation is playing. Setting this to
    * true will start up a requestAnimationFrame with the `play` method.
@@ -402,7 +412,7 @@ class PerspectiveCard {
    * @default false
    */
   set playing(value) {
-    if(!this.playing && value === true) {
+    if (!this.playing && value === true) {
       // Reset last frame time
       this.lastFrameTime = 0;
       requestAnimationFrame(this.play);
@@ -412,7 +422,7 @@ class PerspectiveCard {
   get playing() {
     return this._playing === true;
   }
-  
+
   /**
    * (getter/setter) The amount of time the last frame took
    *
@@ -420,14 +430,14 @@ class PerspectiveCard {
    * @default 0
    */
   set lastFrameTime(value) {
-    if(!isNaN(value)) this._lastframeTime = value;
+    if (!isNaN(value)) this._lastframeTime = value;
   }
   get lastFrameTime() {
     return this._lastframeTime || 0;
   }
-  
+
   /**
-   * (getter/setter) The animation delta. We use this and not the 
+   * (getter/setter) The animation delta. We use this and not the
    * RaF delta because we want this to pause when the animation is
    * not running.
    *
@@ -435,14 +445,14 @@ class PerspectiveCard {
    * @default 0
    */
   set delta(value) {
-    if(!isNaN(value)) this._delta = value;
+    if (!isNaN(value)) this._delta = value;
   }
   get delta() {
     return this._delta || 0;
   }
-  
+
   /**
-   * (getter/setter) Whether the card animates based on the position 
+   * (getter/setter) Whether the card animates based on the position
    * of the pointer. If this is true it will set the pointermove
    * event listener, otherwise it will try to remove it.
    *
@@ -450,10 +460,10 @@ class PerspectiveCard {
    * @default false
    */
   set pointerControlled(value) {
-    if(!this.pointerControlled && value === true) {
-      window.addEventListener( "pointermove", this.pointerMove);
-    } else if(this.pointerControlled && value === false) {
-      window.removeEventListener( "pointermove", this.pointerMove);
+    if (!this.pointerControlled && value === true) {
+      window.addEventListener("pointermove", this.pointerMove);
+    } else if (this.pointerControlled && value === false) {
+      window.removeEventListener("pointermove", this.pointerMove);
     }
     this._pointerControlled = value === true;
   }
@@ -475,28 +485,30 @@ class PerspectiveCard {
    * @returns {mat4} out
    */
   static targetTo(eye, target, up) {
+    if (eye.array) eye = eye.array;
+    if (target.array) target = target.array;
+    if (up.array) up = up.array;
 
-    if(eye.array) eye = eye.array;
-    if(target.array) target = target.array;
-    if(up.array) up = up.array;
-
-    if(
-      eye.length && eye.length >= 3 && 
-      target.length && target.length >= 3 && 
-      up.length && up.length >= 3) {
-
+    if (
+      eye.length &&
+      eye.length >= 3 &&
+      target.length &&
+      target.length >= 3 &&
+      up.length &&
+      up.length >= 3
+    ) {
       const e = { x: eye[0], y: eye[1], z: eye[2] },
-            c = { x: target[0], y: target[1], z: target[2] },
-            u = { x: up[0], y: up[1], z: up[2] };
+        c = { x: target[0], y: target[1], z: target[2] },
+        u = { x: up[0], y: up[1], z: up[2] };
 
       const off = {
         x: e.x - c.x,
         y: e.y - c.y,
         z: e.z - c.z
       };
-      let l = off.x*off.x + off.y*off.y + off.z*off.z;
-      if(l>0) {
-        l = 1. / Math.sqrt(l);
+      let l = off.x * off.x + off.y * off.y + off.z * off.z;
+      if (l > 0) {
+        l = 1 / Math.sqrt(l);
         off.x *= l;
         off.y *= l;
         off.z *= l;
@@ -507,9 +519,9 @@ class PerspectiveCard {
         y: u.z * off.x - u.x * off.z,
         z: u.x * off.y - u.y * off.x
       };
-      l = or.x*or.x + or.y*or.y + or.z*or.z;
-      if(l>0) {
-        l = 1. / Math.sqrt(l);
+      l = or.x * or.x + or.y * or.y + or.z * or.z;
+      if (l > 0) {
+        l = 1 / Math.sqrt(l);
         or.x *= l;
         or.y *= l;
         or.z *= l;
@@ -537,15 +549,14 @@ class PerspectiveCard {
         1
       ];
     }
-  };
-  
+  }
 }
 
 /**
- * The clickable perspective card adds functionality that allows the zooming 
- * the card by clicking on it. In doing so the card flips and animates up to a 
+ * The clickable perspective card adds functionality that allows the zooming
+ * the card by clicking on it. In doing so the card flips and animates up to a
  * modal style display.
- * 
+ *
  * @todo Add some extra functionality here like a close button and keyboard close
  *
  * @author Liam Egan <liam@wethecollective.com>
@@ -554,33 +565,35 @@ class PerspectiveCard {
  * @extends PerspectiveCard
  */
 class ClickablePerspectiveCard extends PerspectiveCard {
-
-	/**
-	 * The ClickablePerspectiveCard constructor. Creates and initialises the perspective 
+  /**
+   * The ClickablePerspectiveCard constructor. Creates and initialises the perspective
    * card component.
-	 *
-	 * @constructor
-	 * @param {HTMLElement} element 				The element that contains all of the card details
-	 * @param {Object}      settings 				The settings of the component
-	 */
+   *
+   * @constructor
+   * @param {HTMLElement} element 				The element that contains all of the card details
+   * @param {Object}      settings 				The settings of the component
+   */
   constructor(element, settings) {
     // Call the superfunction
     super(element, settings);
-    
+
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this);
-    
+
     // Add the listener to the pointer up event
-    this.element.addEventListener('pointerup', this.onClick);
-    
+    this.element.addEventListener("pointerup", this.onClick);
+
     // Set the card's starting dimensions
-    this.startingDimensions = [this.element.offsetWidth, this.element.offsetHeight];
-    
+    this.startingDimensions = [
+      this.element.offsetWidth,
+      this.element.offsetHeight
+    ];
+
     // Create the matte - this is the element that will appear behind the card.
-    this.matte = document.createElement('div');
+    this.matte = document.createElement("div");
     this.matte.className = `${this.element.classList[0]}--matte`;
   }
-  
+
   /**
    * This is the main run-loop function.
    * It is responsible for taking the various previously set properies
@@ -588,62 +601,59 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * (more commonly) as the callback to a animation frame.
    *
    * @public
-	 * @param {number}  delta 				The delta of the animation
+   * @param {number}  delta 				The delta of the animation
    * @param {boolean} raf=true      This just determines whether to run the next RAF as a part of this call
    */
   play(delta, raf = true) {
     // Call the superfunction
     super.play(delta, raf);
-    
+
     // If we are tweening values and our tween time is less than the duration
-    if(this.tweenTime < this.tweenDuration && this.tweening === true) {
+    if (this.tweenTime < this.tweenDuration && this.tweening === true) {
       // Tween the position of the card on screen
       this.screenPosition = [
         easeInOutCubic(
-          this.tweenTime, 
+          this.tweenTime,
           this.startingPosition[0],
           this.targetPosition[0] - this.startingPosition[0],
-          this.tweenDuration ),
+          this.tweenDuration
+        ),
         easeInOutCubic(
-          this.tweenTime, 
+          this.tweenTime,
           this.startingPosition[1],
           this.targetPosition[1] - this.startingPosition[1],
-          this.tweenDuration )
+          this.tweenDuration
+        )
       ];
-      
+
       // Tween the card scale
       this.screenScale = easeInOutCubic(
-          this.tweenTime, 
-          this.startingScale,
-          this.targetScale - this.startingScale,
-          this.tweenDuration );
-      
+        this.tweenTime,
+        this.startingScale,
+        this.targetScale - this.startingScale,
+        this.tweenDuration
+      );
+
       // Tween the rotation value
-      // This is responsible for moving the look at point in a large circle 
+      // This is responsible for moving the look at point in a large circle
       // around the card and gives the illusion that the card is flipping
       const r = easeInOutSine(
-          this.tweenTime, 
-          Math.PI*.5,
-          this.rotationAmount,
-          this.tweenDuration );
-      const t = [
-        Math.cos(r) * -800,
-        Math.sin(r) * -800
-      ];
-      this.lookPoint = [
-        t[0],
-        this.lookPoint[1],
-        t[1]
-      ];
-      
+        this.tweenTime,
+        Math.PI * 0.5,
+        this.rotationAmount,
+        this.tweenDuration
+      );
+      const t = [Math.cos(r) * -800, Math.sin(r) * -800];
+      this.lookPoint = [t[0], this.lookPoint[1], t[1]];
+
       // Update the tween time with the last frame duration
       this.tweenTime += this.lastFrameTime;
 
       // Resize things so that mouse interation is sensible
       this.resize();
 
-    // If our time has run out, but tweening is true it means that the animation has just ended
-    } else if(this.tweening === true) {
+      // If our time has run out, but tweening is true it means that the animation has just ended
+    } else if (this.tweening === true) {
       // Set the card's position on screen to the fixed end point
       this.screenPosition = this.targetPosition;
       this.tweening = false;
@@ -652,14 +662,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.onEndTween();
     }
   }
-  
+
   // Toggle the enlarged flag on click
   onClick() {
     this.enlarged = !this.enlarged;
   }
-  
+
   /**
-   * (getter/setter) Whether the card is enlarged or not. This is a BIG 
+   * (getter/setter) Whether the card is enlarged or not. This is a BIG
    * setter and is really responsible for generating the tweening values
    * setting up the tween and initialising it.
    *
@@ -667,7 +677,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default false
    */
   set enlarged(value) {
-
     // Whether we were enlarged already
     const wasEnlarged = this.enlarged;
 
@@ -675,23 +684,27 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this._enlarged = value === true;
 
     // If we're going from unenlarged to enlarged
-    if(this.enlarged === true && wasEnlarged === false) {
-      
+    if (this.enlarged === true && wasEnlarged === false) {
       // Set up the DOM for this. Basically the same as setting up a modal.
-      document.body.style.overflow = 'hidden';
-      if(['MacIntel', 'iPhone', 'iPad', 'Android'].indexOf(navigator.platform) === -1) document.body.style.paddingRight = '15px'; // Restricting this to non macs
-      this.element.style.position = 'fixed';
-      this.element.classList.add('modal');
+      document.body.style.overflow = "hidden";
+      if (
+        ["MacIntel", "iPhone", "iPad", "Android"].indexOf(
+          navigator.platform
+        ) === -1
+      )
+        document.body.style.paddingRight = "15px"; // Restricting this to non macs
+      this.element.style.position = "fixed";
+      this.element.classList.add("modal");
       setTimeout(() => {
-        this.matte.classList.add('modal');
+        this.matte.classList.add("modal");
       }, 0);
       document.body.appendChild(this.matte);
-      
+
       // Initialise our tween timing variables
       this.tweening = true;
       this.tweenTime = 0;
       this.tweenDuration = 1500; // 1.5 seconds
-      
+
       // Set up our positional arrays
       const viewportOffset = this.element.getBoundingClientRect();
       // Start position
@@ -700,14 +713,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         viewportOffset.top - window.scrollY
       ];
       // Current position
-      this.screenPosition = [
-        viewportOffset.left,
-        viewportOffset.top
-      ];
+      this.screenPosition = [viewportOffset.left, viewportOffset.top];
       // End position
       this.targetPosition = [
-        window.innerWidth * .5 - this.startingDimensions[0] * .5,
-        window.innerHeight * .5 - this.startingDimensions[1] * .5
+        window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5,
+        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5
       ];
 
       // Set up our scaling properties
@@ -719,69 +729,64 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // This basically ensures that we scale up to 70% width *or* 70% height. Whichever is smaller
       const screenRatio = window.innerWidth / window.innerHeight;
       const cardRatio = this.startingDimensions[0] / this.startingDimensions[1];
-      if(screenRatio < cardRatio) {
-        const width = window.innerWidth * .7;
+      if (screenRatio < cardRatio) {
+        const width = window.innerWidth * 0.7;
         this.targetScale = width / this.startingDimensions[0];
       } else {
-        const height = window.innerHeight * .7;
+        const height = window.innerHeight * 0.7;
         this.targetScale = height / this.startingDimensions[1];
       }
-      
+
       // Set up the amount of rotation that needs to happen
       this.rotationAmount = Math.PI * -2;
-      
+
       // An empty endTween function for this tween
       this.onEndTween = function() {};
-      
-    // If we're going from enlarged to unenlarged
-    } else if(this.enlarged === false && wasEnlarged === true) {
 
+      // If we're going from enlarged to unenlarged
+    } else if (this.enlarged === false && wasEnlarged === true) {
       // Remove the modal class from the matte
-      this.matte.classList.remove('modal');
-      
+      this.matte.classList.remove("modal");
+
       // Initialise our tween timing variables
       this.tweening = true;
       this.tweenTime = 0;
       this.tweenDuration = 1000; // 1 second
-      
+
       // Set up our positional arrays. Basically just opposing the previous tween
       const startingPosition = this.startingPosition;
       this.startingPosition = this.targetPosition;
       this.targetPosition = startingPosition;
-      
+
       // Set up our scaling properties
       this.startingScale = this.screenScale;
       this.targetScale = 1;
-      
+
       // Set up the amount of rotation that needs to happen
       // We want this to be opposite to the previous one
       this.rotationAmount = Math.PI * 2;
-      
+
       // At the end of this tween we clean everything up
       this.onEndTween = function() {
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        this.element.classList.remove('modal');
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+        this.element.classList.remove("modal");
         document.body.removeChild(this.matte);
-        
-        this.element.style.position = '';
-        this.screenPosition = [
-          0,
-          0
-        ]
-        
-        this.element.style.left = '';
-        this.element.style.top = '';
-      }
+
+        this.element.style.position = "";
+        this.screenPosition = [0, 0];
+
+        this.element.style.left = "";
+        this.element.style.top = "";
+      };
     }
-      
   }
   get enlarged() {
     return this._enlarged === true;
   }
-  
+
   /**
-   * (getter/setter) Whether the card is in a tweening state. This just 
+   * (getter/setter) Whether the card is in a tweening state. This just
    * enforces a boolean value.
    *
    * @type {Boolean}
@@ -793,7 +798,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   get tweening() {
     return this._tweening === true;
   }
-  
+
   /**
    * (getter/setter) The current tween time.
    *
@@ -801,12 +806,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default 0
    */
   set tweenTime(value) {
-    if(!isNaN(value)) this._tweenTime = value;
+    if (!isNaN(value)) this._tweenTime = value;
   }
   get tweenTime() {
     return this._tweenTime || 0;
   }
-  
+
   /**
    * (getter/setter) The current tween duration.
    *
@@ -814,12 +819,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default 0
    */
   set tweenDuration(value) {
-    if(!isNaN(value)) this._tweenDuration = value;
+    if (!isNaN(value)) this._tweenDuration = value;
   }
   get tweenDuration() {
     return this._tweenDuration || 0;
   }
-  
+
   /**
    * (getter/setter) The function to call when the tween ends.
    *
@@ -827,14 +832,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default null
    */
   set onEndTween(value) {
-    if(value instanceof Function) {
+    if (value instanceof Function) {
       this._onEndTween = value.bind(this);
     }
   }
   get onEndTween() {
-    return this._onEndTween || function(){};
+    return this._onEndTween || function() {};
   }
-  
+
   /**
    * (getter/setter) The target position on-screen for the card.
    *
@@ -842,14 +847,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default [0,0]
    */
   set targetPosition(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._targetPosition = value;
     }
   }
   get targetPosition() {
-    return this._targetPosition || [0,0];
+    return this._targetPosition || [0, 0];
   }
-  
+
   /**
    * (getter/setter) The current position on-screen for the card.
    * This also updates the element's styles left and top. So this
@@ -859,16 +864,16 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default [0,0]
    */
   set screenPosition(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._screenPosition = value;
       this.element.style.left = `${value[0]}px`;
       this.element.style.top = `${value[1]}px`;
     }
   }
   get screenPosition() {
-    return this._screenPosition || [0,0];
+    return this._screenPosition || [0, 0];
   }
-  
+
   /**
    * (getter/setter) The card's current scale value.
    *
@@ -876,7 +881,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default 0
    */
   set screenScale(value) {
-    if(!isNaN(value)) {
+    if (!isNaN(value)) {
       this._screenScale = value;
       this.element.style.transform = `scale(${value})`;
     }
@@ -884,7 +889,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   get screenScale() {
     return this._screenScale || 1;
   }
-  
+
   /**
    * (getter/setter) The target dimensions for the card.
    *
@@ -892,13 +897,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default [0,0]
    */
   set targetDimensions(value) {
-    if(value instanceof Array && value.length >= 2) {
+    if (value instanceof Array && value.length >= 2) {
       this._targetDimensions = value;
     }
   }
   get targetDimensions() {
-    return this._targetDimensions || [0,0];
+    return this._targetDimensions || [0, 0];
   }
 }
 
-export { PerspectiveCard, ClickablePerspectiveCard }
+export { PerspectiveCard, ClickablePerspectiveCard };

@@ -1,4 +1,4 @@
-.card {
+.perspective-card {
   height: 418px;
   perspective: 350px;
   position: relative;
@@ -6,7 +6,7 @@
   transform-style: preserve-3d;
   width: 300px;
 }
-.card__shine {
+.perspective-card__shine {
   border-radius: 15px;
   left: 0px;
   height: 100%;
@@ -15,33 +15,33 @@
   transform: translateZ(.5px);
   width: 100%;
 }
-.card__transformer {
+.perspective-card__transformer {
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
   width: 100%;
 }
-.card__artwork {
+.perspective-card__artwork {
   position: absolute;
   top: 0;
 }
-.card__artwork--front {
+.perspective-card__artwork--front {
 }
-.card__artwork--rear {
+.perspective-card__artwork--rear {
   transform: translateZ(-.5px) scaleX(-1);
 }
-.card img {
+.perspective-card img {
   border-radius: 15px;
   box-shadow: 5px 5px 0px rgba(0,0,0,.0);
   display: block;
   max-width: 100%;
   transition: .5s linear box-shadow;
 }
-.card--over img {
+.perspective-card--over img {
   box-shadow: 5px 5px 20px rgba(0,0,0,.4);
 }
 
-.card--matte {
+.perspective-card--matte {
   background-color: rgba(0,0,0,.5);
   height: 100vh;
   left: 0;
@@ -52,9 +52,11 @@
   width: 100vw;
   z-index: 1000;
 }
-.card--matte.modal {
+
+.perspective-card--matte.modal {
   opacity: 1;
 }
-.card.modal {
+
+.perspective-card.modal {
   z-index: 1001;
 }
