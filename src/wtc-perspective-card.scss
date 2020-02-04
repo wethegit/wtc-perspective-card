@@ -55,6 +55,7 @@
 
 .perspective-card--matte.modal {
   opacity: 1;
+  pointer-events: all;
 }
 
 .perspective-card.modal {
