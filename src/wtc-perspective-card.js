@@ -714,6 +714,9 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     if (this.enlarged === true && wasEnlarged === false) {
       window.addEventListener("keyup", this.onKey);
       
+      // Get the current bounding client rectangle
+      const viewportOffset = this.element.getBoundingClientRect();
+      
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = "hidden";
       if (
@@ -735,11 +738,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.tweenDuration = 1500; // 1.5 seconds
 
       // Set up our positional arrays
-      const viewportOffset = this.element.getBoundingClientRect();
       // Start position
       this.startingPosition = [
-        viewportOffset.left - window.scrollX,
-        viewportOffset.top - window.scrollY
+        viewportOffset.left,
+        viewportOffset.top
       ];
       // Current position
       this.screenPosition = [viewportOffset.left, viewportOffset.top];
