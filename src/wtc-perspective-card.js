@@ -601,6 +601,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this);
+    this.onKey = this.onKey.bind(this);
 
     // Add the listener to the pointer up event
     this.element.addEventListener("pointerup", this.onClick);
@@ -689,6 +690,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   onClick() {
     this.enlarged = !this.enlarged;
   }
+  
+  onKey(e) {
+    console.log(e.keyCode);
+    if (e.keyCode === 27) this.enlarged = false;
+  }
 
   /**
    * (getter/setter) Whether the card is enlarged or not. This is a BIG
@@ -704,9 +710,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Set the value
     this._enlarged = value === true;
+    
+    console.log(this.enlarged === false, wasEnlarged === true)
 
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
+      window.addEventListener("keyup", this.onKey);
+      
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = "hidden";
       if (
@@ -767,6 +777,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
+      window.removeEventListener("keyup", this.onKey);
+      
       // Remove the modal class from the matte
       this.matte.classList.remove("modal");
 
