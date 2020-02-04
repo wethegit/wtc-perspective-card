@@ -1,8 +1,6 @@
 const SUPPORTSTOUCH = "ontouchstart" in window || navigator.msMaxTouchPoints;
 const EPSILON = 0.001;
 
-let lastDelta = 0;
-
 // Easing functions
 const easeInOutCubic = function(time, start, change, duration) {
   if ((time /= duration / 2) < 1)
@@ -50,7 +48,8 @@ class PerspectiveCard {
     // set settings
     this.settings = {
       ambient:
-        settings.ambient || this.element.hasAttribute("data-ambient") || false
+        settings.ambient || this.element.hasAttribute("data-ambient") || false,
+      debug: settings.debug || this.element.hasAttribute("data-debug") || false
     };
 
     // Find the transformer and shine elements. We save these so we
@@ -104,8 +103,8 @@ class PerspectiveCard {
     }
 
     // Set the last frame time in order to derive the sensible delta
-    this.lastFrameTime = Math.max(1, Math.min(32, delta - lastDelta));
-    lastDelta = delta;
+    this.lastFrameTime = Math.max(16, Math.min(32, delta - this.lastDelta));
+    this.lastDelta = delta;
     this.delta += this.lastFrameTime;
 
     // Set the divisor for animations based on the last frame time
@@ -459,6 +458,19 @@ class PerspectiveCard {
   }
   get delta() {
     return this._delta || 0;
+  }
+
+  /**
+   * (getter/setter) The animation's last frame delta delta.
+   *
+   * @type {Number}
+   * @default 0
+   */
+  set lastDelta(value) {
+    if (!isNaN(value)) this._lastDelta = value;
+  }
+  get lastDelta() {
+    return this._lastDelta || 0;
   }
 
   /**
