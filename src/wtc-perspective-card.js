@@ -612,10 +612,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.matte.addEventListener("pointerup", this.onClick);
 
     // Set the card's starting dimensions
-    this.startingDimensions = [
-      this.element.offsetWidth,
-      this.element.offsetHeight
-    ];
+    setTimeout(() => {
+      this.startingDimensions = [
+        this.element.offsetWidth,
+        this.element.offsetHeight
+      ];
+    }, 100);
   }
 
   /**
