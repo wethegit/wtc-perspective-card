@@ -603,18 +603,19 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onClick = this.onClick.bind(this);
     this.onKey = this.onKey.bind(this);
 
+    // Create the matte - this is the element that will appear behind the card.
+    this.matte = document.createElement("div");
+    this.matte.className = `${this.element.classList[0]}--matte`;
+
     // Add the listener to the pointer up event
     this.element.addEventListener("pointerup", this.onClick);
+    this.matte.addEventListener("pointerup", this.onClick);
 
     // Set the card's starting dimensions
     this.startingDimensions = [
       this.element.offsetWidth,
       this.element.offsetHeight
     ];
-
-    // Create the matte - this is the element that will appear behind the card.
-    this.matte = document.createElement("div");
-    this.matte.className = `${this.element.classList[0]}--matte`;
   }
 
   /**
