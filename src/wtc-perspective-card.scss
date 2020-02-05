@@ -53,11 +53,11 @@
   z-index: 1000;
 }
 
-.perspective-card--matte.modal {
+.perspective-card--matte.perspective-card--modal {
   opacity: 1;
   pointer-events: all;
 }
 
-.perspective-card.modal {
+.perspective-card.perspective-card--modal {
   z-index: 1001;
 }
