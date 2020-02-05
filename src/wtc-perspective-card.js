@@ -727,9 +727,9 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       )
         document.body.style.paddingRight = "15px"; // Restricting this to non macs
       this.element.style.position = "fixed";
-      this.element.classList.add("modal");
+      this.element.classList.add("perspective-card--modal");
       setTimeout(() => {
-        this.matte.classList.add("modal");
+        this.matte.classList.add("perspective-card--modal");
       }, 0);
       document.body.appendChild(this.matte);
 
