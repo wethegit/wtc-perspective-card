@@ -673,15 +673,15 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // Update the tween time with the last frame duration
       this.tweenTime += this.lastFrameTime;
 
-      // Resize things so that mouse interation is sensible
-      this.resize();
-
       // If our time has run out, but tweening is true it means that the animation has just ended
     } else if (this.tweening === true) {
       // Set the card's position on screen to the fixed end point
       this.screenPosition = this.targetPosition;
       this.tweening = false;
 
+      // Resize things so that mouse interation is sensible
+      this.resize();
+      
       // Run our end function.
       this.onEndTween();
     }
@@ -804,7 +804,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.onEndTween = function() {
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
-        this.element.classList.remove("modal");
+        this.element.classList.remove("perspective-card--modal");
         document.body.removeChild(this.matte);
 
         this.element.style.position = "";
