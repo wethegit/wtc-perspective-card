@@ -820,6 +820,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         // Returning the ambient state to what it was, if it *was* false
         if (this._wasAmbient === false) {
           this.ambient = false;
+        }
+        if (this.pointerControlled === false) {
           this.playing = false;
         }
       };
