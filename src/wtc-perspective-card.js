@@ -717,6 +717,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       
       // Get the current bounding client rectangle
       const viewportOffset = this.element.getBoundingClientRect();
+
+      // This makes it so that, when the card is enlarged that it runs ambiently by defailt
+      this._wasAmbient = this.ambient;
+      this.ambient = true;
       
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = "hidden";
@@ -812,6 +816,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
         this.element.style.left = "";
         this.element.style.top = "";
+
+        // Returning the ambient state to what it was, if it *was* false
+        if (this._wasAmbient === false) {
+          this.ambient = false;
+          this.playing = false;
+        }
       };
     }
   }
