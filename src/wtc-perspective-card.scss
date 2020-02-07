@@ -1,44 +1,56 @@
 .perspective-card {
-  height: 418px;
-  perspective: 350px;
+  perspective: 600px;
   position: relative;
   touch-action: none;
   transform-style: preserve-3d;
-  width: 300px;
 }
+
 .perspective-card__shine {
-  border-radius: 15px;
-  left: 0px;
+  border-bottom-left-radius: 4.25% 3%;
+  border-bottom-right-radius: 4.25% 3%;
+  border-top-left-radius: 4.35% 3%;
+  border-top-right-radius: 4.25% 3%;
   height: 100%;
+  left: 0px;
+  overflow: hidden;
   position: absolute;
   top: 0px;
   transform: translateZ(.5px);
   width: 100%;
 }
-.perspective-card__transformer {
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  width: 100%;
-}
+
 .perspective-card__artwork {
+  backface-visibility: hidden;
+  box-shadow: 5px 5px 0px rgba(0,0,0,.0);
+  transition: .5s linear box-shadow;
+
+  img {
+    display: block;
+    width: 100%;
+  }
+}
+
+.perspective-card__artwork--back {
+  left: 0;
   position: absolute;
   top: 0;
+  transform: rotateY(180deg);
+  width: 100%;
 }
+
 .perspective-card__artwork--front {
+  position: relative;
 }
-.perspective-card__artwork--rear {
-  transform: translateZ(-.5px) scaleX(-1);
+
+.perspective-card__transformer {
+  position: relative;
+  transform-style: preserve-3d;
 }
-.perspective-card img {
-  border-radius: 15px;
-  box-shadow: 5px 5px 0px rgba(0,0,0,.0);
-  display: block;
-  max-width: 100%;
-  transition: .5s linear box-shadow;
-}
-.perspective-card--over img {
-  box-shadow: 5px 5px 20px rgba(0,0,0,.4);
+
+.perspective-card--over {
+  .perspective-card__artwork {
+    box-shadow: 5px 5px 20px rgba(0,0,0,.4);
+  }
 }
 
 .perspective-card--matte {

@@ -17,9 +17,9 @@ const easeInOutSine = function(time, start, change, duration) {
  * ```
  * .perspective-card
  *   .perspective-card__transformer
- *     .perspective-card__artwork card__artwork--front
+ *     .perspective-card__artwork.perspective-card__artwork--front
  *       img
- *     .perspective-card__artwork card__artwork--rear (optional)
+ *     .perspective-card__artwork.perspective-card__artwork--back
  *       img
  *     .perspective-card__shine
  * ```
