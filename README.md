@@ -75,18 +75,18 @@ const card = new PerspectiveCard(document.getElementById('card'));
 <dt><a href="#PerspectiveCard">PerspectiveCard</a></dt>
 <dd><p>This sets up the basic perspective card. This class expects markup at least
 conforming to:</p>
-<pre><code>.card
-  .card__transformer
-    .card__artwork card__artwork--front
+<pre><code>.perspective-card
+  .perspective-card__transformer
+    .perspective-card__artwork.perspective-card__artwork--front
       img
-    .card__artwork card__artwork--rear (optional)
+    .perspective-card__artwork.perspective-card__artwork--back
       img
-    .card__shine</code></pre><p>This class is designed to be used with a decorator function (provided by
+    .perspective-card__shine</code></pre><p>This class is designed to be used with a decorator function (provided by
 the new wtc-decorator static class) or used directly like:</p>
 <pre><code>const p = new PerspectiveCard(element);</code></pre></dd>
 <dt><a href="#ClickablePerspectiveCard">ClickablePerspectiveCard</a> ⇐ <code><a href="#PerspectiveCard">PerspectiveCard</a></code></dt>
-<dd><p>The clickable perspective card adds functionality that allows the zooming 
-the card by clicking on it. In doing so the card flips and animates up to a 
+<dd><p>The clickable perspective card adds functionality that allows the zooming
+the card by clicking on it. In doing so the card flips and animates up to a
 modal style display.</p>
 </dd>
 </dl>
@@ -97,13 +97,13 @@ modal style display.</p>
 This sets up the basic perspective card. This class expects markup at least
 conforming to:
 ```
-.card
-  .card__transformer
-    .card__artwork card__artwork--front
+.perspective-card
+  .perspective-card__transformer
+    .perspective-card__artwork.perspective-card__artwork--front
       img
-    .card__artwork card__artwork--rear (optional)
+    .perspective-card__artwork.perspective-card__artwork--back
       img
-    .card__shine
+    .perspective-card__shine
 ```
 
 This class is designed to be used with a decorator function (provided by
@@ -127,10 +127,13 @@ const p = new PerspectiveCard(element);
         * [.center](#PerspectiveCard+center) : <code>Array</code>
         * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
         * [.size](#PerspectiveCard+size) : <code>Array</code>
+        * [.debug](#PerspectiveCard+debug) : <code>Boolean</code>
+        * [.ambient](#PerspectiveCard+ambient) : <code>Boolean</code>
         * [.axis](#PerspectiveCard+axis) : <code>Array</code>
         * [.playing](#PerspectiveCard+playing) : <code>Boolean</code>
         * [.lastFrameTime](#PerspectiveCard+lastFrameTime) : <code>Number</code>
         * [.delta](#PerspectiveCard+delta) : <code>Number</code>
+        * [.lastDelta](#PerspectiveCard+lastDelta) : <code>Number</code>
         * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
         * [.play(delta, raf)](#PerspectiveCard+play)
         * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
@@ -206,6 +209,21 @@ animate towards this.
 
 **Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Default**: <code>[0, 0]</code>  
+<a name="PerspectiveCard+debug"></a>
+
+### perspectiveCard.debug : <code>Boolean</code>
+(getter/setter) Debug setting.
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>false</code>  
+<a name="PerspectiveCard+ambient"></a>
+
+### perspectiveCard.ambient : <code>Boolean</code>
+(getter/setter) Ambient setting.	
+Setting to tru will automatically animate the card.
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>false</code>  
 <a name="PerspectiveCard+axis"></a>
 
 ### perspectiveCard.axis : <code>Array</code>
@@ -231,16 +249,23 @@ true will start up a requestAnimationFrame with the `play` method.
 <a name="PerspectiveCard+delta"></a>
 
 ### perspectiveCard.delta : <code>Number</code>
-(getter/setter) The animation delta. We use this and not the 
+(getter/setter) The animation delta. We use this and not the
 RaF delta because we want this to pause when the animation is
 not running.
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>0</code>  
+<a name="PerspectiveCard+lastDelta"></a>
+
+### perspectiveCard.lastDelta : <code>Number</code>
+(getter/setter) The animation's last frame delta delta.
 
 **Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Default**: <code>0</code>  
 <a name="PerspectiveCard+pointerControlled"></a>
 
 ### perspectiveCard.pointerControlled : <code>Boolean</code>
-(getter/setter) Whether the card animates based on the position 
+(getter/setter) Whether the card animates based on the position
 of the pointer. If this is true it will set the pointermove
 event listener, otherwise it will try to remove it.
 
@@ -287,7 +312,7 @@ This sets the target point to a value based on the pointer's position
 ### perspectiveCard.pointerEnter(e)
 The event listener for the pointer enter event
 This sets the pointerControlled property to true, updates the target
-zoom and adds the class `card--over` to the element.
+zoom and adds the class `perspective-card--over` to the element.
 
 **Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Access**: public  
@@ -301,7 +326,7 @@ zoom and adds the class `card--over` to the element.
 ### perspectiveCard.pointerLeave(e)
 The event listener for the pointer leave event
 This sets the pointerControlled property to false, updates the
-target zoom and removes the class `card--over` to the element.
+target zoom and removes the class `perspective-card--over` to the element.
 
 **Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Access**: public  
@@ -357,8 +382,8 @@ Generates a matrix that makes something look at something else.
 <a name="ClickablePerspectiveCard"></a>
 
 ## ClickablePerspectiveCard ⇐ [<code>PerspectiveCard</code>](#PerspectiveCard)
-The clickable perspective card adds functionality that allows the zooming 
-the card by clicking on it. In doing so the card flips and animates up to a 
+The clickable perspective card adds functionality that allows the zooming
+the card by clicking on it. In doing so the card flips and animates up to a
 modal style display.
 
 **Kind**: global class  
@@ -389,23 +414,26 @@ modal style display.
     * [.center](#PerspectiveCard+center) : <code>Array</code>
     * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
     * [.size](#PerspectiveCard+size) : <code>Array</code>
+    * [.debug](#PerspectiveCard+debug) : <code>Boolean</code>
+    * [.ambient](#PerspectiveCard+ambient) : <code>Boolean</code>
     * [.axis](#PerspectiveCard+axis) : <code>Array</code>
     * [.playing](#PerspectiveCard+playing) : <code>Boolean</code>
     * [.lastFrameTime](#PerspectiveCard+lastFrameTime) : <code>Number</code>
     * [.delta](#PerspectiveCard+delta) : <code>Number</code>
+    * [.lastDelta](#PerspectiveCard+lastDelta) : <code>Number</code>
     * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
+    * [.resize(e)](#ClickablePerspectiveCard+resize)
     * [.play(delta, raf)](#ClickablePerspectiveCard+play)
     * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
     * [.pointerMove(e)](#PerspectiveCard+pointerMove)
     * [.pointerEnter(e)](#PerspectiveCard+pointerEnter)
     * [.pointerLeave(e)](#PerspectiveCard+pointerLeave)
-    * [.resize(e)](#PerspectiveCard+resize)
     * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
 
 <a name="new_ClickablePerspectiveCard_new"></a>
 
 ### new ClickablePerspectiveCard(element, settings)
-The ClickablePerspectiveCard constructor. Creates and initialises the perspective 
+The ClickablePerspectiveCard constructor. Creates and initialises the perspective
 card component.
 
 
@@ -417,7 +445,7 @@ card component.
 <a name="ClickablePerspectiveCard+enlarged"></a>
 
 ### clickablePerspectiveCard.enlarged : <code>Boolean</code>
-(getter/setter) Whether the card is enlarged or not. This is a BIG 
+(getter/setter) Whether the card is enlarged or not. This is a BIG
 setter and is really responsible for generating the tweening values
 setting up the tween and initialising it.
 
@@ -426,7 +454,7 @@ setting up the tween and initialising it.
 <a name="ClickablePerspectiveCard+tweening"></a>
 
 ### clickablePerspectiveCard.tweening : <code>Boolean</code>
-(getter/setter) Whether the card is in a tweening state. This just 
+(getter/setter) Whether the card is in a tweening state. This just
 enforces a boolean value.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
@@ -542,6 +570,23 @@ animate towards this.
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Default**: <code>[0, 0]</code>  
 **Overrides**: [<code>size</code>](#PerspectiveCard+size)  
+<a name="PerspectiveCard+debug"></a>
+
+### clickablePerspectiveCard.debug : <code>Boolean</code>
+(getter/setter) Debug setting.
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>false</code>  
+**Overrides**: [<code>debug</code>](#PerspectiveCard+debug)  
+<a name="PerspectiveCard+ambient"></a>
+
+### clickablePerspectiveCard.ambient : <code>Boolean</code>
+(getter/setter) Ambient setting.	
+Setting to tru will automatically animate the card.
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>false</code>  
+**Overrides**: [<code>ambient</code>](#PerspectiveCard+ambient)  
 <a name="PerspectiveCard+axis"></a>
 
 ### clickablePerspectiveCard.axis : <code>Array</code>
@@ -570,23 +615,48 @@ true will start up a requestAnimationFrame with the `play` method.
 <a name="PerspectiveCard+delta"></a>
 
 ### clickablePerspectiveCard.delta : <code>Number</code>
-(getter/setter) The animation delta. We use this and not the 
+(getter/setter) The animation delta. We use this and not the
 RaF delta because we want this to pause when the animation is
 not running.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Default**: <code>0</code>  
 **Overrides**: [<code>delta</code>](#PerspectiveCard+delta)  
+<a name="PerspectiveCard+lastDelta"></a>
+
+### clickablePerspectiveCard.lastDelta : <code>Number</code>
+(getter/setter) The animation's last frame delta delta.
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>0</code>  
+**Overrides**: [<code>lastDelta</code>](#PerspectiveCard+lastDelta)  
 <a name="PerspectiveCard+pointerControlled"></a>
 
 ### clickablePerspectiveCard.pointerControlled : <code>Boolean</code>
-(getter/setter) Whether the card animates based on the position 
+(getter/setter) Whether the card animates based on the position
 of the pointer. If this is true it will set the pointermove
 event listener, otherwise it will try to remove it.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Default**: <code>false</code>  
 **Overrides**: [<code>pointerControlled</code>](#PerspectiveCard+pointerControlled)  
+<a name="ClickablePerspectiveCard+resize"></a>
+
+### clickablePerspectiveCard.resize(e)
+The event listener for the resize and scroll events	
+This updates the position and size of the element and sets the	
+axis for use in animation. This is bound to a debouncer so that	
+it doesn't get called a hundred times when scrolling or	
+resizing.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>resize</code>](#PerspectiveCard+resize)  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>event</code> | The pointer event object |
+
 <a name="ClickablePerspectiveCard+play"></a>
 
 ### clickablePerspectiveCard.play(delta, raf)
@@ -631,7 +701,7 @@ This sets the target point to a value based on the pointer's position
 ### clickablePerspectiveCard.pointerEnter(e)
 The event listener for the pointer enter event
 This sets the pointerControlled property to true, updates the target
-zoom and adds the class `card--over` to the element.
+zoom and adds the class `perspective-card--over` to the element.
 
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Overrides**: [<code>pointerEnter</code>](#PerspectiveCard+pointerEnter)  
@@ -646,27 +716,10 @@ zoom and adds the class `card--over` to the element.
 ### clickablePerspectiveCard.pointerLeave(e)
 The event listener for the pointer leave event
 This sets the pointerControlled property to false, updates the
-target zoom and removes the class `card--over` to the element.
+target zoom and removes the class `perspective-card--over` to the element.
 
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Overrides**: [<code>pointerLeave</code>](#PerspectiveCard+pointerLeave)  
-**Access**: public  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| e | <code>event</code> | The pointer event object |
-
-<a name="PerspectiveCard+resize"></a>
-
-### clickablePerspectiveCard.resize(e)
-The event listener for the resize and scroll events
-This updates the position and size of the element and sets the
-axis for use in animation. This is bound to a debouncer so that
-it doesn't get called a hundred times when scrolling or
-resizing.
-
-**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
-**Overrides**: [<code>resize</code>](#PerspectiveCard+resize)  
 **Access**: public  
 
 | Param | Type | Description |
