@@ -72,7 +72,7 @@ class PerspectiveCard {
     this.element.addEventListener("pointerenter", this.pointerEnter);
     this.element.addEventListener("pointerleave", this.pointerLeave);
 
-    if (this.settings.ambient) {
+    if (this.ambient) {
       // Set up and bind the intersection observer
       this.observer = new IntersectionObserver(this.intersect, {
         rootMargin: "0%",
@@ -224,6 +224,8 @@ class PerspectiveCard {
     this.pointerControlled = true;
     this.zoom = 40;
     this.element.classList.add("perspective-card--over");
+
+    if (!this.ambient) this.playing = true;
   }
 
   /**
@@ -239,6 +241,14 @@ class PerspectiveCard {
     this.pointerControlled = false;
     this.zoom = 0;
     this.element.classList.remove("perspective-card--over");
+    	
+    if (!this.ambient) {	
+      this.playing = false;	
+      setTimeout(() => {	
+        this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`;	
+        this.shine.style.background = `none`;	
+      }, 100);	
+    }
   }
 
   /**
@@ -256,8 +266,8 @@ class PerspectiveCard {
   resize(e) {
     const resize = () => {
       const pos = this.element.getBoundingClientRect();
-      this.position = [pos.left, pos.top];
-      this.size = [this.element.offsetWidth, this.element.offsetHeight];
+      this.position = [pos.left, pos.top];	
+      this.size = [pos.width, pos.height];
       this.axis = [
         this.position[0] + this.size[0] * 0.5,
         this.position[1] + this.size[1] * 0.5
@@ -395,6 +405,31 @@ class PerspectiveCard {
   }
   get size() {
     return this._size || [0, 0];
+  }	
+  /**	
+   * (getter/setter) Debug setting.	
+   *	
+   * @type {Boolean}	
+   * @default false	
+   */	
+  set debug(value) {	
+    this._debug = value;	
+  }	
+  get debug() {	
+    return this._debug || false;	
+  }	
+  /**	
+   * (getter/setter) Ambient setting.	
+   * Setting to tru will automatically animate the card.	
+   *	
+   * @type {Boolean}	
+   * @default false	
+   */	
+  set ambient(value) {	
+    this._ambient = value;	
+  }	
+  get ambient() {	
+    return this._ambient || false;	
   }
 
   /**
@@ -609,14 +644,35 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     // Add the listener to the pointer up event
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
+  }	
 
-    // Set the card's starting dimensions
-    setTimeout(() => {
-      this.startingDimensions = [
-        this.element.offsetWidth,
-        this.element.offsetHeight
-      ];
-    }, 100);
+  /**	
+   * The event listener for the resize and scroll events	
+   * This updates the position and size of the element and sets the	
+   * axis for use in animation. This is bound to a debouncer so that	
+   * it doesn't get called a hundred times when scrolling or	
+   * resizing.	
+   *	
+   * @public	
+   * @param {event}  e 				The pointer event object	
+   * @listens pointerleave	
+   * @listens scroll	
+   */	
+  resize(e) {	
+    const resize = () => {	
+      const pos = this.element.getBoundingClientRect();	
+      if (this.enlarged === false) {	
+        this.startingDimensions = [pos.width, pos.height];	
+      }	
+      this.position = [pos.left, pos.top];	
+      this.size = [pos.width, pos.height];	
+      this.axis = [	
+        this.position[0] + this.size[0] * 0.5,	
+        this.position[1] + this.size[1] * 0.5	
+      ];	
+    };	
+    clearTimeout(this.debounceTimer);	
+    this.debounceTimer = setTimeout(resize, 300);	
   }
 
   /**
@@ -705,7 +761,9 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @type {Boolean}
    * @default false
    */
-  set enlarged(value) {
+  set enlarged(value) {	
+    if (this.tweening === true) return;
+
     // Whether we were enlarged already
     const wasEnlarged = this.enlarged;
 
@@ -749,30 +807,32 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         viewportOffset.left,
         viewportOffset.top
       ];
-      // Current position
-      this.screenPosition = [viewportOffset.left, viewportOffset.top];
-      // End position
-      this.targetPosition = [
-        window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5,
-        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5
-      ];
 
       // Set up our scaling properties
       // start scale
       this.startingScale = 1;
       // current scale
-      this.screenScale = 1;
+      this.screenScale = 1;	
+      let fscale = 0.7;
       // Then we need to determine the target position based on the ratio of the screen to the card
       // This basically ensures that we scale up to 70% width *or* 70% height. Whichever is smaller
       const screenRatio = window.innerWidth / window.innerHeight;
       const cardRatio = this.startingDimensions[0] / this.startingDimensions[1];
       if (screenRatio < cardRatio) {
-        const width = window.innerWidth * 0.7;
+        const width = window.innerWidth * fscale;
         this.targetScale = width / this.startingDimensions[0];
       } else {
-        const height = window.innerHeight * 0.7;
+        const height = window.innerHeight * fscale;
         this.targetScale = height / this.startingDimensions[1];
-      }
+      }	
+
+      // Current position	
+      this.screenPosition = [viewportOffset.left, viewportOffset.top];	
+      // End position	
+      this.targetPosition = [	
+        window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5,	
+        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5	
+      ];
 
       // Set up the amount of rotation that needs to happen
       this.rotationAmount = Math.PI * -2;
@@ -784,8 +844,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     } else if (this.enlarged === false && wasEnlarged === true) {
       window.removeEventListener("keyup", this.onKey);
       
-      // Remove the modal class from the matte
-      this.matte.classList.remove("modal");
+      // Remove the modal class from the matte	
+      this.matte.classList.remove("perspective-card--modal");
 
       // Initialise our tween timing variables
       this.tweening = true;
@@ -809,8 +869,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.onEndTween = function() {
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
-        this.element.classList.remove("perspective-card--modal");
         document.body.removeChild(this.matte);
+        this.element.classList.remove("perspective-card--modal");
 
         this.element.style.position = "";
         this.screenPosition = [0, 0];
@@ -950,35 +1010,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
   get targetDimensions() {
     return this._targetDimensions || [0, 0];
-  }
-  
-  /**
-   * (getter/setter) Debug setting.
-   *
-   * @type {Boolean}
-   * @default false
-   */
-  set debug(value) {
-    this._debug = value;
-  }
-
-  get debug() {
-    return this._debug || false;
-  }
-
-  /**
-   * (getter/setter) Ambient setting.
-   * Setting to tru will automatically animate the card.
-   *
-   * @type {Boolean}
-   * @default false
-   */
-  set ambient(value) {
-    this._ambient = value;
-  }
-
-  get ambient() {
-    return this._ambient || false;
   }
 }
 
