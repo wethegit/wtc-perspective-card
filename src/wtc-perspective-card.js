@@ -45,12 +45,11 @@ class PerspectiveCard {
   constructor(element, settings = {}) {
     // Set the element
     this.element = element;
+    
     // set settings
-    this.settings = {
-      ambient:
-        settings.ambient || this.element.hasAttribute("data-ambient") || false,
-      debug: settings.debug || this.element.hasAttribute("data-debug") || false
-    };
+    this.debug = settings.debug || this.element.hasAttribute("data-debug") || false;
+    this.zoom = settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 40;
+    this.ambient = settings.ambient || this.element.hasAttribute("data-ambient") || false;
 
     // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
@@ -951,6 +950,35 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
   get targetDimensions() {
     return this._targetDimensions || [0, 0];
+  }
+  
+  /**
+   * (getter/setter) Debug setting.
+   *
+   * @type {Boolean}
+   * @default false
+   */
+  set debug(value) {
+    this._debug = value;
+  }
+
+  get debug() {
+    return this._debug || false;
+  }
+
+  /**
+   * (getter/setter) Ambient setting.
+   * Setting to tru will automatically animate the card.
+   *
+   * @type {Boolean}
+   * @default false
+   */
+  set ambient(value) {
+    this._ambient = value;
+  }
+
+  get ambient() {
+    return this._ambient || false;
   }
 }
 
