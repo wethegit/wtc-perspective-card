@@ -639,7 +639,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Create the matte - this is the element that will appear behind the card.
     this.matte = document.createElement("div");
-    this.matte.className = `${this.element.classList[0]}--matte`;
+    this.matte.className = `perspective-card--matte`;
 
     // Add the listener to the pointer up event
     this.element.addEventListener("pointerup", this.onClick);
