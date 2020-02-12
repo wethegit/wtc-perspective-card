@@ -106,6 +106,10 @@ class PerspectiveCard {
     this.lastDelta = delta;
     this.delta += this.lastFrameTime;
 
+    if (this.motionOff) {
+      return;
+    }
+
     // Set the divisor for animations based on the last frame time
     let divisor = 1 / this.lastFrameTime;
     // if (isNaN(divisor) || divisor === Infinity) divisor = 1;
@@ -299,6 +303,19 @@ class PerspectiveCard {
   /**
    * Getters and setters
    */
+
+   /**
+   * (getter/setter) The motion value
+   *
+   * @type {boolean}
+   * @default true
+   */
+  set motionOff(value) {
+    this._motionOff = value === true;
+  }
+  get motionOff() {
+    return this._motionOff !== false;
+  }
 
   /**
    * (getter/setter) The element value
