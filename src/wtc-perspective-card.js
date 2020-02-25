@@ -314,7 +314,7 @@ class PerspectiveCard {
     this._motionOff = value === true;
   }
   get motionOff() {
-    return this._motionOff !== false;
+    return this._motionOff === true;
   }
 
   /**
