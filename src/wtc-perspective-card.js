@@ -664,12 +664,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this);
     this.onKey = this.onKey.bind(this);
+    this.onPointerDown = this.onPointerDown.bind(this);
 
     // Create the matte - this is the element that will appear behind the card.
     this.matte = document.createElement("div");
     this.matte.className = `perspective-card--matte`;
 
     // Add the listener to the pointer up event
+    this.element.addEventListener("pointerdown", this.onPointerDown);
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
   }
