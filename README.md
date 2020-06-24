@@ -1,34 +1,45 @@
 # WTC Perspective Card
+
 wtc-perspective-card provides a way to create a fake 3d card animation.
 
 ## Installation
+
 ```sh
-$ yarn add wtc-perspective-card
+$ npm install wtc-perspective-card
 ```
 
 ## Demo
+
 https://codepen.io/shubniggurath/pen/99df48ac9073736b0bbf5bd0e062a096?editors=0110
 
 ## Usage
+
 Import it into your project.
+
 ```javascript
-import PerspectiveCard from 'wtc-perspective-card';
+import PerspectiveCard from "wtc-perspective-card";
 ```
 
 Import the stylesheet with sass or use the css file.
+
 ```scss
 @import "~wtc-perspective-card";
 ```
 
 Add your markup.
+
 ```html
 <div class="card">
   <div class="card__transformer">
     <div class="card__artwork card__artwork--front">
-      <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/982762/9b1b5b5-1.png" />
+      <img
+        src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/982762/9b1b5b5-1.png"
+      />
     </div>
     <div class="card__artwork card__artwork--rear">
-      <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/982762/pokemon_card_backside_in_high_resolution_by_atomicmonkeytcg_dah43cy-fullview.png" />
+      <img
+        src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/982762/pokemon_card_backside_in_high_resolution_by_atomicmonkeytcg_dah43cy-fullview.png"
+      />
     </div>
     <div class="card__shine"></div>
   </div>
@@ -38,16 +49,21 @@ Add your markup.
 You now have 2 options to initalize the component.
 
 ### Instanciating
+
 #### 1. Using The Decorator function
+
 If you are using just add **data-decorator="PerspectiveCard"** to your markup.
+
 ```html
 <div class="perspective-card" data-decorator="PerspectiveCard">
   <img class="perspective-card__img" src="path/image.jpg" />
 </div>
 ```
+
 And then write your decorator code to take a set of DOM elements and decorate them with the class
+
 ```javascript
-const decorate = function(decorator, nodeSet) {
+const decorate = function (decorator, nodeSet) {
   const controllers = [];
   Array.from(nodeSet).forEach((node) => {
     const controller = new decorator(node, node.dataset);
@@ -56,19 +72,25 @@ const decorate = function(decorator, nodeSet) {
     controllers.push(controller);
   });
   return controllers;
-}
+};
 ```
+
 Then feed your DOM elements to the decorator code
+
 ```javascript
-const controllers = decorate(PerspectiveCard, document.querySelectorAll('[data-decorator="PerspectiveCard"]'));
+const controllers = decorate(
+  PerspectiveCard,
+  document.querySelectorAll('[data-decorator="PerspectiveCard"]')
+);
 ```
 
 #### 2. Vanilla JS
-Plain vanilla javascript with ES6 and module imports.
-```javascript
-const card = new PerspectiveCard(document.getElementById('card'));
-```
 
+Plain vanilla javascript with ES6 and module imports.
+
+```javascript
+const card = new PerspectiveCard(document.getElementById("card"));
+```
 ## Classes
 
 <dl>
@@ -113,19 +135,19 @@ const p = new PerspectiveCard(element);
 ```
 
 **Kind**: global class  
-**Created**: Jan 28, 2020  
-**Version**: 2.0.0  
-**Author**: Liam Egan <liam@wethecollective.com>  
 
 * [PerspectiveCard](#PerspectiveCard)
     * [new PerspectiveCard(element, settings)](#new_PerspectiveCard_new)
     * _instance_
+        * [.motionOff](#PerspectiveCard+motionOff) : <code>boolean</code>
         * [.element](#PerspectiveCard+element) : <code>HTMLElement</code>
         * [.position](#PerspectiveCard+position) : <code>Array</code>
         * [.tPoint](#PerspectiveCard+tPoint) : <code>Array</code>
         * [.lookPoint](#PerspectiveCard+lookPoint) : <code>Array</code>
         * [.center](#PerspectiveCard+center) : <code>Array</code>
         * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
+        * [.zoomSize](#PerspectiveCard+zoomSize) : <code>Number</code>
+        * [.intensity](#PerspectiveCard+intensity) : <code>Number</code>
         * [.size](#PerspectiveCard+size) : <code>Array</code>
         * [.debug](#PerspectiveCard+debug) : <code>Boolean</code>
         * [.ambient](#PerspectiveCard+ambient) : <code>Boolean</code>
@@ -156,6 +178,13 @@ The PerspectiveCard constructor. Creates and initialises the perspective card co
 | element | <code>HTMLElement</code> | The element that contains all of the card details |
 | settings | <code>Object</code> | The settings of the component |
 
+<a name="PerspectiveCard+motionOff"></a>
+
+### perspectiveCard.motionOff : <code>boolean</code>
+(getter/setter) The motion value
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>true</code>  
 <a name="PerspectiveCard+element"></a>
 
 ### perspectiveCard.element : <code>HTMLElement</code>
@@ -196,12 +225,26 @@ look look at.
 <a name="PerspectiveCard+zoom"></a>
 
 ### perspectiveCard.zoom : <code>Array</code>
-(getter/setter) The target zoom value. If this is very different to the
+(getter/setter) The current zoom value. If this is very different to the
 Z component of the center point, the animation frame will attempt to
 animate towards this.
 
 **Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Default**: <code>[0, 0, 0]</code>  
+<a name="PerspectiveCard+zoomSize"></a>
+
+### perspectiveCard.zoomSize : <code>Number</code>
+(getter/setter) The target zoom value
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>40</code>  
+<a name="PerspectiveCard+intensity"></a>
+
+### perspectiveCard.intensity : <code>Number</code>
+(getter/setter) The intensity for the ambient animation.
+
+**Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Default**: <code>10</code>  
 <a name="PerspectiveCard+size"></a>
 
 ### perspectiveCard.size : <code>Array</code>
@@ -219,7 +262,7 @@ animate towards this.
 <a name="PerspectiveCard+ambient"></a>
 
 ### perspectiveCard.ambient : <code>Boolean</code>
-(getter/setter) Ambient setting.	
+(getter/setter) Ambient setting.
 Setting to tru will automatically animate the card.
 
 **Kind**: instance property of [<code>PerspectiveCard</code>](#PerspectiveCard)  
@@ -407,12 +450,15 @@ modal style display.
     * [.screenPosition](#ClickablePerspectiveCard+screenPosition) : <code>Vec2</code> \| <code>Array</code>
     * [.screenScale](#ClickablePerspectiveCard+screenScale) : <code>Number</code>
     * [.targetDimensions](#ClickablePerspectiveCard+targetDimensions) : <code>Vec2</code> \| <code>Array</code>
+    * [.motionOff](#PerspectiveCard+motionOff) : <code>boolean</code>
     * [.element](#PerspectiveCard+element) : <code>HTMLElement</code>
     * [.position](#PerspectiveCard+position) : <code>Array</code>
     * [.tPoint](#PerspectiveCard+tPoint) : <code>Array</code>
     * [.lookPoint](#PerspectiveCard+lookPoint) : <code>Array</code>
     * [.center](#PerspectiveCard+center) : <code>Array</code>
     * [.zoom](#PerspectiveCard+zoom) : <code>Array</code>
+    * [.zoomSize](#PerspectiveCard+zoomSize) : <code>Number</code>
+    * [.intensity](#PerspectiveCard+intensity) : <code>Number</code>
     * [.size](#PerspectiveCard+size) : <code>Array</code>
     * [.debug](#PerspectiveCard+debug) : <code>Boolean</code>
     * [.ambient](#PerspectiveCard+ambient) : <code>Boolean</code>
@@ -510,6 +556,14 @@ should *only* be set during a tween.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Default**: <code>[0,0]</code>  
+<a name="PerspectiveCard+motionOff"></a>
+
+### clickablePerspectiveCard.motionOff : <code>boolean</code>
+(getter/setter) The motion value
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>true</code>  
+**Overrides**: [<code>motionOff</code>](#PerspectiveCard+motionOff)  
 <a name="PerspectiveCard+element"></a>
 
 ### clickablePerspectiveCard.element : <code>HTMLElement</code>
@@ -555,13 +609,29 @@ look look at.
 <a name="PerspectiveCard+zoom"></a>
 
 ### clickablePerspectiveCard.zoom : <code>Array</code>
-(getter/setter) The target zoom value. If this is very different to the
+(getter/setter) The current zoom value. If this is very different to the
 Z component of the center point, the animation frame will attempt to
 animate towards this.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Default**: <code>[0, 0, 0]</code>  
 **Overrides**: [<code>zoom</code>](#PerspectiveCard+zoom)  
+<a name="PerspectiveCard+zoomSize"></a>
+
+### clickablePerspectiveCard.zoomSize : <code>Number</code>
+(getter/setter) The target zoom value
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>40</code>  
+**Overrides**: [<code>zoomSize</code>](#PerspectiveCard+zoomSize)  
+<a name="PerspectiveCard+intensity"></a>
+
+### clickablePerspectiveCard.intensity : <code>Number</code>
+(getter/setter) The intensity for the ambient animation.
+
+**Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Default**: <code>10</code>  
+**Overrides**: [<code>intensity</code>](#PerspectiveCard+intensity)  
 <a name="PerspectiveCard+size"></a>
 
 ### clickablePerspectiveCard.size : <code>Array</code>
@@ -581,7 +651,7 @@ animate towards this.
 <a name="PerspectiveCard+ambient"></a>
 
 ### clickablePerspectiveCard.ambient : <code>Boolean</code>
-(getter/setter) Ambient setting.	
+(getter/setter) Ambient setting.
 Setting to tru will automatically animate the card.
 
 **Kind**: instance property of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
@@ -643,10 +713,10 @@ event listener, otherwise it will try to remove it.
 <a name="ClickablePerspectiveCard+resize"></a>
 
 ### clickablePerspectiveCard.resize(e)
-The event listener for the resize and scroll events	
-This updates the position and size of the element and sets the	
-axis for use in animation. This is bound to a debouncer so that	
-it doesn't get called a hundred times when scrolling or	
+The event listener for the resize and scroll events
+This updates the position and size of the element and sets the
+axis for use in animation. This is bound to a debouncer so that
+it doesn't get called a hundred times when scrolling or
 resizing.
 
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  

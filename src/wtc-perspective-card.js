@@ -29,10 +29,6 @@ const easeInOutSine = function (time, start, change, duration) {
  * ```
  * const p = new PerspectiveCard(element);
  * ```
- *
- * @author Liam Egan <liam@wethecollective.com>
- * @version 2.0.0
- * @created Jan 28, 2020
  */
 class PerspectiveCard {
   /**
@@ -427,7 +423,7 @@ class PerspectiveCard {
   get zoom() {
     return this._zoom || 0;
   }
-  
+
   /**
    * (getter/setter) The target zoom value
    *
