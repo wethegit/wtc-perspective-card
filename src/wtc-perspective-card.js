@@ -49,8 +49,8 @@ class PerspectiveCard {
     // set settings
     this.debug =
       settings.debug || this.element.hasAttribute("data-debug") || false;
-    this.zoom =
-      settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 0;
+    this.zoomSize =
+      settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 40;
     this.intensity =
       settings.intensity ||
       parseInt(this.element.getAttribute("data-intensity")) ||
@@ -245,7 +245,7 @@ class PerspectiveCard {
    */
   pointerEnter(e) {
     this.pointerControlled = true;
-    this.zoom = 40;
+    this.zoom = this.zoomSize;
     this.element.classList.add("perspective-card--over");
 
     if (this.ambient < 0) this.playing = true;
@@ -414,7 +414,7 @@ class PerspectiveCard {
   }
 
   /**
-   * (getter/setter) The target zoom value. If this is very different to the
+   * (getter/setter) The current zoom value. If this is very different to the
    * Z component of the center point, the animation frame will attempt to
    * animate towards this.
    *
@@ -426,6 +426,19 @@ class PerspectiveCard {
   }
   get zoom() {
     return this._zoom || 0;
+  }
+  
+  /**
+   * (getter/setter) The target zoom value
+   *
+   * @type {Number}
+   * @default 40
+   */
+  set zoomSize(value) {
+    if (!isNaN(value)) this._zoomSize = value;
+  }
+  get zoomSize() {
+    return this._zoomSize || 40;
   }
 
   /**
