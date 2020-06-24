@@ -125,7 +125,7 @@ class PerspectiveCard {
       // const a = 1.8 + Math.sin(2. * d + .2) + .4 * Math.cos(4. * 2. * d);
       // const l = a * 80.;
 
-      const d = this.delta * 0.0001;
+      const d = this.delta * 0.0001 + (parseInt(this.settings.ambient) || 0);
       const s = Math.sin(d * 2);
       const c = Math.cos(d * 0.5);
       const l = 200 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
