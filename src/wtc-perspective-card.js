@@ -50,7 +50,7 @@ class PerspectiveCard {
     this.debug =
       settings.debug || this.element.hasAttribute("data-debug") || false;
     this.zoom =
-      settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 40;
+      settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 0;
     this.intensity =
       settings.intensity ||
       parseInt(this.element.getAttribute("data-intensity")) ||
