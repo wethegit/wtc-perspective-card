@@ -51,6 +51,10 @@ class PerspectiveCard {
       settings.debug || this.element.hasAttribute("data-debug") || false;
     this.zoom =
       settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 40;
+    this.intensity =
+      settings.intensity ||
+      parseInt(this.element.getAttribute("data-intensity")) ||
+      10;
 
     this.ambient = -1;
 
@@ -139,7 +143,7 @@ class PerspectiveCard {
       const d = this.delta * 0.0001 + this.ambient;
       const s = Math.sin(d * 2);
       const c = Math.cos(d * 0.5);
-      const l = 200 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
+      const l = this.intensity * 10 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
 
       this.tPoint = [c * l, s * l, this.tPoint[2]];
     }
@@ -422,6 +426,19 @@ class PerspectiveCard {
   }
   get zoom() {
     return this._zoom || 0;
+  }
+
+  /**
+   * (getter/setter) The intensity for the ambient animation.
+   *
+   * @type {Number}
+   * @default 10
+   */
+  set intensity(value) {
+    if (!isNaN(value)) this._intensity = value;
+  }
+  get intensity() {
+    return this._intensity || 10;
   }
 
   /**
