@@ -54,15 +54,17 @@ class PerspectiveCard {
 
     this.ambient = -1;
 
-    if (settings.ambient !== undefined) {
+    if (settings.ambient !== undefined && settings.ambient !== false) {
       const settingsVal = settings.ambient;
       if (settingsVal === true) this.ambient = 0;
-      else if (settingsVal >= 0) this.ambient = settingsVal;
+      else this.ambient = settingsVal;
     } else if (this.element.hasAttribute("data-ambient")) {
       const dataVal = this.element.getAttribute("data-ambient");
 
-      if (dataVal === "" || dataVal === "true") this.ambient = 0;
-      else if (parseInt(dataVal) >= 0) this.ambient = parseInt(dataVal);
+      if (dataVal !== "false") {
+        if (dataVal === "" || dataVal === "true") this.ambient = 0;
+        else this.ambient = parseInt(dataVal);
+      }
     }
 
     // Find the transformer and shine elements. We save these so we
