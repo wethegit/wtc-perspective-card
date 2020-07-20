@@ -29,10 +29,6 @@ const easeInOutSine = function (time, start, change, duration) {
  * ```
  * const p = new PerspectiveCard(element);
  * ```
- *
- * @author Liam Egan <liam@wethecollective.com>
- * @version 2.0.0
- * @created Jan 28, 2020
  */
 class PerspectiveCard {
   /**
@@ -49,10 +45,27 @@ class PerspectiveCard {
     // set settings
     this.debug =
       settings.debug || this.element.hasAttribute("data-debug") || false;
-    this.zoom =
+    this.zoomSize =
       settings.zoom || parseInt(this.element.getAttribute("data-zoom")) || 40;
-    this.ambient =
-      settings.ambient || this.element.hasAttribute("data-ambient") || false;
+    this.intensity =
+      settings.intensity ||
+      parseInt(this.element.getAttribute("data-intensity")) ||
+      10;
+
+    this.ambient = -1;
+
+    if (settings.ambient !== undefined && settings.ambient !== false) {
+      const settingsVal = settings.ambient;
+      if (settingsVal === true) this.ambient = 0;
+      else this.ambient = settingsVal;
+    } else if (this.element.hasAttribute("data-ambient")) {
+      const dataVal = this.element.getAttribute("data-ambient");
+
+      if (dataVal !== "false") {
+        if (dataVal === "" || dataVal === "true") this.ambient = 0;
+        else this.ambient = parseInt(dataVal);
+      }
+    }
 
     // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
@@ -75,7 +88,7 @@ class PerspectiveCard {
     this.element.addEventListener("pointerenter", this.pointerEnter);
     this.element.addEventListener("pointerleave", this.pointerLeave);
 
-    if (this.ambient) {
+    if (this.ambient >= 0) {
       // Set up and bind the intersection observer
       this.observer = new IntersectionObserver(this.intersect, {
         rootMargin: "0%",
@@ -125,10 +138,10 @@ class PerspectiveCard {
       // const a = 1.8 + Math.sin(2. * d + .2) + .4 * Math.cos(4. * 2. * d);
       // const l = a * 80.;
 
-      const d = this.delta * 0.0001;
+      const d = this.delta * 0.0001 + this.ambient;
       const s = Math.sin(d * 2);
       const c = Math.cos(d * 0.5);
-      const l = 200 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
+      const l = this.intensity * 10 * Math.cos(d * 3.542 + 1234.5); // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
 
       this.tPoint = [c * l, s * l, this.tPoint[2]];
     }
@@ -230,10 +243,10 @@ class PerspectiveCard {
    */
   pointerEnter(e) {
     this.pointerControlled = true;
-    this.zoom = 40;
+    this.zoom = this.zoomSize;
     this.element.classList.add("perspective-card--over");
 
-    if (!this.ambient) this.playing = true;
+    if (this.ambient < 0) this.playing = true;
   }
 
   /**
@@ -250,7 +263,7 @@ class PerspectiveCard {
     this.zoom = 0;
     this.element.classList.remove("perspective-card--over");
 
-    if (!this.ambient) {
+    if (this.ambient < 0) {
       this.playing = false;
       setTimeout(() => {
         this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`;
@@ -399,7 +412,7 @@ class PerspectiveCard {
   }
 
   /**
-   * (getter/setter) The target zoom value. If this is very different to the
+   * (getter/setter) The current zoom value. If this is very different to the
    * Z component of the center point, the animation frame will attempt to
    * animate towards this.
    *
@@ -411,6 +424,32 @@ class PerspectiveCard {
   }
   get zoom() {
     return this._zoom || 0;
+  }
+
+  /**
+   * (getter/setter) The target zoom value
+   *
+   * @type {Number}
+   * @default 40
+   */
+  set zoomSize(value) {
+    if (!isNaN(value)) this._zoomSize = value;
+  }
+  get zoomSize() {
+    return this._zoomSize || 40;
+  }
+
+  /**
+   * (getter/setter) The intensity for the ambient animation.
+   *
+   * @type {Number}
+   * @default 10
+   */
+  set intensity(value) {
+    if (!isNaN(value)) this._intensity = value;
+  }
+  get intensity() {
+    return this._intensity || 10;
   }
 
   /**
@@ -656,9 +695,15 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     // Call the superfunction
     super(element, settings);
 
+    // We're using this varaible to prevent the user from clicking multiple
+    // perspective cards and having them all open. This will make sure only the
+    // FIRST clicked card will open.
+    window.clickablePerspectiveCard_initialtouch = null;
+
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this);
     this.onKey = this.onKey.bind(this);
+    this.onPointerDown = this.onPointerDown.bind(this);
 
     this._tweenBuffer = false;
 
@@ -667,6 +712,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.matte.className = `perspective-card--matte`;
 
     // Add the listener to the pointer up event
+    this.element.addEventListener("pointerdown", this.onPointerDown);
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
   }
@@ -771,9 +817,20 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   // Toggle the enlarged flag on click
-  onClick() {
-    if (this._tweenBuffer == false) {
+  onClick(e) {
+    if (
+      window.clickablePerspectiveCard_initialtouch === e.pointerId &&
+      this._tweenBuffer == false
+    ) {
       this.enlarged = !this.enlarged;
+      window.clickablePerspectiveCard_initialtouch = null;
+    }
+  }
+
+  // Toggle the enlarged flag on click
+  onPointerDown(e) {
+    if (window.clickablePerspectiveCard_initialtouch === null) {
+      window.clickablePerspectiveCard_initialtouch = e.pointerId;
     }
   }
 
@@ -807,7 +864,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // This makes it so that, when the card is enlarged that it runs ambiently by defailt
       this._wasAmbient = this.ambient;
-      this.ambient = true;
+      this.ambient = 0;
 
       // Set up the DOM for this. Basically the same as setting up a modal.
       document.body.style.overflow = "hidden";
@@ -908,8 +965,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         }, 100);
 
         // Returning the ambient state to what it was, if it *was* false
-        if (this._wasAmbient === false) {
-          this.ambient = false;
+        if (this._wasAmbient < 0) {
+          this.ambient = -1;
         }
         if (this.pointerControlled === false) {
           this.playing = false;
