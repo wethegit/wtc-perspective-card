@@ -820,7 +820,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   onClick(e) {
     if (
       window.clickablePerspectiveCard_initialtouch === e.pointerId &&
-      this._tweenBuffer == false
+      this._tweenBuffer === false
     ) {
       this.enlarged = !this.enlarged;
       window.clickablePerspectiveCard_initialtouch = null;
