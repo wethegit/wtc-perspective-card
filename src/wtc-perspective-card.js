@@ -705,6 +705,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onKey = this.onKey.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
 
+    this._tweenBuffer = false;
+
     // Create the matte - this is the element that will appear behind the card.
     this.matte = document.createElement("div");
     this.matte.className = `perspective-card--matte`;
@@ -816,7 +818,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
   // Toggle the enlarged flag on click
   onClick(e) {
-    if (window.clickablePerspectiveCard_initialtouch === e.pointerId) {
+    if (
+      window.clickablePerspectiveCard_initialtouch === e.pointerId &&
+      this._tweenBuffer === false
+    ) {
       this.enlarged = !this.enlarged;
       window.clickablePerspectiveCard_initialtouch = null;
     }
@@ -981,6 +986,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @default false
    */
   set tweening(value) {
+    if (value !== this._tweening) {
+      this._tweenBuffer = true;
+      setTimeout(() => {
+        this._tweenBuffer = false;
+      }, 1000);
+    }
     this._tweening = value === true;
   }
   get tweening() {
