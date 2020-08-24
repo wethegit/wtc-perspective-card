@@ -829,7 +829,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
   // Toggle the enlarged flag on click
   onPointerDown(e) {
-    if (window.clickablePerspectiveCard_initialtouch === null) {
+    if (
+      window.clickablePerspectiveCard_initialtouch === null &&
+      this._tweenBuffer === false
+    ) {
       window.clickablePerspectiveCard_initialtouch = e.pointerId;
     }
   }
