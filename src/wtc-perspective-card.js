@@ -2,12 +2,12 @@ const SUPPORTSTOUCH = "ontouchstart" in window || navigator.msMaxTouchPoints;
 const EPSILON = 0.001;
 
 // Easing functions
-const easeInOutCubic = function (time, start, change, duration) {
+const easeInOutCubic = function(time, start, change, duration) {
   if ((time /= duration / 2) < 1)
     return change * 0.5 * time * time * time + start;
   return change * 0.5 * ((time -= 2) * time * time + 2) + start;
 };
-const easeInOutSine = function (time, start, change, duration) {
+const easeInOutSine = function(time, start, change, duration) {
   return (-change / 2) * (Math.cos((Math.PI * time) / duration) - 1) + start;
 };
 
@@ -92,7 +92,7 @@ class PerspectiveCard {
       // Set up and bind the intersection observer
       this.observer = new IntersectionObserver(this.intersect, {
         rootMargin: "0%",
-        threshold: [0.1],
+        threshold: [0.1]
       });
       this.observer.observe(this.element);
     }
@@ -152,7 +152,7 @@ class PerspectiveCard {
       this.center = [
         this.center[0],
         this.center[1],
-        this.center[2] + (this.zoom - this.center[2]) * (divisor * 2),
+        this.center[2] + (this.zoom - this.center[2]) * (divisor * 2)
       ];
     }
 
@@ -167,8 +167,7 @@ class PerspectiveCard {
           (this.tPoint[0] - this.lookPoint[0]) * (divisor * 2),
         this.lookPoint[1] +
           (this.tPoint[1] - this.lookPoint[1]) * (divisor * 2),
-        this.lookPoint[2] +
-          (this.tPoint[2] - this.lookPoint[2]) * (divisor * 2),
+        this.lookPoint[2] + (this.tPoint[2] - this.lookPoint[2]) * (divisor * 2)
       ];
     }
 
@@ -176,7 +175,7 @@ class PerspectiveCard {
     const worldMatrix = PerspectiveCard.targetTo(this.center, this.lookPoint, [
       0,
       1,
-      0,
+      0
     ]);
 
     // Find the polar coordinates for the rendition of the gradient.
@@ -207,7 +206,7 @@ class PerspectiveCard {
     const d = [
       this.lookPoint[0] - this.tPoint[0],
       this.lookPoint[1] - this.tPoint[1],
-      this.lookPoint[2] - this.tPoint[2],
+      this.lookPoint[2] - this.tPoint[2]
     ];
     this._lookDifferential = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
   }
@@ -228,7 +227,7 @@ class PerspectiveCard {
     this.tPoint = [
       e.clientX - this.axis[0],
       e.clientY - this.axis[1],
-      this.tPoint[2],
+      this.tPoint[2]
     ];
   }
 
@@ -291,7 +290,7 @@ class PerspectiveCard {
       this.size = [pos.width, pos.height];
       this.axis = [
         this.position[0] + this.size[0] * 0.5,
-        this.position[1] + this.size[1] * 0.5,
+        this.position[1] + this.size[1] * 0.5
       ];
     };
     clearTimeout(this.debounceTimer);
@@ -622,7 +621,7 @@ class PerspectiveCard {
       const off = {
         x: e.x - c.x,
         y: e.y - c.y,
-        z: e.z - c.z,
+        z: e.z - c.z
       };
       let l = off.x * off.x + off.y * off.y + off.z * off.z;
       if (l > 0) {
@@ -635,7 +634,7 @@ class PerspectiveCard {
       const or = {
         x: u.y * off.z - u.z * off.y,
         y: u.z * off.x - u.x * off.z,
-        z: u.x * off.y - u.y * off.x,
+        z: u.x * off.y - u.y * off.x
       };
       l = or.x * or.x + or.y * or.y + or.z * or.z;
       if (l > 0) {
@@ -664,7 +663,7 @@ class PerspectiveCard {
         e.x,
         e.y,
         e.z,
-        1,
+        1
       ];
     }
   }
@@ -715,6 +714,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.element.addEventListener("pointerdown", this.onPointerDown);
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
+    this.matte.addEventListener("pointerdown", this.onPointerDown);
   }
 
   /**
@@ -740,7 +740,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.size = [pos.width, pos.height];
       this.axis = [
         this.position[0] + this.size[0] * 0.5,
-        this.position[1] + this.size[1] * 0.5,
+        this.position[1] + this.size[1] * 0.5
       ];
     };
     clearTimeout(this.debounceTimer);
@@ -776,7 +776,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
           this.startingPosition[1],
           this.targetPosition[1] - this.startingPosition[1],
           this.tweenDuration
-        ),
+        )
       ];
 
       // Tween the card scale
@@ -916,14 +916,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // End position
       this.targetPosition = [
         window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5,
-        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5,
+        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5
       ];
 
       // Set up the amount of rotation that needs to happen
       this.rotationAmount = Math.PI * -2;
 
       // An empty endTween function for this tween
-      this.onEndTween = function () {};
+      this.onEndTween = function() {};
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
@@ -951,7 +951,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.rotationAmount = Math.PI * 2;
 
       // At the end of this tween we clean everything up
-      this.onEndTween = function () {
+      this.onEndTween = function() {
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
         document.body.removeChild(this.matte);
@@ -1039,7 +1039,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
   get onEndTween() {
-    return this._onEndTween || function () {};
+    return this._onEndTween || function() {};
   }
 
   /**
