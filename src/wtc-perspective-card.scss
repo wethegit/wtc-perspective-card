@@ -1,7 +1,6 @@
 .perspective-card {
   perspective: 600px;
   position: relative;
-  touch-action: none;
   transform-style: preserve-3d;
 }
 
@@ -15,14 +14,14 @@
   overflow: hidden;
   position: absolute;
   top: 0px;
-  transform: translateZ(.5px);
+  transform: translateZ(0.5px);
   width: 100%;
 }
 
 .perspective-card__artwork {
   backface-visibility: hidden;
-  box-shadow: 5px 5px 0px rgba(0,0,0,.0);
-  transition: .5s linear box-shadow;
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0);
+  transition: 0.5s linear box-shadow;
 
   img {
     display: block;
@@ -49,18 +48,18 @@
 
 .perspective-card--over {
   .perspective-card__artwork {
-    box-shadow: 5px 5px 20px rgba(0,0,0,.4);
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
   }
 }
 
 .perspective-card--matte {
-  background-color: rgba(0,0,0,.5);
+  background-color: rgba(0, 0, 0, 0.5);
   height: 100vh;
   left: 0;
   opacity: 0;
   position: fixed;
   top: 0;
-  transition: opacity .5s linear;
+  transition: opacity 0.5s linear;
   width: 100vw;
   z-index: 1000;
 }
