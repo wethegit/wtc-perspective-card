@@ -703,8 +703,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onClick = this.onClick.bind(this);
     this.onKey = this.onKey.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
-
+    this.onPointerMove = this.onPointerMove.bind(this);
     this._tweenBuffer = false;
+
+    this._pointerMoving = false;
+    this._pointerMovingPos = 0;
+    this._pointerStartPos;
 
     // Create the matte - this is the element that will appear behind the card.
     this.matte = document.createElement("div");
@@ -715,6 +719,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerdown", this.onPointerDown);
+    this.element.addEventListener("pointermove", this.onPointerMove);
   }
 
   /**
@@ -819,22 +824,40 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   // Toggle the enlarged flag on click
   onClick(e) {
     if (
+      window.cardClickEsc != true &&
       window.clickablePerspectiveCard_initialtouch === e.pointerId &&
       this._tweenBuffer === false
     ) {
       this.enlarged = !this.enlarged;
-      window.clickablePerspectiveCard_initialtouch = null;
+    }
+    window.clickablePerspectiveCard_initialtouch = null;
+    window.cardClickEsc = false;
+  }
+
+  onPointerMove(e) {
+    if (!this._pointerMoving) {
+      window.requestAnimationFrame(() => {
+        this._pointerMovingPos = e.y;
+        this._pointerMoving = false;
+      });
+      this._pointerMoving = true;
     }
   }
 
   // Toggle the enlarged flag on click
   onPointerDown(e) {
-    if (
-      window.clickablePerspectiveCard_initialtouch === null &&
-      this._tweenBuffer === false
-    ) {
-      window.clickablePerspectiveCard_initialtouch = e.pointerId;
-    }
+    this._pointerStartPos = e.y;
+    this._pointerMovingPos = this._pointerStartPos;
+    window.clickablePerspectiveCard_initialtouch = e.pointerId;
+
+    setTimeout(() => {
+      if (
+        this._pointerMovingPos < this._pointerStartPos - 10 ||
+        this._pointerMovingPos > this._pointerStartPos + 10
+      ) {
+        window.cardClickEsc = true;
+      }
+    }, 200);
   }
 
   onKey(e) {
