@@ -74,8 +74,6 @@ class PerspectiveCard {
     );
     this.shine = this.element.querySelector(".perspective-card__shine");
 
-    this.cardImage = this.element.querySelector('.perspective-card [class*="front"]');
-
     // Bind our event listeners
     this.resize = this.resize.bind(this);
     this.pointerMove = this.pointerMove.bind(this);
@@ -928,17 +926,16 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         // Transform style preserve 3d, and the translateZ were causing 
         // the card image to pixelate on non retina monitors. Removing these
         // whilst the card is open fixes that.
-        this.cardImage.style.transform = "initial";
-        this.transformer.style.transformStyle = "flat";
+        this.element.classList.add("perspective-card--is-open");
+
       };
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
       window.removeEventListener("keyup", this.onKey);
 
-      // Adds 3d transforms back in on close. 
-      this.transformer.style.transformStyle = "preserve-3d";
-      this.cardImage.style.transform = "translateZ(2px)";
+      // Adds 3d transforms back in on close.
+      this.element.classList.remove("perspective-card--is-open");
 
       // Remove the modal class from the matte
       this.matte.classList.remove("perspective-card--modal");
