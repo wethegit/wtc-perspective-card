@@ -73,3 +73,13 @@
 .perspective-card.perspective-card--modal {
   z-index: 1001;
 }
+
+.perspective-card--is-open {
+  .perspective-card__transformer {
+    transform-style: flat;
+  }
+
+  [class*="front"] {
+    transform: initial;
+  }
+}
