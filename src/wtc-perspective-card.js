@@ -81,6 +81,7 @@ class PerspectiveCard {
     this.pointerLeave = this.pointerLeave.bind(this);
     this.play = this.play.bind(this);
     this.intersect = this.intersect.bind(this);
+    this.hideIntersect = this.hideIntersect.bind(this);
 
     // Add event listeners for resize, scroll, pointer enter and leave
     window.addEventListener("resize", this.resize);
@@ -95,6 +96,19 @@ class PerspectiveCard {
         threshold: [0.1]
       });
       this.observer.observe(this.element);
+    } else {
+      // Set up and bind the hiding intersection observer
+      // this.element.style.display = "none";
+      this.element.classList.add('intersection-off');
+      this.observer = new IntersectionObserver(
+        this.hideIntersect,
+        {
+          rootMargin: "100px",
+        }
+      );
+      setTimeout(() => {
+        this.observer.observe(this.element.parentNode);
+      }, 0)
     }
 
     // Initial resize to find the location and dimensions of the element
@@ -312,6 +326,27 @@ class PerspectiveCard {
         this.playing = true;
       } else {
         this.playing = false;
+      }
+    });
+  }
+
+  /**
+   * Listener for the intersection observer callback
+   *
+   * @public
+   * @param  {object} entries   the object that contains all of the elements being calculated by this observer
+   * @param  {object} observer  the observer instance itself
+   * @return void
+   */
+   hideIntersect(entries, observer) {
+    // Loop through the entries and set up the playing state based on whether the element is onscreen or not.
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        this.element.classList.remove("intersection-off");
+        // this.element.style.display = "block";
+      } else {
+        this.element.classList.add("intersection-off");
+        // this.element.style.display = "none";
       }
     });
   }
