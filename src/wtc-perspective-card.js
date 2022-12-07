@@ -76,6 +76,8 @@ class PerspectiveCard {
 
     // Bind our event listeners
     this.resize = this.resize.bind(this);
+    this.touchStart = this.touchStart.bind(this);
+    this.touchEnd = this.touchEnd.bind(this);
     this.pointerMove = this.pointerMove.bind(this);
     this.pointerEnter = this.pointerEnter.bind(this);
     this.pointerLeave = this.pointerLeave.bind(this);
@@ -88,6 +90,8 @@ class PerspectiveCard {
     window.addEventListener("scroll", this.resize);
     this.element.addEventListener("pointerenter", this.pointerEnter);
     this.element.addEventListener("pointerleave", this.pointerLeave);
+    this.element.addEventListener("touchstart", this.touchStart);
+    this.element.addEventListener("touchend", this.touchEnd);
 
     if (this.ambient >= 0) {
       // Set up and bind the intersection observer
@@ -133,12 +137,13 @@ class PerspectiveCard {
 
     // Set the last frame time in order to derive the sensible delta
     this.lastFrameTime = Math.max(16, Math.min(32, delta - this.lastDelta));
-    this.lastDelta = delta;
-    this.delta += this.lastFrameTime;
 
     if (this.motionOff) {
       return;
     }
+
+    this.lastDelta = delta;
+    this.delta += this.lastFrameTime;
 
     // Set the divisor for animations based on the last frame time
     let divisor = 1 / this.lastFrameTime;
@@ -229,6 +234,14 @@ class PerspectiveCard {
    * Event Listeners
    */
 
+  touchStart(e) {
+    this.touching = true;
+  }
+
+  touchEnd(e) {
+    this.touching = false;
+  }
+
   /**
    * The event listener for the pointer move event.
    * This sets the target point to a value based on the pointer's position
@@ -238,6 +251,7 @@ class PerspectiveCard {
    * @listens pointermove
    */
   pointerMove(e) {
+    if (this.touching === true) return;
     this.tPoint = [
       e.clientX - this.axis[0],
       e.clientY - this.axis[1],
@@ -246,7 +260,7 @@ class PerspectiveCard {
   }
 
   /**
-   * The event listener for the pointer enter event
+   * The event listener for the pointer enter
    * This sets the pointerControlled property to true, updates the target
    * zoom and adds the class `perspective-card--over` to the element.
    *
@@ -255,6 +269,8 @@ class PerspectiveCard {
    * @listens pointerenter
    */
   pointerEnter(e) {
+    if (this.touching === true) return;
+    
     this.pointerControlled = true;
     this.zoom = this.zoomSize;
     this.element.classList.add("perspective-card--over");
@@ -738,18 +754,29 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onClick = this.onClick.bind(this);
     this.onKey = this.onKey.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
-
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onPointerMove = this.onPointerMove.bind(this);
     this._tweenBuffer = false;
+
+    this._pointerMoving = false;
+    this._pointerMovingPos = 0;
+    this._pointerStartPos;
 
     // Create the matte - this is the element that will appear behind the card.
     this.matte = document.createElement("div");
     this.matte.className = `perspective-card--matte`;
 
     // Add the listener to the pointer up event
+    this.element.addEventListener("touchstart", this.onTouchStart);
+    this.element.addEventListener("touchend", this.onTouchEnd);
     this.element.addEventListener("pointerdown", this.onPointerDown);
     this.element.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerup", this.onClick);
     this.matte.addEventListener("pointerdown", this.onPointerDown);
+    this.matte.addEventListener("touchmove", this.onTouchMove);
+    this.element.addEventListener("pointermove", this.onPointerMove);
   }
 
   /**
@@ -854,16 +881,68 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   // Toggle the enlarged flag on click
   onClick(e) {
     if (
+      window.cardClickEsc != true &&
       window.clickablePerspectiveCard_initialtouch === e.pointerId &&
       this._tweenBuffer === false
     ) {
       this.enlarged = !this.enlarged;
-      window.clickablePerspectiveCard_initialtouch = null;
+    }
+    window.clickablePerspectiveCard_initialtouch = null;
+    window.cardClickEsc = false;
+  }
+
+  onTouchMove(e) {
+    if (e.targetTouches.length === 1) {
+      e.preventDefault();
     }
   }
 
-  // Toggle the enlarged flag on click
-  onPointerDown(e) {
+  onTouchStart(e) {
+    this.touching = true;
+
+    setTimeout(() => {
+      if (this.touching === true) {
+        window.cardClickEsc = true;
+      }
+    }, 300);
+
+    // Below was an attept to fix the card click / drag issue
+    // which is more elegantly solved above. I'm leaving this
+    // here for posterity. Liam.
+    // let pointerStartPos = e.touches[0].screenY;
+    // console.log("-----", e.touches[0].screenY);
+    // let pointerDiff = 0;
+    // const threshold = 10;
+    // const onPointerMove = e => {
+    //   console.log(e.screenY);
+    //   pointerDiff = pointerStartPos - e.screenY;
+    // };
+    // window.addEventListener("pointermove", onPointerMove);
+    // setTimeout(() => {
+    //   window.removeEventListener("pointermove", onPointerMove);
+    //   console.log("pointerdiff after 300 ms", Math.abs(pointerDiff));
+    //   if (Math.abs(pointerDiff) > threshold) {
+    //     window.cardClickEsc = true;
+    //   }
+    // }, 300);
+  }
+  onTouchEnd(e) {
+    this.touching = false;
+    setTimeout(() => (window.cardClickEsc = false), 0);
+  }
+
+  onPointerMove(e) {
+    if (!this._pointerMoving) {
+      window.requestAnimationFrame(() => {
+        this._pointerMovingPos = e.y;
+        this._pointerMoving = false;
+      });
+      this._pointerMoving = true;
+    }
+  }
+
+   // Toggle the enlarged flag on click
+   onPointerDown(e) {
     if (
       window.clickablePerspectiveCard_initialtouch === null &&
       this._tweenBuffer === false
