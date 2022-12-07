@@ -74,8 +74,6 @@ class PerspectiveCard {
     );
     this.shine = this.element.querySelector(".perspective-card__shine");
 
-    this.cardImage = this.element.querySelector(".card__img--front");
-
     // Bind our event listeners
     this.resize = this.resize.bind(this);
     this.touchStart = this.touchStart.bind(this);
