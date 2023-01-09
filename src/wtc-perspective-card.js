@@ -792,7 +792,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @listens scroll
    */
 
-  resize(e) {
+  resize(e, force = false) {
     const resize = () => {
       const pos = this.element.getBoundingClientRect();
       if (this.enlarged === false) {
@@ -805,8 +805,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.position[1] + this.size[1] * 0.5
       ];
     };
-    clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(resize, 300);
+
+    if (force) {
+      resize();
+    } else {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(resize, 300);
+    }
   }
 
   /**
@@ -880,6 +885,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
   // Toggle the enlarged flag on click
   onClick(e) {
+    this.resize(null, true);
+
     if (
       window.cardClickEsc != true &&
       window.clickablePerspectiveCard_initialtouch === e.pointerId &&
