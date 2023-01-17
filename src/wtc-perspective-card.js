@@ -798,19 +798,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @listens scroll
    */
 
-  updatePosition() {
-    const pos = this.element.getBoundingClientRect();
-      if (this.enlarged === false) {
-        this.startingDimensions = [pos.width, pos.height];
-      }
-      this.position = [pos.left, pos.top];
-      this.size = [pos.width, pos.height];
-      this.axis = [
-        this.position[0] + this.size[0] * 0.5,
-        this.position[1] + this.size[1] * 0.5
-      ];
-  }
-
   resize(e, force = false) {
     if (force) {
       this.updatePosition();
