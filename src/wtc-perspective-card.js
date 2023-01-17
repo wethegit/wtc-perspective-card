@@ -76,6 +76,7 @@ class PerspectiveCard {
 
     // Bind our event listeners
     this.resize = this.resize.bind(this);
+    this.updatePosition = this.updatePosition.bind(this);
     this.touchStart = this.touchStart.bind(this);
     this.touchEnd = this.touchEnd.bind(this);
     this.pointerMove = this.pointerMove.bind(this);
@@ -313,18 +314,23 @@ class PerspectiveCard {
    * @listens pointerleave
    * @listens scroll
    */
-  resize(e) {
-    const resize = () => {
-      const pos = this.element.getBoundingClientRect();
+
+  updatePosition() {
+    const pos = this.element.getBoundingClientRect();
+      if (this.enlarged === false) {
+        this.startingDimensions = [pos.width, pos.height];
+      }
       this.position = [pos.left, pos.top];
       this.size = [pos.width, pos.height];
       this.axis = [
         this.position[0] + this.size[0] * 0.5,
         this.position[1] + this.size[1] * 0.5
       ];
-    };
+  }
+
+  resize(e) {
     clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(resize, 300);
+    this.debounceTimer = setTimeout(this.updatePosition, 300);
   }
 
   /**
@@ -792,9 +798,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @listens scroll
    */
 
-  resize(e, force = false) {
-    const resize = () => {
-      const pos = this.element.getBoundingClientRect();
+  updatePosition() {
+    const pos = this.element.getBoundingClientRect();
       if (this.enlarged === false) {
         this.startingDimensions = [pos.width, pos.height];
       }
@@ -804,13 +809,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.position[0] + this.size[0] * 0.5,
         this.position[1] + this.size[1] * 0.5
       ];
-    };
+  }
 
+  resize(e, force = false) {
     if (force) {
-      resize();
+      this.updatePosition();
     } else {
       clearTimeout(this.debounceTimer);
-      this.debounceTimer = setTimeout(resize, 300);
+      this.debounceTimer = setTimeout(this.updatePosition, 300);
     }
   }
 
