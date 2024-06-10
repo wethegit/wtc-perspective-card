@@ -19,7 +19,7 @@
     "prepare": "npm run build && webpack --config webpack.config.js && npm run minify-js && npm run minify-css"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.6",
+    "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.6",
     "@babel/preset-env": "^7.24.6",
     "autoprefixer": "^10.4.19",
