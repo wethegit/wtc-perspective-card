@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.24.6",
-    "@babel/core": "^7.24.6",
+    "@babel/core": "^7.24.9",
     "@babel/preset-env": "^7.24.6",
     "autoprefixer": "^10.4.19",
     "babel-loader": "^8.3.0",
