@@ -103,9 +103,13 @@ conforming to:</p>
       img
     .perspective-card__artwork.perspective-card__artwork--back
       img
-    .perspective-card__shine</code></pre><p>This class is designed to be used with a decorator function (provided by
+    .perspective-card__shine
+</code></pre>
+<p>This class is designed to be used with a decorator function (provided by
 the new wtc-decorator static class) or used directly like:</p>
-<pre><code>const p = new PerspectiveCard(element);</code></pre></dd>
+<pre><code>const p = new PerspectiveCard(element);
+</code></pre>
+</dd>
 <dt><a href="#ClickablePerspectiveCard">ClickablePerspectiveCard</a> ⇐ <code><a href="#PerspectiveCard">PerspectiveCard</a></code></dt>
 <dd><p>The clickable perspective card adds functionality that allows the zooming
 the card by clicking on it. In doing so the card flips and animates up to a
@@ -159,11 +163,13 @@ const p = new PerspectiveCard(element);
         * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
         * [.play(delta, raf)](#PerspectiveCard+play)
         * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
+        * [.touchStart()](#PerspectiveCard+touchStart)
         * [.pointerMove(e)](#PerspectiveCard+pointerMove)
         * [.pointerEnter(e)](#PerspectiveCard+pointerEnter)
         * [.pointerLeave(e)](#PerspectiveCard+pointerLeave)
-        * [.resize(e)](#PerspectiveCard+resize)
+        * [.updatePosition(e)](#PerspectiveCard+updatePosition)
         * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
+        * [.hideIntersect(entries, observer)](#PerspectiveCard+hideIntersect) ⇒
     * _static_
         * [.targetTo(eye, center, up)](#PerspectiveCard.targetTo) ⇒ <code>mat4</code>
 
@@ -337,6 +343,12 @@ Calculates the difference between the look point and the look point target
 
 **Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Access**: public  
+<a name="PerspectiveCard+touchStart"></a>
+
+### perspectiveCard.touchStart()
+Event Listeners
+
+**Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
 <a name="PerspectiveCard+pointerMove"></a>
 
 ### perspectiveCard.pointerMove(e)
@@ -353,7 +365,7 @@ This sets the target point to a value based on the pointer's position
 <a name="PerspectiveCard+pointerEnter"></a>
 
 ### perspectiveCard.pointerEnter(e)
-The event listener for the pointer enter event
+The event listener for the pointer enter
 This sets the pointerControlled property to true, updates the target
 zoom and adds the class `perspective-card--over` to the element.
 
@@ -378,9 +390,9 @@ target zoom and removes the class `perspective-card--over` to the element.
 | --- | --- | --- |
 | e | <code>event</code> | The pointer event object |
 
-<a name="PerspectiveCard+resize"></a>
+<a name="PerspectiveCard+updatePosition"></a>
 
-### perspectiveCard.resize(e)
+### perspectiveCard.updatePosition(e)
 The event listener for the resize and scroll events
 This updates the position and size of the element and sets the
 axis for use in animation. This is bound to a debouncer so that
@@ -397,6 +409,20 @@ resizing.
 <a name="PerspectiveCard+intersect"></a>
 
 ### perspectiveCard.intersect(entries, observer) ⇒
+Listener for the intersection observer callback
+
+**Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+**Returns**: void  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| entries | <code>object</code> | the object that contains all of the elements being calculated by this observer |
+| observer | <code>object</code> | the observer instance itself |
+
+<a name="PerspectiveCard+hideIntersect"></a>
+
+### perspectiveCard.hideIntersect(entries, observer) ⇒
 Listener for the intersection observer callback
 
 **Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
@@ -471,10 +497,13 @@ modal style display.
     * [.resize(e)](#ClickablePerspectiveCard+resize)
     * [.play(delta, raf)](#ClickablePerspectiveCard+play)
     * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
+    * [.touchStart()](#PerspectiveCard+touchStart)
     * [.pointerMove(e)](#PerspectiveCard+pointerMove)
     * [.pointerEnter(e)](#PerspectiveCard+pointerEnter)
     * [.pointerLeave(e)](#PerspectiveCard+pointerLeave)
+    * [.updatePosition(e)](#PerspectiveCard+updatePosition)
     * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
+    * [.hideIntersect(entries, observer)](#PerspectiveCard+hideIntersect) ⇒
 
 <a name="new_ClickablePerspectiveCard_new"></a>
 
@@ -720,7 +749,6 @@ it doesn't get called a hundred times when scrolling or
 resizing.
 
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
-**Overrides**: [<code>resize</code>](#PerspectiveCard+resize)  
 **Access**: public  
 
 | Param | Type | Description |
@@ -752,6 +780,13 @@ Calculates the difference between the look point and the look point target
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Overrides**: [<code>calculateLookDifferential</code>](#PerspectiveCard+calculateLookDifferential)  
 **Access**: public  
+<a name="PerspectiveCard+touchStart"></a>
+
+### clickablePerspectiveCard.touchStart()
+Event Listeners
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>touchStart</code>](#PerspectiveCard+touchStart)  
 <a name="PerspectiveCard+pointerMove"></a>
 
 ### clickablePerspectiveCard.pointerMove(e)
@@ -769,7 +804,7 @@ This sets the target point to a value based on the pointer's position
 <a name="PerspectiveCard+pointerEnter"></a>
 
 ### clickablePerspectiveCard.pointerEnter(e)
-The event listener for the pointer enter event
+The event listener for the pointer enter
 This sets the pointerControlled property to true, updates the target
 zoom and adds the class `perspective-card--over` to the element.
 
@@ -796,6 +831,23 @@ target zoom and removes the class `perspective-card--over` to the element.
 | --- | --- | --- |
 | e | <code>event</code> | The pointer event object |
 
+<a name="PerspectiveCard+updatePosition"></a>
+
+### clickablePerspectiveCard.updatePosition(e)
+The event listener for the resize and scroll events
+This updates the position and size of the element and sets the
+axis for use in animation. This is bound to a debouncer so that
+it doesn't get called a hundred times when scrolling or
+resizing.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>updatePosition</code>](#PerspectiveCard+updatePosition)  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>event</code> | The pointer event object |
+
 <a name="PerspectiveCard+intersect"></a>
 
 ### clickablePerspectiveCard.intersect(entries, observer) ⇒
@@ -803,6 +855,21 @@ Listener for the intersection observer callback
 
 **Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
 **Overrides**: [<code>intersect</code>](#PerspectiveCard+intersect)  
+**Returns**: void  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| entries | <code>object</code> | the object that contains all of the elements being calculated by this observer |
+| observer | <code>object</code> | the observer instance itself |
+
+<a name="PerspectiveCard+hideIntersect"></a>
+
+### clickablePerspectiveCard.hideIntersect(entries, observer) ⇒
+Listener for the intersection observer callback
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>hideIntersect</code>](#PerspectiveCard+hideIntersect)  
 **Returns**: void  
 **Access**: public  
 

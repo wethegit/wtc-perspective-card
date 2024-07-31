@@ -12,11 +12,12 @@
   "scripts": {
     "document": "{ cat USAGE.md; npx jsdoc2md src/wtc-perspective-card.js; } > README.md",
     "prebuild-js": "babel src/ --presets @babel/preset-env --out-dir build",
-    "prebuild-css": "node-sass --output-style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
+    "prebuild-css": "sass --output-style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
     "minify-js": "uglifyjs build/wtc-perspective-card.js --compress --output dist/wtc-perspective-card.min.js",
     "minify-css": "postcss build/wtc-perspective-card.css --no-map --use autoprefixer -d dist/",
     "build": "npm run prebuild-js && npm rum prebuild-css",
-    "prepare": "npm run build && webpack --config webpack.config.js && npm run minify-js && npm run minify-css"
+    "prepare": "npm run build && webpack --config webpack.config.js && npm run minify-js && npm run minify-css",
+    "format": "prettier --write --ignore-unknown ./src/*.{js,scss}"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
@@ -27,6 +28,8 @@
     "jsdoc-to-markdown": "^8.0.3",
     "node-sass": "^9.0.0",
     "postcss-cli": "^11.0.0",
+    "prettier": "~3.3.3",
+    "sass": "~1.80.4",
     "uglify-js": "^3.19.1",
     "webpack": "^5.93.0",
     "webpack-cli": "^5.0.1"
