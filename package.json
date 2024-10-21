@@ -24,7 +24,7 @@
     "@babel/preset-env": "^7.25.0",
     "autoprefixer": "^10.4.20",
     "babel-loader": "^8.3.0",
-    "jsdoc-to-markdown": "^8.0.3",
+    "jsdoc-to-markdown": "^9.0.4",
     "node-sass": "^9.0.0",
     "postcss-cli": "^11.0.0",
     "uglify-js": "^3.19.1",
