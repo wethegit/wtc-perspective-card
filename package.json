@@ -12,7 +12,7 @@
   "scripts": {
     "document": "{ cat USAGE.md; npx jsdoc2md src/wtc-perspective-card.js; } > README.md",
     "prebuild-js": "babel src/ --presets @babel/preset-env --out-dir build",
-    "prebuild-css": "sass --output-style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
+    "prebuild-css": "sass --style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
     "minify-js": "uglifyjs build/wtc-perspective-card.js --compress --output dist/wtc-perspective-card.min.js",
     "minify-css": "postcss build/wtc-perspective-card.css --no-map --use autoprefixer -d dist/",
     "build": "npm run prebuild-js && npm rum prebuild-css",
@@ -26,7 +26,6 @@
     "autoprefixer": "^10.4.20",
     "babel-loader": "^8.3.0",
     "jsdoc-to-markdown": "^8.0.3",
-    "node-sass": "^9.0.0",
     "postcss-cli": "^11.0.0",
     "prettier": "~3.3.3",
     "sass": "~1.80.4",
