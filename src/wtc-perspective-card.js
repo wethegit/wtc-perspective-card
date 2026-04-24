@@ -115,6 +115,20 @@ class PerspectiveCard {
 
     // Initial resize to find the location and dimensions of the element
     this.resize()
+
+    // Set up foil if enabled
+    this.foil = settings.foil || this.element.hasAttribute('data-foil') || false
+    if (this.foil) {
+      this.foilMask =
+        settings.foilMask || this.element.getAttribute('data-foil-mask') || null
+      this.foilEtch =
+        settings.foilEtch || this.element.getAttribute('data-foil-etch') || null
+      this.foilDebug =
+        settings.foilDebug ||
+        this.element.hasAttribute('data-foil-debug') ||
+        false
+      this._setupFoil()
+    }
   }
 
   /**
@@ -212,6 +226,14 @@ class PerspectiveCard {
       0.01,
       Math.abs(len * 0.002)
     )}) 5%, rgba(255,255,255,0) 80%)`
+
+    // Rotate the foil gradient to match the card's current tilt angle
+    if (this._foilGradient) {
+      this._foilGradient.setAttribute(
+        'gradientTransform',
+        `rotate(${(angle * 180) / Math.PI}, 0.5, 0.5)`
+      )
+    }
   }
 
   /**
@@ -643,6 +665,113 @@ class PerspectiveCard {
   }
 
   /**
+   * Builds the foil SVG overlay and appends it to the transformer element.
+   * Called once from the constructor when foil is enabled.
+   */
+  _setupFoil() {
+    const id = PerspectiveCard._foilIdCounter++
+    const ns = 'http://www.w3.org/2000/svg'
+
+    const svg = document.createElementNS(ns, 'svg')
+    svg.setAttribute('class', 'perspective-card__foil')
+    svg.setAttribute('aria-hidden', 'true')
+
+    const defs = document.createElementNS(ns, 'defs')
+
+    // Rainbow gradient — angle is updated every frame in play()
+    const grad = document.createElementNS(ns, 'linearGradient')
+    grad.id = `pc-foil-grad-${id}`
+    grad.setAttribute('gradientUnits', 'objectBoundingBox')
+    grad.setAttribute('x1', '0')
+    grad.setAttribute('y1', '0.5')
+    grad.setAttribute('x2', '1')
+    grad.setAttribute('y2', '0.5')
+    ;[
+      [0, 'rgba(253,29,29,1)'],
+      [0.125, 'rgba(253,201,29,1)'],
+      [0.25, 'rgba(49,253,175,1)'],
+      [0.375, 'rgba(60,188,252,1)'],
+      [0.5, 'rgba(253,29,29,1)'],
+      [0.625, 'rgba(253,201,29,1)'],
+      [0.75, 'rgba(49,253,175,1)'],
+      [0.875, 'rgba(60,188,252,1)'],
+      [1, 'rgba(253,29,29,1)']
+    ].forEach(([offset, color]) => {
+      const stop = document.createElementNS(ns, 'stop')
+      stop.setAttribute('offset', offset)
+      stop.setAttribute('stop-color', color)
+      grad.appendChild(stop)
+    })
+    defs.appendChild(grad)
+    this._foilGradient = grad
+
+    // Optional mask image — shapes which parts of the card show the foil
+    if (this.foilMask) {
+      const mask = document.createElementNS(ns, 'mask')
+      mask.id = `pc-foil-mask-${id}`
+      const img = document.createElementNS(ns, 'image')
+      img.setAttribute('href', this.foilMask)
+      img.setAttribute('preserveAspectRatio', 'xMidYMid slice')
+      img.setAttribute('width', '100%')
+      img.setAttribute('height', '100%')
+      mask.appendChild(img)
+      defs.appendChild(mask)
+    }
+
+    const margin = 40
+
+    if (this.foilEtch) {
+      const filter = document.createElementNS(ns, 'filter')
+      filter.id = `pc-foil-filter-${id}`
+      filter.setAttribute('color-interpolation-filters', 'sRGB')
+      // Expand filter region so the gradient rect's SourceGraphic extends beyond
+      // the card bounds. feDisplacementMap samples SourceGraphic at displaced
+      // coordinates — without this padding, large scale values pull from outside
+      // the element bounds and return transparent pixels.
+      filter.setAttribute('x', `-${margin}%`)
+      filter.setAttribute('y', `-${margin}%`)
+      filter.setAttribute('width', `${100 + margin * 2}%`)
+      filter.setAttribute('height', `${100 + margin * 2}%`)
+
+      const feImg = document.createElementNS(ns, 'feImage')
+      feImg.setAttribute('href', this.foilEtch)
+      feImg.setAttribute('result', 'etch')
+      feImg.setAttribute('preserveAspectRatio', 'xMidYMid slice')
+      feImg.setAttribute('x', '0')
+      feImg.setAttribute('y', '0')
+      feImg.setAttribute('width', '100%')
+      feImg.setAttribute('height', '100%')
+
+      const feDM = document.createElementNS(ns, 'feDisplacementMap')
+      feDM.setAttribute('in', 'SourceGraphic')
+      feDM.setAttribute('in2', 'etch')
+      feDM.setAttribute('scale', '130')
+      feDM.setAttribute('xChannelSelector', 'R')
+      feDM.setAttribute('yChannelSelector', 'G')
+
+      filter.appendChild(feImg)
+      if (!this.foilDebug) filter.appendChild(feDM)
+      defs.appendChild(filter)
+    }
+
+    svg.appendChild(defs)
+
+    const rect = document.createElementNS(ns, 'rect')
+    rect.setAttribute('x', `-${margin}%`)
+    rect.setAttribute('y', `-${margin}%`)
+    rect.setAttribute('width', `${100 + margin * 2}%`)
+    rect.setAttribute('height', `${100 + margin * 2}%`)
+    rect.setAttribute('fill', `url(#pc-foil-grad-${id})`)
+    // if (this.foilMask) rect.setAttribute('mask', `url(#pc-foil-mask-${id})`)
+    if (this.foilEtch) rect.setAttribute('filter', `url(#pc-foil-filter-${id})`)
+
+    svg.appendChild(rect)
+    this.transformer.appendChild(svg)
+  }
+
+  static _foilIdCounter = 0
+
+  /**
    * Static classes
    */
 
@@ -996,6 +1125,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       document.body.appendChild(this.matte)
 
       // Initialise our tween timing variables
+      this.playing = true
       this.tweening = true
       this.tweenTime = 0
       this.tweenDuration = 1500 // 1.5 seconds
@@ -1034,9 +1164,24 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.rotationAmount = Math.PI * -2
 
       this.onEndTween = function () {
-        // Transform style preserve 3d, and the translateZ were causing
-        // the card image to pixelate on non retina monitors. Removing these
-        // whilst the card is open fixes that.
+        // Convert the CSS scale() to real dimensions so the browser renders
+        // at the actual display size rather than upscaling a small raster.
+        // This also fixes SVG filter blurriness (feImage is rasterised at the
+        // element's intrinsic size and gets blurry when scale() upscales it).
+        const scale = this.screenScale
+        this._resolvedScale = scale
+
+        const w = this.startingDimensions[0] * scale
+        const h = this.startingDimensions[1] * scale
+
+        this.element.style.width = `${w}px`
+        this.element.style.height = `${h}px`
+        this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
+        this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
+        this.element.style.transform = 'none'
+        this._screenScale = 1
+
+        if (this.foil) this._updateFoilBounds()
         this.element.classList.add('perspective-card--is-open')
       }
 
@@ -1049,6 +1194,16 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // Remove the modal class from the matte
       this.matte.classList.remove('perspective-card--modal')
+
+      // We converted scale() to real dimensions when opening; restore the
+      // scale transform now so the close tween can animate it back to 1.
+      const resolvedScale = this._resolvedScale || 1
+      this._screenScale = resolvedScale
+      this.element.style.transform = `scale(${resolvedScale})`
+      this.element.style.width = ''
+      this.element.style.height = ''
+      this.element.style.left = `${window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5}px`
+      this.element.style.top = `${window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5}px`
 
       // Initialise our tween timing variables
       this.tweening = true
@@ -1076,6 +1231,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.element.classList.remove('perspective-card--modal')
 
         this.element.style.position = ''
+        this.element.style.transform = ''
         this.screenPosition = [0, 0]
 
         this.element.style.left = ''
@@ -1085,11 +1241,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
           this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
         }, 100)
 
-        // Returning the ambient state to what it was, if it *was* false
-        if (this._wasAmbient < 0) {
-          this.ambient = -1
-        }
-        if (this.pointerControlled === false) {
+        // Restore the ambient state to whatever it was before opening
+        this.ambient = this._wasAmbient
+        // Only stop playing for hover-only cards (ambient < 0) when the
+        // pointer isn't over the card — ambient cards keep running
+        if (this._wasAmbient < 0 && this.pointerControlled === false) {
           this.playing = false
         }
       }
