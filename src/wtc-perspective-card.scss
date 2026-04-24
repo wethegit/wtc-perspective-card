@@ -1,8 +1,21 @@
 .perspective-card {
-  perspective: 600px;
+  perspective: 1000px;
   position: relative;
   touch-action: none;
   transform-style: preserve-3d;
+}
+
+.perspective-card__foil {
+  height: 100%;
+  left: 0;
+  mix-blend-mode: overlay;
+  opacity: 0.8;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: translateZ(1px);
+  width: 100%;
+  z-index: 1;
 }
 
 .perspective-card__shine {
