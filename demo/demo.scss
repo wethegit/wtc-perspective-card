@@ -1,0 +1,142 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0d0d12;
+  --surface: #16161f;
+  --text: #e8e8f0;
+  --text-muted: #6b6b80;
+  --accent: #7c6af7;
+  --card-width: 220px;
+  --radius: 12px;
+}
+
+html,
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+.site-header {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+}
+
+.site-header__title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.site-header__desc {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 40ch;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+// ─── Demo grid ────────────────────────────────────────────────────────────────
+
+.demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3rem 4rem;
+  padding: 4rem 2rem 6rem;
+}
+
+.demo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: var(--card-width);
+}
+
+.demo-item__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.demo-item__desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+// ─── Perspective card sizing ───────────────────────────────────────────────────
+
+.perspective-card {
+  width: var(--card-width);
+  cursor: pointer;
+}
+
+// ─── Card artwork ─────────────────────────────────────────────────────────────
+
+.card-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  border-radius: var(--radius);
+}
+
+// Card A — hover (indigo/violet → amber)
+.card-art--a-front {
+  background:
+    radial-gradient(ellipse at 30% 25%, rgba(150, 120, 255, 0.6) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 70%, rgba(90, 60, 220, 0.5) 0%, transparent 50%),
+    linear-gradient(155deg, #1a1040 0%, #0e0828 100%);
+}
+
+.card-art--a-back {
+  background:
+    radial-gradient(ellipse at 60% 30%, rgba(255, 190, 80, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 25% 75%, rgba(220, 100, 50, 0.4) 0%, transparent 50%),
+    linear-gradient(155deg, #2a1500 0%, #1a0e00 100%);
+}
+
+// Card B — ambient (teal/green → purple)
+.card-art--b-front {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(60, 220, 180, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(20, 160, 130, 0.4) 0%, transparent 50%),
+    linear-gradient(155deg, #001a18 0%, #000e0c 100%);
+}
+
+.card-art--b-back {
+  background:
+    radial-gradient(ellipse at 40% 35%, rgba(180, 80, 255, 0.5) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 75%, rgba(120, 40, 200, 0.4) 0%, transparent 50%),
+    linear-gradient(155deg, #120020 0%, #0a0014 100%);
+}
+
+// Card C — clickable (rose/gold → midnight)
+.card-art--c-front {
+  background:
+    radial-gradient(ellipse at 35% 30%, rgba(255, 100, 150, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 70%, rgba(200, 60, 100, 0.4) 0%, transparent 50%),
+    linear-gradient(155deg, #200010 0%, #110008 100%);
+}
+
+.card-art--c-back {
+  background:
+    radial-gradient(ellipse at 55% 25%, rgba(255, 215, 80, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 30% 75%, rgba(200, 160, 30, 0.4) 0%, transparent 50%),
+    linear-gradient(155deg, #1a1400 0%, #0e0c00 100%);
+}

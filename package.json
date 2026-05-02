@@ -7,35 +7,23 @@
   },
   "author": "Liam Egan <liam@wethecollectibe.com>",
   "license": "MIT",
-  "main": "dist/wtc-perspective-card.min.js",
+  "main": "dist/wtc-perspective-card.umd.js",
+  "module": "dist/wtc-perspective-card.js",
   "style": "dist/wtc-perspective-card.css",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build --mode lib && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
+    "build:demo": "vite build",
+    "preview": "vite preview --root demo",
     "document": "{ cat USAGE.md; npx jsdoc2md src/wtc-perspective-card.js; } > README.md",
-    "prebuild-js": "babel src/ --presets @babel/preset-env --out-dir build",
-    "prebuild-css": "sass --style compressed src/wtc-perspective-card.scss build/wtc-perspective-card.css",
-    "minify-js": "uglifyjs build/wtc-perspective-card.js --compress --output dist/wtc-perspective-card.min.js",
-    "minify-css": "postcss build/wtc-perspective-card.css --no-map --use autoprefixer -d dist/",
-    "build": "npm run prebuild-js && npm rum prebuild-css",
-    "prepare": "npm run build && webpack --config webpack.config.js && npm run minify-js && npm run minify-css",
     "format": "prettier --write --ignore-unknown ./src/*.{js,scss}"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.8",
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
     "autoprefixer": "^10.4.20",
-    "babel-loader": "^8.3.0",
     "jsdoc-to-markdown": "^8.0.3",
-    "postcss-cli": "^11.0.0",
+    "postcss": "^8.4.47",
     "prettier": "~3.3.3",
     "sass": "~1.80.4",
-    "uglify-js": "^3.19.1",
-    "webpack": "^5.93.0",
-    "webpack-cli": "^5.0.1"
-  },
-  "dependencies": {
-    "@babel/polyfill": "^7.8.3",
-    "core-js": "^3.6.3",
-    "pepjs": "^0.5.2"
+    "vite": "^6.0.0"
   }
 }

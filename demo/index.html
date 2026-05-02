@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wtc-perspective-card</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="site-header__title">wtc-perspective-card</h1>
+      <p class="site-header__desc">
+        A vanilla JS perspective card with hover, ambient, and clickable modes.
+      </p>
+    </header>
+
+    <main class="demo-grid">
+      <!-- Hover only -->
+      <div class="demo-item">
+        <div class="demo-item__label">Hover</div>
+        <div class="perspective-card js-card">
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--a-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--a-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">Tilts toward the cursor on hover.</p>
+      </div>
+
+      <!-- Ambient -->
+      <div class="demo-item">
+        <div class="demo-item__label">Ambient</div>
+        <div class="perspective-card js-card" data-ambient>
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--b-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--b-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">Animates continuously when in view.</p>
+      </div>
+
+      <!-- Clickable -->
+      <div class="demo-item">
+        <div class="demo-item__label">Clickable</div>
+        <div class="perspective-card js-card--clickable" data-ambient="2">
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--c-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--c-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          Click to expand. Flips and zooms to modal.
+        </p>
+      </div>
+
+      <!-- Image card -->
+      <div class="demo-item">
+        <div class="demo-item__label">Image card</div>
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+          data-foil
+          data-foil-mask="./assets/mask.png"
+          data-foil-etch="./assets/etch.png"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <img src="./assets/matte.png" alt="Matte" />
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <img src="./assets/matte.png" alt="Matte" />
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          Click to expand. Ambient animation with a real image.
+        </p>
+      </div>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
