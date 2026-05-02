@@ -172,7 +172,7 @@ class PerspectiveCard {
       const d = this.delta * 0.0001 + this.ambient
       const s = Math.sin(d * 2)
       const c = Math.cos(d * 0.5)
-      const l = this.intensity * 10 * Math.cos(d * 3.542 + 1234.5) // Some really arbitrary numbers here. They don't mean anythign in particular, they just work.
+      const l = this.intensity * 10 * (0.5 + 0.5 * Math.cos(d * 3.542 + 1234.5)) // Half-cosine keeps l in [0, max] so tPoint never reflects through the origin
 
       this.tPoint = [c * l, s * l, this.tPoint[2]]
     }
@@ -884,7 +884,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this)
-    this.onKey = this.onKey.bind(this)
+    this.onDialogCancel = this.onDialogCancel.bind(this)
     this.onPointerDown = this.onPointerDown.bind(this)
     this.onTouchStart = this.onTouchStart.bind(this)
     this.onTouchEnd = this.onTouchEnd.bind(this)
@@ -896,18 +896,20 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this._pointerMovingPos = 0
     this._pointerStartPos
 
-    // Create the matte - this is the element that will appear behind the card.
-    this.matte = document.createElement('div')
-    this.matte.className = `perspective-card--matte`
+    // Create the dialog that acts as the modal backdrop.
+    // The card element is moved into it on open so it lives in the top layer.
+    this.dialog = document.createElement('dialog')
+    this.dialog.className = 'perspective-card__dialog'
 
     // Add the listener to the pointer up event
     this.element.addEventListener('touchstart', this.onTouchStart)
     this.element.addEventListener('touchend', this.onTouchEnd)
     this.element.addEventListener('pointerdown', this.onPointerDown)
     this.element.addEventListener('pointerup', this.onClick)
-    this.matte.addEventListener('pointerup', this.onClick)
-    this.matte.addEventListener('pointerdown', this.onPointerDown)
-    this.matte.addEventListener('touchmove', this.onTouchMove)
+    this.dialog.addEventListener('pointerup', this.onClick)
+    this.dialog.addEventListener('pointerdown', this.onPointerDown)
+    this.dialog.addEventListener('touchmove', this.onTouchMove)
+    this.dialog.addEventListener('cancel', this.onDialogCancel)
     this.element.addEventListener('pointermove', this.onPointerMove)
   }
 
@@ -1077,8 +1079,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
 
-  onKey(e) {
-    if (e.keyCode === 27) this.enlarged = false
+  onDialogCancel(e) {
+    // Prevent the native immediate-close so we can run the close animation instead.
+    e.preventDefault()
+    this.enlarged = false
   }
 
   /**
@@ -1100,29 +1104,30 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
-      window.addEventListener('keyup', this.onKey)
-
-      // Get the current bounding client rectangle
+      // Get the current bounding client rectangle before touching the DOM
       const viewportOffset = this.element.getBoundingClientRect()
 
-      // This makes it so that, when the card is enlarged that it runs ambiently by defailt
+      // This makes it so that, when the card is enlarged that it runs ambiently by default
       this._wasAmbient = this.ambient
       this.ambient = 0
 
-      // Set up the DOM for this. Basically the same as setting up a modal.
-      document.body.style.overflow = 'hidden'
-      if (
-        ['MacIntel', 'iPhone', 'iPad', 'Android'].indexOf(
-          navigator.platform
-        ) === -1
-      )
-        document.body.style.paddingRight = '15px' // Restricting this to non macs
+      // Insert a placeholder in the card's original slot so the layout is
+      // maintained and we can read its current viewport position on close —
+      // even if the page has been scrolled or resized since opening.
+      this._originalParent = this.element.parentNode
+      this._placeholder = document.createElement('div')
+      this._placeholder.style.cssText = `width:${this.startingDimensions[0]}px;height:${this.startingDimensions[1]}px;visibility:hidden;pointer-events:none;`
+      this._placeholder.setAttribute('aria-hidden', 'true')
+      this._originalParent.insertBefore(this._placeholder, this.element)
+
+      // Fix the card in place, move it into the dialog, then open the dialog.
+      // The dialog's showModal() puts it in the top layer, so the card must be
+      // inside it — position:fixed elements in the normal document sit below the top layer.
       this.element.style.position = 'fixed'
       this.element.classList.add('perspective-card--modal')
-      setTimeout(() => {
-        this.matte.classList.add('perspective-card--modal')
-      }, 0)
-      document.body.appendChild(this.matte)
+      document.body.appendChild(this.dialog)
+      this.dialog.appendChild(this.element)
+      this.dialog.showModal()
 
       // Initialise our tween timing variables
       this.playing = true
@@ -1187,13 +1192,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
-      window.removeEventListener('keyup', this.onKey)
-
       // Adds 3d transforms back in on close.
       this.element.classList.remove('perspective-card--is-open')
 
-      // Remove the modal class from the matte
-      this.matte.classList.remove('perspective-card--modal')
+      // Trigger the backdrop fade-out
+      this.dialog.classList.add('perspective-card__dialog--closing')
 
       // We converted scale() to real dimensions when opening; restore the
       // scale transform now so the close tween can animate it back to 1.
@@ -1210,10 +1213,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.tweenTime = 0
       this.tweenDuration = 1000 // 1 second
 
-      // Set up our positional arrays. Basically just opposing the previous tween
-      const startingPosition = this.startingPosition
+      // Read the placeholder's current viewport position so the close tween
+      // targets the right place even if the page was scrolled or resized while open.
+      const placeholderOffset = this._placeholder.getBoundingClientRect()
       this.startingPosition = this.targetPosition
-      this.targetPosition = startingPosition
+      this.targetPosition = [placeholderOffset.left, placeholderOffset.top]
 
       // Set up our scaling properties
       this.startingScale = this.screenScale
@@ -1225,17 +1229,23 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // At the end of this tween we clean everything up
       this.onEndTween = function () {
-        document.body.style.overflow = ''
-        document.body.style.paddingRight = ''
-        document.body.removeChild(this.matte)
-        this.element.classList.remove('perspective-card--modal')
+        // Swap the placeholder out for the real card, restoring the original slot
+        if (this._placeholder && this._placeholder.parentNode) {
+          this._placeholder.replaceWith(this.element)
+        } else {
+          this._originalParent.appendChild(this.element)
+        }
+        this._placeholder = null
 
+        this.element.classList.remove('perspective-card--modal')
         this.element.style.position = ''
         this.element.style.transform = ''
-        this.screenPosition = [0, 0]
-
         this.element.style.left = ''
         this.element.style.top = ''
+
+        this.dialog.close()
+        this.dialog.classList.remove('perspective-card__dialog--closing')
+        document.body.removeChild(this.dialog)
 
         setTimeout(() => {
           this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
