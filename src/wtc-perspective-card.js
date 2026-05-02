@@ -935,6 +935,18 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
 
+  updatePosition() {
+    super.updatePosition()
+
+    // When fully open, re-centre in the current viewport after resize or scroll
+    if (this.enlarged && this.element.classList.contains('perspective-card--is-open')) {
+      const w = parseFloat(this.element.style.width)
+      const h = parseFloat(this.element.style.height)
+      this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
+      this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
+    }
+  }
+
   /**
    * This is the main run-loop function.
    * It is responsible for taking the various previously set properies
