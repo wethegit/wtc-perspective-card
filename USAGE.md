@@ -91,3 +91,29 @@ Plain vanilla javascript with ES6 and module imports.
 ```javascript
 const card = new PerspectiveCard(document.getElementById("card"));
 ```
+
+## Events
+
+Both classes dispatch `CustomEvent`s on the card element. Events bubble, so you can listen on any ancestor. All event names are prefixed with `perspectivecard:`.
+
+```javascript
+cardElement.addEventListener('perspectivecard:play', (e) => {
+  console.log('card animation started')
+})
+```
+
+### PerspectiveCard events
+
+| Event | Fired when |
+| --- | --- |
+| `perspectivecard:play` | The animation loop starts — either because the card entered the viewport (ambient mode) or the pointer entered the card. |
+| `perspectivecard:pause` | The animation loop stops — card left the viewport or pointer left the card. |
+
+### ClickablePerspectiveCard events
+
+| Event | Fired when |
+| --- | --- |
+| `perspectivecard:open` | The card starts its open animation (tween begins). |
+| `perspectivecard:opened` | The open animation finishes and the card is fully displayed. |
+| `perspectivecard:close` | The card starts its close animation (tween begins). |
+| `perspectivecard:closed` | The close animation finishes and the card is back in the document flow. |
