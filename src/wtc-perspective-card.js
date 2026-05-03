@@ -592,12 +592,16 @@ class PerspectiveCard {
    * @default false
    */
   set playing(value) {
-    if (!this.playing && value === true) {
+    const wasPlaying = this._playing === true
+    if (!wasPlaying && value === true) {
       // Reset last frame time
       this.lastFrameTime = 0
       requestAnimationFrame(this.play)
     }
     this._playing = value === true
+    if (this._playing !== wasPlaying) {
+      this._dispatch(this._playing ? 'play' : 'pause')
+    }
   }
   get playing() {
     return this._playing === true
@@ -767,6 +771,19 @@ class PerspectiveCard {
 
     svg.appendChild(rect)
     this.transformer.appendChild(svg)
+  }
+
+  /**
+   * Dispatches a CustomEvent on the card element with a `perspectivecard:` prefix.
+   * Events bubble so they can be caught on any ancestor.
+   *
+   * @param {string} name   The event name (without the prefix)
+   * @param {object} detail Optional detail payload
+   */
+  _dispatch(name, detail = {}) {
+    this.element.dispatchEvent(
+      new CustomEvent(`perspectivecard:${name}`, { bubbles: true, detail })
+    )
   }
 
   static _foilIdCounter = 0
@@ -1116,6 +1133,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
+      this._dispatch('open')
+
       // Get the current bounding client rectangle before touching the DOM
       const viewportOffset = this.element.getBoundingClientRect()
 
@@ -1200,10 +1219,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
         if (this.foil) this._updateFoilBounds()
         this.element.classList.add('perspective-card--is-open')
+        this._dispatch('opened')
       }
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
+      this._dispatch('close')
+
       // Adds 3d transforms back in on close.
       this.element.classList.remove('perspective-card--is-open')
 
@@ -1258,6 +1280,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.dialog.close()
         this.dialog.classList.remove('perspective-card__dialog--closing')
         document.body.removeChild(this.dialog)
+        this._dispatch('closed')
 
         setTimeout(() => {
           this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
