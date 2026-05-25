@@ -755,7 +755,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Bind the extra handlers
     this.onClick = this.onClick.bind(this)
-    this.onKey = this.onKey.bind(this)
+    this.onWindowKeyDown = this.onWindowKeyDown.bind(this)
+    this.onKeyDown = this.onKeyDown.bind(this)
     this.onPointerDown = this.onPointerDown.bind(this)
     this.onTouchStart = this.onTouchStart.bind(this)
     this.onTouchEnd = this.onTouchEnd.bind(this)
@@ -780,6 +781,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.matte.addEventListener('pointerdown', this.onPointerDown)
     this.matte.addEventListener('touchmove', this.onTouchMove)
     this.element.addEventListener('pointermove', this.onPointerMove)
+    this.element.addEventListener('keydown', this.onKeyDown)
   }
 
   /**
@@ -883,6 +885,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this._tweenBuffer === false
     ) {
       this.enlarged = !this.enlarged
+      this.element.blur() // prevent visible focus ring
     }
     window.clickablePerspectiveCard_initialtouch = null
     window.cardClickEsc = false
@@ -948,8 +951,40 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
 
-  onKey(e) {
-    if (e.keyCode === 27) this.enlarged = false
+  // applied on window
+  onWindowKeyDown(e) {
+    if (e.keyCode === 27) {
+      this.enlarged = false
+    }
+
+    if (e.key === 'Tab' && this.enlarged === true) {
+      // trap focus within the card
+      e.preventDefault()
+      this.element.focus()
+    }
+  }
+
+  // applied on the element
+  onKeyDown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      this.resize(null, true)
+
+      if (window.cardClickEsc === true || this._tweenBuffer === true) {
+        window.clickablePerspectiveCard_initialtouch = null
+        window.cardClickEsc = false
+        return
+      }
+
+      this.playing = true
+      this.element.blur() // prevent visible focus ring
+      this.element.focus({ focusVisible: false }) // focus to the element again to trap the keyboard events within it
+
+      this.enlarged = !this.enlarged
+
+      window.clickablePerspectiveCard_initialtouch = null
+      window.cardClickEsc = false
+    }
   }
 
   /**
@@ -971,12 +1006,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
-      window.addEventListener('keyup', this.onKey)
+      window.addEventListener('keydown', this.onWindowKeyDown)
 
       // Get the current bounding client rectangle
       const viewportOffset = this.element.getBoundingClientRect()
 
-      // This makes it so that, when the card is enlarged that it runs ambiently by defailt
+      // This makes it so that, when the card is enlarged that it runs ambiently by default
       this._wasAmbient = this.ambient
       this.ambient = 0
 
@@ -1042,7 +1077,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
-      window.removeEventListener('keyup', this.onKey)
+      window.removeEventListener('keydown', this.onWindowKeyDown)
 
       // Adds 3d transforms back in on close.
       this.element.classList.remove('perspective-card--is-open')
