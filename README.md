@@ -92,6 +92,47 @@ Plain vanilla javascript with ES6 and module imports.
 const card = new PerspectiveCard(document.getElementById("card"));
 ```
 
+## Accessibility
+
+`ClickablePerspectiveCard` is operated through a real `<button>` element that
+invisibly covers the card — all activation (mouse, touch, keyboard and
+assistive technology) runs through it. If your markup doesn't include one,
+the component creates it for you:
+
+```html
+<button
+  type="button"
+  class="perspective-card__button"
+  aria-label="Expand"
+  aria-haspopup="dialog"
+  aria-expanded="false"
+></button>
+```
+
+- **Labelling** — set the accessible name with the `buttonLabel` setting or a
+  `data-button-label` attribute on the card element. It defaults to "Expand".
+
+```html
+<div class="perspective-card" data-button-label="Expand the Charizard card">
+```
+
+```javascript
+new ClickablePerspectiveCard(element, { buttonLabel: "Expand the Charizard card" });
+```
+
+- **Bring your own button** — if a `button.perspective-card__button` already
+  exists inside the card element, the component uses it instead of creating
+  one, so you can supply your own label or content.
+- **Keyboard** — the card can be opened and closed with Enter/Space, and
+  closed with Escape (handled by the modal `dialog`'s cancel event).
+- **State** — the button exposes `aria-haspopup="dialog"` and toggles
+  `aria-expanded` as the card opens and closes.
+- **Focus** — while open, the card lives in a modal `dialog` (the rest of the
+  page is inert); when it closes, focus returns to the card's button.
+
+The basic `PerspectiveCard` (hover/ambient) is presentational and isn't given
+a button.
+
 ## Events
 
 Both classes dispatch `CustomEvent`s on the card element. Events bubble, so you can listen on any ancestor. All event names are prefixed with `perspectivecard:`.
@@ -117,7 +158,6 @@ cardElement.addEventListener('perspectivecard:play', (e) => {
 | `perspectivecard:opened` | The open animation finishes and the card is fully displayed. |
 | `perspectivecard:close` | The card starts its close animation (tween begins). |
 | `perspectivecard:closed` | The close animation finishes and the card is back in the document flow. |
-
 ## Classes
 
 <dl>
@@ -141,6 +181,14 @@ the new wtc-decorator static class) or used directly like:</p>
 <dd><p>The clickable perspective card adds functionality that allows the zooming
 the card by clicking on it. In doing so the card flips and animates up to a
 modal style display.</p>
+<p>For accessibility, the card is operated through a real <code>button</code> element
+that covers the card. If the markup doesn&#39;t already contain a
+<code>button.perspective-card__button</code>, one is created and appended
+automatically, labelled from <code>settings.buttonLabel</code> or the
+<code>data-button-label</code> attribute. The button exposes <code>aria-haspopup=&quot;dialog&quot;</code>
+and <code>aria-expanded</code>, can be operated with Enter/Space, and receives focus
+back when the card closes. Escape closes the open card via the dialog&#39;s
+cancel event.</p>
 </dd>
 </dl>
 
@@ -197,6 +245,8 @@ const p = new PerspectiveCard(element);
         * [.updatePosition(e)](#PerspectiveCard+updatePosition)
         * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
         * [.hideIntersect(entries, observer)](#PerspectiveCard+hideIntersect) ⇒
+        * [._setupFoil()](#PerspectiveCard+_setupFoil)
+        * [._dispatch(name, detail)](#PerspectiveCard+_dispatch)
     * _static_
         * [.targetTo(eye, center, up)](#PerspectiveCard.targetTo) ⇒ <code>mat4</code>
 
@@ -461,6 +511,26 @@ Listener for the intersection observer callback
 | entries | <code>object</code> | the object that contains all of the elements being calculated by this observer |
 | observer | <code>object</code> | the observer instance itself |
 
+<a name="PerspectiveCard+_setupFoil"></a>
+
+### perspectiveCard.\_setupFoil()
+Builds the foil SVG overlay and appends it to the transformer element.
+Called once from the constructor when foil is enabled.
+
+**Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+<a name="PerspectiveCard+_dispatch"></a>
+
+### perspectiveCard.\_dispatch(name, detail)
+Dispatches a CustomEvent on the card element with a `perspectivecard:` prefix.
+Events bubble so they can be caught on any ancestor.
+
+**Kind**: instance method of [<code>PerspectiveCard</code>](#PerspectiveCard)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The event name (without the prefix) |
+| detail | <code>object</code> | Optional detail payload |
+
 <a name="PerspectiveCard.targetTo"></a>
 
 ### PerspectiveCard.targetTo(eye, center, up) ⇒ <code>mat4</code>
@@ -482,15 +552,20 @@ The clickable perspective card adds functionality that allows the zooming
 the card by clicking on it. In doing so the card flips and animates up to a
 modal style display.
 
+For accessibility, the card is operated through a real `button` element
+that covers the card. If the markup doesn't already contain a
+`button.perspective-card__button`, one is created and appended
+automatically, labelled from `settings.buttonLabel` or the
+`data-button-label` attribute. The button exposes `aria-haspopup="dialog"`
+and `aria-expanded`, can be operated with Enter/Space, and receives focus
+back when the card closes. Escape closes the open card via the dialog's
+cancel event.
+
 **Kind**: global class  
 **Extends**: [<code>PerspectiveCard</code>](#PerspectiveCard)  
 **Created**: Jan 28, 2020  
 **Version**: 2.0.0  
 **Author**: Liam Egan <liam@wethecollective.com>  
-**Todo**
-
-- [ ] Add some extra functionality here like a close button and keyboard close
-
 
 * [ClickablePerspectiveCard](#ClickablePerspectiveCard) ⇐ [<code>PerspectiveCard</code>](#PerspectiveCard)
     * [new ClickablePerspectiveCard(element, settings)](#new_ClickablePerspectiveCard_new)
@@ -523,6 +598,8 @@ modal style display.
     * [.pointerControlled](#PerspectiveCard+pointerControlled) : <code>Boolean</code>
     * [.resize(e)](#ClickablePerspectiveCard+resize)
     * [.play(delta, raf)](#ClickablePerspectiveCard+play)
+    * [.onButtonClick(e)](#ClickablePerspectiveCard+onButtonClick)
+    * [.onDialogClick(e)](#ClickablePerspectiveCard+onDialogClick)
     * [.calculateLookDifferential()](#PerspectiveCard+calculateLookDifferential)
     * [.touchStart()](#PerspectiveCard+touchStart)
     * [.pointerMove(e)](#PerspectiveCard+pointerMove)
@@ -531,6 +608,8 @@ modal style display.
     * [.updatePosition(e)](#PerspectiveCard+updatePosition)
     * [.intersect(entries, observer)](#PerspectiveCard+intersect) ⇒
     * [.hideIntersect(entries, observer)](#PerspectiveCard+hideIntersect) ⇒
+    * [._setupFoil()](#PerspectiveCard+_setupFoil)
+    * [._dispatch(name, detail)](#PerspectiveCard+_dispatch)
 
 <a name="new_ClickablePerspectiveCard_new"></a>
 
@@ -543,6 +622,7 @@ card component.
 | --- | --- | --- |
 | element | <code>HTMLElement</code> | The element that contains all of the card details |
 | settings | <code>Object</code> | The settings of the component |
+| settings.buttonLabel | <code>String</code> | The accessible label for the trigger button. Falls back to the `data-button-label` attribute, then to "Expand" |
 
 <a name="ClickablePerspectiveCard+enlarged"></a>
 
@@ -799,6 +879,37 @@ and transforming the card. This can be called individually, or
 | delta | <code>number</code> |  | The delta of the animation |
 | raf | <code>boolean</code> | <code>true</code> | This just determines whether to run the next RAF as a part of this call |
 
+<a name="ClickablePerspectiveCard+onButtonClick"></a>
+
+### clickablePerspectiveCard.onButtonClick(e)
+The event listener for the trigger button's click event. This is the
+single path through which the card is opened and closed — the browser
+normalises pointer, keyboard and assistive-technology activation into
+click events for us, including cancelling presses that drag away from
+the button or turn into scrolls.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>event</code> | The click event object |
+
+<a name="ClickablePerspectiveCard+onDialogClick"></a>
+
+### clickablePerspectiveCard.onDialogClick(e)
+The event listener for the dialog's click event. Clicks on the modal
+backdrop target the dialog element itself, so this closes the card on
+backdrop click. Clicks on the card bubble up here too, but those carry
+the button as their target and are ignored.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>event</code> | The click event object |
+
 <a name="PerspectiveCard+calculateLookDifferential"></a>
 
 ### clickablePerspectiveCard.calculateLookDifferential()
@@ -904,4 +1015,26 @@ Listener for the intersection observer callback
 | --- | --- | --- |
 | entries | <code>object</code> | the object that contains all of the elements being calculated by this observer |
 | observer | <code>object</code> | the observer instance itself |
+
+<a name="PerspectiveCard+_setupFoil"></a>
+
+### clickablePerspectiveCard.\_setupFoil()
+Builds the foil SVG overlay and appends it to the transformer element.
+Called once from the constructor when foil is enabled.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>\_setupFoil</code>](#PerspectiveCard+_setupFoil)  
+<a name="PerspectiveCard+_dispatch"></a>
+
+### clickablePerspectiveCard.\_dispatch(name, detail)
+Dispatches a CustomEvent on the card element with a `perspectivecard:` prefix.
+Events bubble so they can be caught on any ancestor.
+
+**Kind**: instance method of [<code>ClickablePerspectiveCard</code>](#ClickablePerspectiveCard)  
+**Overrides**: [<code>\_dispatch</code>](#PerspectiveCard+_dispatch)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The event name (without the prefix) |
+| detail | <code>object</code> | Optional detail payload |
 

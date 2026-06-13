@@ -126,6 +126,44 @@ body {
     linear-gradient(155deg, #120020 0%, #0a0014 100%);
 }
 
+// ─── Custom foil (recipe) ─────────────────────────────────────────────────────
+// The card publishes --perspective-card-angle (tilt direction, radians) and
+// --perspective-card-tilt (tilt magnitude) on the element every animation
+// frame. This foil swings a rainbow gradient with the tilt angle, etched by
+// the SVG displacement filter defined in the card's markup.
+
+.card-foil {
+  height: 100%;
+  left: 0;
+  mix-blend-mode: overlay;
+  opacity: 0.8;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: translateZ(1px);
+  width: 100%;
+  z-index: 1;
+}
+
+.card-foil__gradient {
+  position: absolute;
+  inset: -40%;
+  filter: url('#foil-etch');
+  background: linear-gradient(
+    var(--perspective-card-angle, 0rad),
+    rgba(253, 29, 29, 1) 0%,
+    rgba(253, 201, 29, 1) 12.5%,
+    rgba(49, 253, 175, 1) 25%,
+    rgba(60, 188, 252, 1) 37.5%,
+    rgba(253, 29, 29, 1) 50%,
+    rgba(253, 201, 29, 1) 62.5%,
+    rgba(49, 253, 175, 1) 75%,
+    rgba(60, 188, 252, 1) 87.5%,
+    rgba(253, 29, 29, 1) 100%
+  );
+}
+
 // Card C — clickable (rose/gold → midnight)
 .card-art--c-front {
   background:

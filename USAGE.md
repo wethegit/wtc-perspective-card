@@ -92,6 +92,131 @@ Plain vanilla javascript with ES6 and module imports.
 const card = new PerspectiveCard(document.getElementById("card"));
 ```
 
+## Accessibility
+
+`ClickablePerspectiveCard` is operated through a real `<button>` element that
+invisibly covers the card — all activation (mouse, touch, keyboard and
+assistive technology) runs through it. If your markup doesn't include one,
+the component creates it for you:
+
+```html
+<button
+  type="button"
+  class="perspective-card__button"
+  aria-label="Expand"
+  aria-haspopup="dialog"
+  aria-expanded="false"
+></button>
+```
+
+- **Labelling** — set the accessible name with the `buttonLabel` setting or a
+  `data-button-label` attribute on the card element. It defaults to "Expand".
+
+```html
+<div class="perspective-card" data-button-label="Expand the Charizard card">
+```
+
+```javascript
+new ClickablePerspectiveCard(element, { buttonLabel: "Expand the Charizard card" });
+```
+
+- **Bring your own button** — if a `button.perspective-card__button` already
+  exists inside the card element, the component uses it instead of creating
+  one, so you can supply your own label or content.
+- **Keyboard** — the card can be opened and closed with Enter/Space, and
+  closed with Escape (handled by the modal `dialog`'s cancel event).
+- **State** — the button exposes `aria-haspopup="dialog"` and toggles
+  `aria-expanded` as the card opens and closes.
+- **Focus** — while open, the card lives in a modal `dialog` (the rest of the
+  page is inert); when it closes, focus returns to the card's button.
+
+The basic `PerspectiveCard` (hover/ambient) is presentational and isn't given
+a button.
+
+## CSS custom properties
+
+While animating, the card publishes its tilt as CSS custom properties on the
+card element, updated every animation frame:
+
+| Property | Value |
+| --- | --- |
+| `--perspective-card-angle` | The direction of the tilt, in radians (e.g. `1.62rad`). Matches the angle used for the shine gradient. |
+| `--perspective-card-tilt` | The magnitude of the tilt, unitless. `0` when the card is flat, larger as it tilts further. |
+
+These let you drive your own per-frame effects — holographic foils, glints,
+texture shifts — from pure CSS on any element you place inside the card.
+
+### Recipe: holographic foil
+
+> Up to v2, a foil overlay could be generated with the `data-foil` attribute.
+> That has been removed in v3 in favour of the approach below, which gives
+> you full control over the palette, blend and etch treatment.
+
+Add a foil layer to your card markup, alongside the artwork and shine — here
+with an optional SVG displacement filter that "etches" the foil with a
+texture:
+
+```html
+<div class="perspective-card">
+  <div class="perspective-card__transformer">
+    <!-- artwork front/back and shine as usual, then: -->
+    <div class="card-foil" aria-hidden="true">
+      <div class="card-foil__gradient"></div>
+      <svg width="0" height="0">
+        <defs>
+          <filter id="foil-etch" color-interpolation-filters="sRGB"
+                  x="-40%" y="-40%" width="180%" height="180%">
+            <feImage href="./assets/etch.png" result="etch"
+                     preserveAspectRatio="xMidYMid slice"
+                     x="0" y="0" width="100%" height="100%" />
+            <feDisplacementMap in="SourceGraphic" in2="etch" scale="130"
+                               xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</div>
+```
+
+Then swing a gradient with the card's tilt:
+
+```css
+.card-foil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  mix-blend-mode: overlay;
+  opacity: 0.8;
+  pointer-events: none;
+  transform: translateZ(1px);
+  z-index: 1;
+}
+
+.card-foil__gradient {
+  position: absolute;
+  inset: -40%; /* overdraw so the displacement never samples outside the layer */
+  filter: url('#foil-etch'); /* optional — remove for a plain holo gradient */
+  background: linear-gradient(
+    var(--perspective-card-angle, 0rad),
+    rgba(253, 29, 29, 1) 0%,
+    rgba(253, 201, 29, 1) 12.5%,
+    rgba(49, 253, 175, 1) 25%,
+    rgba(60, 188, 252, 1) 37.5%,
+    rgba(253, 29, 29, 1) 50%,
+    rgba(253, 201, 29, 1) 62.5%,
+    rgba(49, 253, 175, 1) 75%,
+    rgba(60, 188, 252, 1) 87.5%,
+    rgba(253, 29, 29, 1) 100%
+  );
+}
+```
+
+A working version of this ships in the repo's demo (`demo/index.html`).
+
 ## Events
 
 Both classes dispatch `CustomEvent`s on the card element. Events bubble, so you can listen on any ancestor. All event names are prefixed with `perspectivecard:`.
