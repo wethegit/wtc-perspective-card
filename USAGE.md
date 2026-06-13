@@ -122,7 +122,23 @@ new ClickablePerspectiveCard(element, { buttonLabel: "Expand the Charizard card"
 
 - **Bring your own button** — if a `button.perspective-card__button` already
   exists inside the card element, the component uses it instead of creating
-  one, so you can supply your own label or content.
+  one. Reasons you'd want to do this:
+  - **Visible affordance** — put a badge, icon, or "View ↗" label inside the
+    button so there's a visual cue in addition to the hover interaction:
+    ```html
+    <button type="button" class="perspective-card__button" aria-label="Expand">
+      <span class="my-badge" aria-hidden="true">View ↗</span>
+    </button>
+    ```
+  - **Rich accessible name** — the auto-created button uses a plain
+    `aria-label`. If you need `aria-labelledby`, an SVG `<title>`, or a more
+    complex accessible-name calculation, write the button yourself.
+  - **SSR / static rendering** — when the page is rendered server-side the
+    button is already in the HTML, so keyboard users and screen readers have
+    access to it before JavaScript initialises.
+  - **Framework lifecycle** — in React/Vue/etc. you may want to hold a ref to
+    the button, bind your own additional handlers, or co-locate it with the
+    rest of the component's controlled markup.
 - **Keyboard** — the card can be opened and closed with Enter/Space, and
   closed with Escape (handled by the modal `dialog`'s cancel event).
 - **State** — the button exposes `aria-haspopup="dialog"` and toggles

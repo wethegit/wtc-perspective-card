@@ -780,6 +780,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @param {HTMLElement} element 				The element that contains all of the card details
    * @param {Object}      settings 				The settings of the component
    * @param {String}      settings.buttonLabel 	The accessible label for the trigger button. Falls back to the `data-button-label` attribute, then to "Expand"
+   * @param {Boolean}     settings.closeButton 	Show a dedicated close button inside the modal. Defaults to true. Set false or add data-close-button="false" to opt out.
+   * @param {String}      settings.closeButtonLabel Accessible label for the close button. Falls back to the `data-close-button-label` attribute, then to "Close"
    */
   constructor(element, settings = {}) {
     // Call the superfunction
@@ -789,8 +791,17 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onButtonClick = this.onButtonClick.bind(this)
     this.onDialogClick = this.onDialogClick.bind(this)
     this.onDialogCancel = this.onDialogCancel.bind(this)
+    this.onCloseButtonClick = this.onCloseButtonClick.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this._tweenBuffer = false
+
+    this._showCloseButton =
+      settings.closeButton !== false &&
+      this.element.getAttribute('data-close-button') !== 'false'
+    this._closeButtonLabel =
+      settings.closeButtonLabel ||
+      this.element.getAttribute('data-close-button-label') ||
+      'Close'
 
     // The modifier class routes all pointer interaction to the trigger
     // button — the transformer is made pointer-transparent in CSS so the
@@ -979,6 +990,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
 
+  onCloseButtonClick() {
+    if (this._tweenBuffer === true) return
+    this.enlarged = false
+  }
+
   onDialogCancel(e) {
     // Prevent the native immediate-close so we can run the close animation instead.
     e.preventDefault()
@@ -1032,7 +1048,28 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.element.classList.add('perspective-card--modal')
       document.body.appendChild(this.dialog)
       this.dialog.appendChild(this.element)
+
+      // Label the dialog from the trigger so screen readers announce it with
+      // context ("Expand card, dialog") rather than a bare "dialog".
+      this.dialog.setAttribute(
+        'aria-label',
+        this.button.getAttribute('aria-label') || 'Card'
+      )
+
       this.dialog.showModal()
+
+      // Inject a close button and move focus to it so AT users and touch
+      // users have an explicit labelled dismiss control without relying on Escape.
+      if (this._showCloseButton) {
+        this._closeButton = document.createElement('button')
+        this._closeButton.type = 'button'
+        this._closeButton.className = 'perspective-card__close-button'
+        this._closeButton.setAttribute('aria-label', this._closeButtonLabel)
+        this._closeButton.innerHTML = '<span aria-hidden="true">&#x2715;</span>'
+        this._closeButton.addEventListener('click', this.onCloseButtonClick)
+        this.dialog.appendChild(this._closeButton)
+        this._closeButton.focus()
+      }
 
       // Initialise our tween timing variables
       this.playing = true
@@ -1149,6 +1186,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.element.style.transform = ''
         this.element.style.left = ''
         this.element.style.top = ''
+
+        if (this._closeButton) {
+          this._closeButton.removeEventListener('click', this.onCloseButtonClick)
+          this._closeButton = null
+        }
 
         this.dialog.close()
         this.dialog.classList.remove('perspective-card__dialog--closing')

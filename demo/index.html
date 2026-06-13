@@ -149,6 +149,47 @@
           a real image.
         </p>
       </div>
+
+      <!-- Custom button -->
+      <div class="demo-item">
+        <div class="demo-item__label">Custom button</div>
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--d-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--d-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+          <!--
+            Pre-supplied button. The component finds this by the
+            perspective-card__button class and uses it instead of
+            creating one. The badge inside is a visible affordance;
+            aria-hidden keeps it out of the AT label so only the
+            button's own text is announced.
+          -->
+          <button
+            type="button"
+            class="perspective-card__button"
+            aria-label="Expand deep-sea card"
+          >
+            <span class="card-badge" aria-hidden="true">View ↗</span>
+          </button>
+        </div>
+        <p class="demo-item__desc">
+          Button supplied in markup. The "View ↗" badge is a child of the
+          button, giving a visible expand affordance.
+        </p>
+      </div>
     </main>
 
     <script type="module" src="./main.js"></script>
