@@ -17,13 +17,13 @@ https://codepen.io/shubniggurath/pen/99df48ac9073736b0bbf5bd0e062a096?editors=01
 Import it into your project.
 
 ```javascript
-import PerspectiveCard from "wtc-perspective-card";
+import PerspectiveCard from 'wtc-perspective-card'
 ```
 
 Import the stylesheet with sass or use the css file.
 
 ```scss
-@import "~wtc-perspective-card";
+@import '~wtc-perspective-card';
 ```
 
 Add your markup.
@@ -50,46 +50,12 @@ You now have 2 options to initalize the component.
 
 ### Instanciating
 
-#### 1. Using The Decorator function
-
-If you are using just add **data-decorator="PerspectiveCard"** to your markup.
-
-```html
-<div class="perspective-card" data-decorator="PerspectiveCard">
-  <img class="perspective-card__img" src="path/image.jpg" />
-</div>
-```
-
-And then write your decorator code to take a set of DOM elements and decorate them with the class
-
-```javascript
-const decorate = function (decorator, nodeSet) {
-  const controllers = [];
-  Array.from(nodeSet).forEach((node) => {
-    const controller = new decorator(node, node.dataset);
-    node.data = node.data || {};
-    node.data.controller = controller;
-    controllers.push(controller);
-  });
-  return controllers;
-};
-```
-
-Then feed your DOM elements to the decorator code
-
-```javascript
-const controllers = decorate(
-  PerspectiveCard,
-  document.querySelectorAll('[data-decorator="PerspectiveCard"]')
-);
-```
-
-#### 2. Vanilla JS
+#### Vanilla JS
 
 Plain vanilla javascript with ES6 and module imports.
 
 ```javascript
-const card = new PerspectiveCard(document.getElementById("card"));
+const card = new PerspectiveCard(document.getElementById('card'))
 ```
 
 ## Accessibility
@@ -113,11 +79,16 @@ the component creates it for you:
   `data-button-label` attribute on the card element. It defaults to "Expand".
 
 ```html
-<div class="perspective-card" data-button-label="Expand the Charizard card">
+<div
+  class="perspective-card"
+  data-button-label="Expand the Charizard card"
+></div>
 ```
 
 ```javascript
-new ClickablePerspectiveCard(element, { buttonLabel: "Expand the Charizard card" });
+new ClickablePerspectiveCard(element, {
+  buttonLabel: 'Expand the Charizard card'
+})
 ```
 
 - **Bring your own button** — if a `button.perspective-card__button` already
@@ -154,10 +125,10 @@ a button.
 While animating, the card publishes its tilt as CSS custom properties on the
 card element, updated every animation frame:
 
-| Property | Value |
-| --- | --- |
+| Property                   | Value                                                                                                  |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `--perspective-card-angle` | The direction of the tilt, in radians (e.g. `1.62rad`). Matches the angle used for the shine gradient. |
-| `--perspective-card-tilt` | The magnitude of the tilt, unitless. `0` when the card is flat, larger as it tilts further. |
+| `--perspective-card-tilt`  | The magnitude of the tilt, unitless. `0` when the card is flat, larger as it tilts further.            |
 
 These let you drive your own per-frame effects — holographic foils, glints,
 texture shifts — from pure CSS on any element you place inside the card.
@@ -180,13 +151,30 @@ texture:
       <div class="card-foil__gradient"></div>
       <svg width="0" height="0">
         <defs>
-          <filter id="foil-etch" color-interpolation-filters="sRGB"
-                  x="-40%" y="-40%" width="180%" height="180%">
-            <feImage href="./assets/etch.png" result="etch"
-                     preserveAspectRatio="xMidYMid slice"
-                     x="0" y="0" width="100%" height="100%" />
-            <feDisplacementMap in="SourceGraphic" in2="etch" scale="130"
-                               xChannelSelector="R" yChannelSelector="G" />
+          <filter
+            id="foil-etch"
+            color-interpolation-filters="sRGB"
+            x="-40%"
+            y="-40%"
+            width="180%"
+            height="180%"
+          >
+            <feImage
+              href="./assets/etch.png"
+              result="etch"
+              preserveAspectRatio="xMidYMid slice"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="etch"
+              scale="130"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
           </filter>
         </defs>
       </svg>
@@ -245,16 +233,16 @@ cardElement.addEventListener('perspectivecard:play', (e) => {
 
 ### PerspectiveCard events
 
-| Event | Fired when |
-| --- | --- |
-| `perspectivecard:play` | The animation loop starts — either because the card entered the viewport (ambient mode) or the pointer entered the card. |
-| `perspectivecard:pause` | The animation loop stops — card left the viewport or pointer left the card. |
+| Event                   | Fired when                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `perspectivecard:play`  | The animation loop starts — either because the card entered the viewport (ambient mode) or the pointer entered the card. |
+| `perspectivecard:pause` | The animation loop stops — card left the viewport or pointer left the card.                                              |
 
 ### ClickablePerspectiveCard events
 
-| Event | Fired when |
-| --- | --- |
-| `perspectivecard:open` | The card starts its open animation (tween begins). |
-| `perspectivecard:opened` | The open animation finishes and the card is fully displayed. |
-| `perspectivecard:close` | The card starts its close animation (tween begins). |
+| Event                    | Fired when                                                              |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `perspectivecard:open`   | The card starts its open animation (tween begins).                      |
+| `perspectivecard:opened` | The open animation finishes and the card is fully displayed.            |
+| `perspectivecard:close`  | The card starts its close animation (tween begins).                     |
 | `perspectivecard:closed` | The close animation finishes and the card is back in the document flow. |

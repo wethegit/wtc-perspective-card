@@ -15,7 +15,7 @@
     "build": "vite build --mode lib && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
     "build:demo": "vite build",
     "preview": "vite preview --root demo",
-    "document": "{ cat USAGE.md; npx jsdoc2md src/wtc-perspective-card.js; } > README.md",
+    "document": "{ cat USAGE.md; npx jsdoc2md src/perspective-card.js src/clickable-perspective-card.js; } > README.md",
     "format": "prettier --write --ignore-unknown ./src/*.{js,scss}"
   },
   "devDependencies": {
