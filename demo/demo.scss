@@ -21,7 +21,10 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -98,31 +101,59 @@ body {
 
 // Card A — hover (indigo/violet → amber)
 .card-art--a-front {
-  background:
-    radial-gradient(ellipse at 30% 25%, rgba(150, 120, 255, 0.6) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 70%, rgba(90, 60, 220, 0.5) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 30% 25%,
+      rgba(150, 120, 255, 0.6) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 75% 70%,
+      rgba(90, 60, 220, 0.5) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #1a1040 0%, #0e0828 100%);
 }
 
 .card-art--a-back {
-  background:
-    radial-gradient(ellipse at 60% 30%, rgba(255, 190, 80, 0.5) 0%, transparent 50%),
-    radial-gradient(ellipse at 25% 75%, rgba(220, 100, 50, 0.4) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 60% 30%,
+      rgba(255, 190, 80, 0.5) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 25% 75%,
+      rgba(220, 100, 50, 0.4) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #2a1500 0%, #1a0e00 100%);
 }
 
 // Card B — ambient (teal/green → purple)
 .card-art--b-front {
-  background:
-    radial-gradient(ellipse at 50% 20%, rgba(60, 220, 180, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 80%, rgba(20, 160, 130, 0.4) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 50% 20%,
+      rgba(60, 220, 180, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 80% 80%,
+      rgba(20, 160, 130, 0.4) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #001a18 0%, #000e0c 100%);
 }
 
 .card-art--b-back {
-  background:
-    radial-gradient(ellipse at 40% 35%, rgba(180, 80, 255, 0.5) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 75%, rgba(120, 40, 200, 0.4) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 40% 35%,
+      rgba(180, 80, 255, 0.5) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 70% 75%,
+      rgba(120, 40, 200, 0.4) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #120020 0%, #0a0014 100%);
 }
 
@@ -164,17 +195,92 @@ body {
   );
 }
 
+// ─── Custom-button badge ──────────────────────────────────────────────────────
+// The badge lives inside the user-supplied button so it's part of the
+// interactive target, but is aria-hidden so it doesn't clobber the label.
+
+.card-badge {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  bottom: 20px;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 1;
+  padding: 4px 10px;
+  pointer-events: none;
+  position: absolute;
+  right: 20px;
+  text-transform: uppercase;
+  // Lift the badge above the 3D-rotating transformer (max z-displacement is
+  // ~34 px at extreme tilt with perspective: 1000px on the parent).
+  transform: translateZ(70px);
+  transition: opacity 0.3s ease;
+}
+
+// Fade the badge out as soon as the card starts opening (aria-expanded is
+// set to "true" at the top of the open tween, "false" at close-end).
+.perspective-card__button[aria-expanded='true'] .card-badge {
+  opacity: 0;
+}
+
 // Card C — clickable (rose/gold → midnight)
 .card-art--c-front {
-  background:
-    radial-gradient(ellipse at 35% 30%, rgba(255, 100, 150, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 70%, rgba(200, 60, 100, 0.4) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 35% 30%,
+      rgba(255, 100, 150, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 70% 70%,
+      rgba(200, 60, 100, 0.4) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #200010 0%, #110008 100%);
 }
 
 .card-art--c-back {
-  background:
-    radial-gradient(ellipse at 55% 25%, rgba(255, 215, 80, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse at 30% 75%, rgba(200, 160, 30, 0.4) 0%, transparent 50%),
+  background: radial-gradient(
+      ellipse at 55% 25%,
+      rgba(255, 215, 80, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 30% 75%,
+      rgba(200, 160, 30, 0.4) 0%,
+      transparent 50%
+    ),
     linear-gradient(155deg, #1a1400 0%, #0e0c00 100%);
+}
+
+// Card D — custom button (deep-sea teal/cyan → dark navy)
+.card-art--d-front {
+  background: radial-gradient(
+      ellipse at 40% 30%,
+      rgba(0, 210, 200, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 75% 75%,
+      rgba(0, 140, 160, 0.4) 0%,
+      transparent 50%
+    ),
+    linear-gradient(155deg, #001a20 0%, #000d14 100%);
+}
+
+.card-art--d-back {
+  background: radial-gradient(
+      ellipse at 60% 35%,
+      rgba(80, 180, 255, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 25% 70%,
+      rgba(30, 100, 200, 0.4) 0%,
+      transparent 50%
+    ),
+    linear-gradient(155deg, #000e1e 0%, #000812 100%);
 }

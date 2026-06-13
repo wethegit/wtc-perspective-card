@@ -18,6 +18,9 @@
   padding: 0;
   position: absolute;
   top: 0;
+  // Propagate the parent's 3D context into the button so children can use
+  // translateZ to escape occlusion by the rotating transformer.
+  transform-style: preserve-3d;
   width: 100%;
 
   &:focus-visible {
@@ -90,6 +93,38 @@
 @keyframes perspective-card-backdrop-out {
   from { opacity: 1; }
   to   { opacity: 0; }
+}
+
+.perspective-card__close-button {
+  appearance: none;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  height: 2.5rem;
+  padding: 0;
+  place-items: center;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  width: 2.5rem;
+
+  span {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
 }
 
 dialog.perspective-card__dialog {
