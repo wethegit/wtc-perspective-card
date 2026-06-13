@@ -29,6 +29,12 @@ const easeInOutSine = function (time, start, change, duration) {
  * ```
  * const p = new PerspectiveCard(element);
  * ```
+ *
+ * While animating, the card publishes its tilt as CSS custom properties on
+ * the element — `--perspective-card-angle` (the tilt direction, in radians)
+ * and `--perspective-card-tilt` (the tilt magnitude, unitless) — so custom
+ * per-frame effects like holographic foils can be driven from pure CSS on
+ * any element placed inside the card.
  */
 class PerspectiveCard {
   /**
@@ -115,20 +121,6 @@ class PerspectiveCard {
 
     // Initial resize to find the location and dimensions of the element
     this.resize()
-
-    // Set up foil if enabled
-    this.foil = settings.foil || this.element.hasAttribute('data-foil') || false
-    if (this.foil) {
-      this.foilMask =
-        settings.foilMask || this.element.getAttribute('data-foil-mask') || null
-      this.foilEtch =
-        settings.foilEtch || this.element.getAttribute('data-foil-etch') || null
-      this.foilDebug =
-        settings.foilDebug ||
-        this.element.hasAttribute('data-foil-debug') ||
-        false
-      this._setupFoil()
-    }
   }
 
   /**
@@ -227,13 +219,11 @@ class PerspectiveCard {
       Math.abs(len * 0.002)
     )}) 5%, rgba(255,255,255,0) 80%)`
 
-    // Rotate the foil gradient to match the card's current tilt angle
-    if (this._foilGradient) {
-      this._foilGradient.setAttribute(
-        'gradientTransform',
-        `rotate(${(angle * 180) / Math.PI}, 0.5, 0.5)`
-      )
-    }
+    // Publish the tilt's polar coordinates as CSS custom properties so
+    // consumers can drive their own per-frame effects — holographic foil,
+    // glints, texture shifts — from pure CSS on any element inside the card.
+    this.element.style.setProperty('--perspective-card-angle', `${angle}rad`)
+    this.element.style.setProperty('--perspective-card-tilt', len)
   }
 
   /**
@@ -669,111 +659,6 @@ class PerspectiveCard {
   }
 
   /**
-   * Builds the foil SVG overlay and appends it to the transformer element.
-   * Called once from the constructor when foil is enabled.
-   */
-  _setupFoil() {
-    const id = PerspectiveCard._foilIdCounter++
-    const ns = 'http://www.w3.org/2000/svg'
-
-    const svg = document.createElementNS(ns, 'svg')
-    svg.setAttribute('class', 'perspective-card__foil')
-    svg.setAttribute('aria-hidden', 'true')
-
-    const defs = document.createElementNS(ns, 'defs')
-
-    // Rainbow gradient — angle is updated every frame in play()
-    const grad = document.createElementNS(ns, 'linearGradient')
-    grad.id = `pc-foil-grad-${id}`
-    grad.setAttribute('gradientUnits', 'objectBoundingBox')
-    grad.setAttribute('x1', '0')
-    grad.setAttribute('y1', '0.5')
-    grad.setAttribute('x2', '1')
-    grad.setAttribute('y2', '0.5')
-    ;[
-      [0, 'rgba(253,29,29,1)'],
-      [0.125, 'rgba(253,201,29,1)'],
-      [0.25, 'rgba(49,253,175,1)'],
-      [0.375, 'rgba(60,188,252,1)'],
-      [0.5, 'rgba(253,29,29,1)'],
-      [0.625, 'rgba(253,201,29,1)'],
-      [0.75, 'rgba(49,253,175,1)'],
-      [0.875, 'rgba(60,188,252,1)'],
-      [1, 'rgba(253,29,29,1)']
-    ].forEach(([offset, color]) => {
-      const stop = document.createElementNS(ns, 'stop')
-      stop.setAttribute('offset', offset)
-      stop.setAttribute('stop-color', color)
-      grad.appendChild(stop)
-    })
-    defs.appendChild(grad)
-    this._foilGradient = grad
-
-    // Optional mask image — shapes which parts of the card show the foil
-    if (this.foilMask) {
-      const mask = document.createElementNS(ns, 'mask')
-      mask.id = `pc-foil-mask-${id}`
-      const img = document.createElementNS(ns, 'image')
-      img.setAttribute('href', this.foilMask)
-      img.setAttribute('preserveAspectRatio', 'xMidYMid slice')
-      img.setAttribute('width', '100%')
-      img.setAttribute('height', '100%')
-      mask.appendChild(img)
-      defs.appendChild(mask)
-    }
-
-    const margin = 40
-
-    if (this.foilEtch) {
-      const filter = document.createElementNS(ns, 'filter')
-      filter.id = `pc-foil-filter-${id}`
-      filter.setAttribute('color-interpolation-filters', 'sRGB')
-      // Expand filter region so the gradient rect's SourceGraphic extends beyond
-      // the card bounds. feDisplacementMap samples SourceGraphic at displaced
-      // coordinates — without this padding, large scale values pull from outside
-      // the element bounds and return transparent pixels.
-      filter.setAttribute('x', `-${margin}%`)
-      filter.setAttribute('y', `-${margin}%`)
-      filter.setAttribute('width', `${100 + margin * 2}%`)
-      filter.setAttribute('height', `${100 + margin * 2}%`)
-
-      const feImg = document.createElementNS(ns, 'feImage')
-      feImg.setAttribute('href', this.foilEtch)
-      feImg.setAttribute('result', 'etch')
-      feImg.setAttribute('preserveAspectRatio', 'xMidYMid slice')
-      feImg.setAttribute('x', '0')
-      feImg.setAttribute('y', '0')
-      feImg.setAttribute('width', '100%')
-      feImg.setAttribute('height', '100%')
-
-      const feDM = document.createElementNS(ns, 'feDisplacementMap')
-      feDM.setAttribute('in', 'SourceGraphic')
-      feDM.setAttribute('in2', 'etch')
-      feDM.setAttribute('scale', '130')
-      feDM.setAttribute('xChannelSelector', 'R')
-      feDM.setAttribute('yChannelSelector', 'G')
-
-      filter.appendChild(feImg)
-      if (!this.foilDebug) filter.appendChild(feDM)
-      defs.appendChild(filter)
-    }
-
-    svg.appendChild(defs)
-
-    const rect = document.createElementNS(ns, 'rect')
-    rect.setAttribute('x', `-${margin}%`)
-    rect.setAttribute('y', `-${margin}%`)
-    rect.setAttribute('width', `${100 + margin * 2}%`)
-    rect.setAttribute('height', `${100 + margin * 2}%`)
-    rect.setAttribute('fill', `url(#pc-foil-grad-${id})`)
-    // if (this.foilMask) rect.setAttribute('mask', `url(#pc-foil-mask-${id})`)
-    if (this.foilEtch) rect.setAttribute('filter', `url(#pc-foil-filter-${id})`)
-
-    svg.appendChild(rect)
-    this.transformer.appendChild(svg)
-  }
-
-  /**
    * Dispatches a CustomEvent on the card element with a `perspectivecard:` prefix.
    * Events bubble so they can be caught on any ancestor.
    *
@@ -785,8 +670,6 @@ class PerspectiveCard {
       new CustomEvent(`perspectivecard:${name}`, { bubbles: true, detail })
     )
   }
-
-  static _foilIdCounter = 0
 
   /**
    * Static classes
@@ -874,7 +757,14 @@ class PerspectiveCard {
  * the card by clicking on it. In doing so the card flips and animates up to a
  * modal style display.
  *
- * @todo Add some extra functionality here like a close button and keyboard close
+ * For accessibility, the card is operated through a real `button` element
+ * that covers the card. If the markup doesn't already contain a
+ * `button.perspective-card__button`, one is created and appended
+ * automatically, labelled from `settings.buttonLabel` or the
+ * `data-button-label` attribute. The button exposes `aria-haspopup="dialog"`
+ * and `aria-expanded`, can be operated with Enter/Space, and receives focus
+ * back when the card closes. Escape closes the open card via the dialog's
+ * cancel event.
  *
  * @author Liam Egan <liam@wethecollective.com>
  * @version 2.0.0
@@ -889,45 +779,53 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @constructor
    * @param {HTMLElement} element 				The element that contains all of the card details
    * @param {Object}      settings 				The settings of the component
+   * @param {String}      settings.buttonLabel 	The accessible label for the trigger button. Falls back to the `data-button-label` attribute, then to "Expand"
    */
-  constructor(element, settings) {
+  constructor(element, settings = {}) {
     // Call the superfunction
     super(element, settings)
 
-    // We're using this varaible to prevent the user from clicking multiple
-    // perspective cards and having them all open. This will make sure only the
-    // FIRST clicked card will open.
-    window.clickablePerspectiveCard_initialtouch = null
-
     // Bind the extra handlers
-    this.onClick = this.onClick.bind(this)
+    this.onButtonClick = this.onButtonClick.bind(this)
+    this.onDialogClick = this.onDialogClick.bind(this)
     this.onDialogCancel = this.onDialogCancel.bind(this)
-    this.onPointerDown = this.onPointerDown.bind(this)
-    this.onTouchStart = this.onTouchStart.bind(this)
-    this.onTouchEnd = this.onTouchEnd.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
-    this.onPointerMove = this.onPointerMove.bind(this)
     this._tweenBuffer = false
 
-    this._pointerMoving = false
-    this._pointerMovingPos = 0
-    this._pointerStartPos
+    // The modifier class routes all pointer interaction to the trigger
+    // button — the transformer is made pointer-transparent in CSS so the
+    // tilting plane can't intercept clicks meant for the button behind it.
+    this.element.classList.add('perspective-card--clickable')
 
     // Create the dialog that acts as the modal backdrop.
     // The card element is moved into it on open so it lives in the top layer.
     this.dialog = document.createElement('dialog')
     this.dialog.className = 'perspective-card__dialog'
 
-    // Add the listener to the pointer up event
-    this.element.addEventListener('touchstart', this.onTouchStart)
-    this.element.addEventListener('touchend', this.onTouchEnd)
-    this.element.addEventListener('pointerdown', this.onPointerDown)
-    this.element.addEventListener('pointerup', this.onClick)
-    this.dialog.addEventListener('pointerup', this.onClick)
-    this.dialog.addEventListener('pointerdown', this.onPointerDown)
+    // Find or create the trigger button. This is a real, transparent button
+    // covering the card through which all open/close activation runs —
+    // pointer, keyboard and assistive technology alike.
+    this.button = this.element.querySelector('button.perspective-card__button')
+    if (!this.button) {
+      this.button = document.createElement('button')
+      this.button.type = 'button'
+      this.button.className = 'perspective-card__button'
+      this.button.setAttribute(
+        'aria-label',
+        settings.buttonLabel ||
+          this.element.getAttribute('data-button-label') ||
+          'Expand'
+      )
+      this.element.appendChild(this.button)
+    }
+    this.button.setAttribute('aria-haspopup', 'dialog')
+    this.button.setAttribute('aria-expanded', 'false')
+    this.button.addEventListener('click', this.onButtonClick)
+
+    // Add the dialog listeners
+    this.dialog.addEventListener('click', this.onDialogClick)
     this.dialog.addEventListener('touchmove', this.onTouchMove)
     this.dialog.addEventListener('cancel', this.onDialogCancel)
-    this.element.addEventListener('pointermove', this.onPointerMove)
   }
 
   /**
@@ -1033,78 +931,51 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     }
   }
 
-  // Toggle the enlarged flag on click
-  onClick(e) {
-    this.resize(null, true)
-
+  /**
+   * The event listener for the trigger button's click event. This is the
+   * single path through which the card is opened and closed — the browser
+   * normalises pointer, keyboard and assistive-technology activation into
+   * click events for us, including cancelling presses that drag away from
+   * the button or turn into scrolls.
+   *
+   * @public
+   * @param {event}  e 				The click event object
+   * @listens click
+   */
+  onButtonClick(e) {
+    if (this._tweenBuffer === true) return
+    // Only one card may be open at a time — ignore activation while
+    // another card holds the modal.
     if (
-      window.cardClickEsc != true &&
-      window.clickablePerspectiveCard_initialtouch === e.pointerId &&
-      this._tweenBuffer === false
-    ) {
-      this.enlarged = !this.enlarged
-    }
-    window.clickablePerspectiveCard_initialtouch = null
-    window.cardClickEsc = false
+      ClickablePerspectiveCard._activeCard !== null &&
+      ClickablePerspectiveCard._activeCard !== this
+    )
+      return
+
+    this.resize(null, true)
+    this.enlarged = !this.enlarged
+  }
+
+  /**
+   * The event listener for the dialog's click event. Clicks on the modal
+   * backdrop target the dialog element itself, so this closes the card on
+   * backdrop click. Clicks on the card bubble up here too, but those carry
+   * the button as their target and are ignored.
+   *
+   * @public
+   * @param {event}  e 				The click event object
+   * @listens click
+   */
+  onDialogClick(e) {
+    if (e.target !== this.dialog) return
+    if (this._tweenBuffer === true) return
+
+    this.enlarged = false
   }
 
   onTouchMove(e) {
     if (e.targetTouches.length === 1) {
       e.preventDefault()
-    }
-  }
-
-  onTouchStart(e) {
-    this.touching = true
-
-    setTimeout(() => {
-      if (this.touching === true) {
-        window.cardClickEsc = true
-      }
-    }, 300)
-
-    // Below was an attept to fix the card click / drag issue
-    // which is more elegantly solved above. I'm leaving this
-    // here for posterity. Liam.
-    // let pointerStartPos = e.touches[0].screenY;
-    // console.log("-----", e.touches[0].screenY);
-    // let pointerDiff = 0;
-    // const threshold = 10;
-    // const onPointerMove = e => {
-    //   console.log(e.screenY);
-    //   pointerDiff = pointerStartPos - e.screenY;
-    // };
-    // window.addEventListener("pointermove", onPointerMove);
-    // setTimeout(() => {
-    //   window.removeEventListener("pointermove", onPointerMove);
-    //   console.log("pointerdiff after 300 ms", Math.abs(pointerDiff));
-    //   if (Math.abs(pointerDiff) > threshold) {
-    //     window.cardClickEsc = true;
-    //   }
-    // }, 300);
-  }
-  onTouchEnd(e) {
-    this.touching = false
-    setTimeout(() => (window.cardClickEsc = false), 0)
-  }
-
-  onPointerMove(e) {
-    if (!this._pointerMoving) {
-      window.requestAnimationFrame(() => {
-        this._pointerMovingPos = e.y
-        this._pointerMoving = false
-      })
-      this._pointerMoving = true
-    }
-  }
-
-  // Toggle the enlarged flag on click
-  onPointerDown(e) {
-    if (
-      window.clickablePerspectiveCard_initialtouch === null &&
-      this._tweenBuffer === false
-    ) {
-      window.clickablePerspectiveCard_initialtouch = e.pointerId
     }
   }
 
@@ -1134,6 +1005,9 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     // If we're going from unenlarged to enlarged
     if (this.enlarged === true && wasEnlarged === false) {
       this._dispatch('open')
+
+      ClickablePerspectiveCard._activeCard = this
+      this.button.setAttribute('aria-expanded', 'true')
 
       // Get the current bounding client rectangle before touching the DOM
       const viewportOffset = this.element.getBoundingClientRect()
@@ -1217,7 +1091,6 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.element.style.transform = 'none'
         this._screenScale = 1
 
-        if (this.foil) this._updateFoilBounds()
         this.element.classList.add('perspective-card--is-open')
         this._dispatch('opened')
       }
@@ -1280,6 +1153,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
         this.dialog.close()
         this.dialog.classList.remove('perspective-card__dialog--closing')
         document.body.removeChild(this.dialog)
+
+        // The browser can't restore focus itself here — the focused button
+        // was moved out of the dialog before close() — so do it manually.
+        this.button.setAttribute('aria-expanded', 'false')
+        this.button.focus()
+
+        ClickablePerspectiveCard._activeCard = null
         this._dispatch('closed')
 
         setTimeout(() => {
@@ -1425,6 +1305,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   get targetDimensions() {
     return this._targetDimensions || [0, 0]
   }
+
+  // The card currently holding (or animating to/from) the modal — only one
+  // card may be open at a time.
+  static _activeCard = null
 }
 
 export { PerspectiveCard as default, ClickablePerspectiveCard }

@@ -59,7 +59,11 @@
       <!-- Clickable -->
       <div class="demo-item">
         <div class="demo-item__label">Clickable</div>
-        <div class="perspective-card js-card--clickable" data-ambient="2">
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+          data-button-label="Expand card"
+        >
           <div class="perspective-card__transformer">
             <div
               class="perspective-card__artwork perspective-card__artwork--front"
@@ -75,7 +79,8 @@
           </div>
         </div>
         <p class="demo-item__desc">
-          Click to expand. Flips and zooms to modal.
+          Click or press Enter to expand, Esc to close. Flips and zooms to
+          modal.
         </p>
       </div>
 
@@ -85,9 +90,7 @@
         <div
           class="perspective-card js-card--clickable"
           data-ambient="2"
-          data-foil
-          data-foil-mask="./assets/mask.png"
-          data-foil-etch="./assets/etch.png"
+          data-button-label="Expand image card"
         >
           <div class="perspective-card__transformer">
             <div
@@ -101,10 +104,49 @@
               <img src="./assets/matte.png" alt="Matte" />
             </div>
             <div class="perspective-card__shine"></div>
+            <!--
+              Custom holographic foil. The card publishes its tilt as CSS
+              custom properties on the element (see demo.scss); the gradient
+              below swings with the tilt and is etched by the SVG
+              displacement filter.
+            -->
+            <div class="card-foil" aria-hidden="true">
+              <div class="card-foil__gradient"></div>
+              <svg width="0" height="0">
+                <defs>
+                  <filter
+                    id="foil-etch"
+                    color-interpolation-filters="sRGB"
+                    x="-40%"
+                    y="-40%"
+                    width="180%"
+                    height="180%"
+                  >
+                    <feImage
+                      href="./assets/etch.png"
+                      result="etch"
+                      preserveAspectRatio="xMidYMid slice"
+                      x="0"
+                      y="0"
+                      width="100%"
+                      height="100%"
+                    />
+                    <feDisplacementMap
+                      in="SourceGraphic"
+                      in2="etch"
+                      scale="130"
+                      xChannelSelector="R"
+                      yChannelSelector="G"
+                    />
+                  </filter>
+                </defs>
+              </svg>
+            </div>
           </div>
         </div>
         <p class="demo-item__desc">
-          Click to expand. Ambient animation with a real image.
+          Click or press Enter to expand, Esc to close. Ambient animation with
+          a real image.
         </p>
       </div>
     </main>

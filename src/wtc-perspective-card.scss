@@ -6,17 +6,24 @@
   border-radius: 20px;
 }
 
-.perspective-card__foil {
+.perspective-card__button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  color: inherit; // buttons default to `buttontext`, which breaks the currentColor focus ring
+  cursor: pointer;
   height: 100%;
   left: 0;
-  mix-blend-mode: overlay;
-  opacity: 0.8;
-  pointer-events: none;
+  padding: 0;
   position: absolute;
   top: 0;
-  transform: translateZ(1px);
   width: 100%;
-  z-index: 1;
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+  }
 }
 
 .perspective-card__shine {
@@ -59,6 +66,14 @@
 .perspective-card__transformer {
   position: relative;
   transform-style: preserve-3d;
+}
+
+// On clickable cards all interaction runs through the trigger button.
+// The tilting transformer sits in front of the flat button in the 3D
+// rendering context, so it must be pointer-transparent or it would
+// intercept clicks before they reach the button.
+.perspective-card--clickable .perspective-card__transformer {
+  pointer-events: none;
 }
 
 .perspective-card--over {
