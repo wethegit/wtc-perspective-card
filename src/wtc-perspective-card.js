@@ -791,6 +791,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onButtonClick = this.onButtonClick.bind(this)
     this.onDialogClick = this.onDialogClick.bind(this)
     this.onDialogCancel = this.onDialogCancel.bind(this)
+    this.onDialogClose = this.onDialogClose.bind(this)
     this.onCloseButtonClick = this.onCloseButtonClick.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this._tweenBuffer = false
@@ -837,6 +838,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.dialog.addEventListener('click', this.onDialogClick)
     this.dialog.addEventListener('touchmove', this.onTouchMove)
     this.dialog.addEventListener('cancel', this.onDialogCancel)
+    this.dialog.addEventListener('close', this.onDialogClose)
   }
 
   /**
@@ -939,6 +941,14 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // Run our end function.
       this.onEndTween()
+
+      // Honour a close that was requested while this tween was running.
+      // Checked here (after onEndTween) so that _resolvedScale and all
+      // other tween-end state are committed before the close sequence reads them.
+      if (this._pendingClose) {
+        this._pendingClose = false
+        this.enlarged = false
+      }
     }
   }
 
@@ -997,8 +1007,74 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
   onDialogCancel(e) {
     // Prevent the native immediate-close so we can run the close animation instead.
+    // Note: browsers fire a second, non-cancelable cancel event on repeated Escape
+    // presses as a safety valve — preventDefault() will silently fail for those.
+    // onDialogClose handles that case.
     e.preventDefault()
-    this.enlarged = false
+    if (this.tweening) {
+      // Can't start the close tween yet — record the intent and honour it
+      // once the current tween's onEndTween has fully committed its state.
+      this._pendingClose = true
+    } else {
+      this.enlarged = false
+    }
+  }
+
+  onDialogClose() {
+    // Fires whenever the dialog closes — either via our own sequence or the browser
+    // force-closing it (non-cancelable cancel event on repeated Escape). If enlarged
+    // is still true here the browser bypassed our animation; clear state and teardown.
+    if (!this.enlarged) return
+    this.tweening = false
+    this._pendingClose = false
+    this._enlarged = false
+    this._teardownModal()
+  }
+
+  _teardownModal() {
+    if (this._closeButton) {
+      this._closeButton.removeEventListener('click', this.onCloseButtonClick)
+      this._closeButton = null
+    }
+
+    if (this._placeholder && this._placeholder.parentNode) {
+      this._placeholder.replaceWith(this.element)
+    } else if (this._originalParent) {
+      this._originalParent.appendChild(this.element)
+    }
+    this._placeholder = null
+
+    this.element.classList.remove('perspective-card--modal')
+    this.element.classList.remove('perspective-card--is-open')
+    this.element.style.position = ''
+    this.element.style.transform = ''
+    this.element.style.width = ''
+    this.element.style.height = ''
+    this.element.style.left = ''
+    this.element.style.top = ''
+
+    this.dialog.classList.remove('perspective-card__dialog--closing')
+    document.body.removeChild(this.dialog)
+
+    // The browser can't restore focus itself here — the focused button was
+    // moved out of the dialog before close() — so do it manually.
+    this.button.setAttribute('aria-expanded', 'false')
+    this.button.focus()
+
+    ClickablePerspectiveCard._activeCard = null
+    this._dispatch('closed')
+
+    // Restore the ambient state to whatever it was before opening
+    this.ambient = this._wasAmbient
+    // Only stop playing for hover-only cards (ambient < 0) when the
+    // pointer isn't over the card — ambient cards keep running
+    if (this._wasAmbient < 0 && this.pointerControlled === false) {
+      this.playing = false
+    }
+
+    setTimeout(() => {
+      this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
+    }, 100)
   }
 
   /**
@@ -1173,48 +1249,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
       // At the end of this tween we clean everything up
       this.onEndTween = function () {
-        // Swap the placeholder out for the real card, restoring the original slot
-        if (this._placeholder && this._placeholder.parentNode) {
-          this._placeholder.replaceWith(this.element)
-        } else {
-          this._originalParent.appendChild(this.element)
-        }
-        this._placeholder = null
-
-        this.element.classList.remove('perspective-card--modal')
-        this.element.style.position = ''
-        this.element.style.transform = ''
-        this.element.style.left = ''
-        this.element.style.top = ''
-
-        if (this._closeButton) {
-          this._closeButton.removeEventListener('click', this.onCloseButtonClick)
-          this._closeButton = null
-        }
-
         this.dialog.close()
-        this.dialog.classList.remove('perspective-card__dialog--closing')
-        document.body.removeChild(this.dialog)
-
-        // The browser can't restore focus itself here — the focused button
-        // was moved out of the dialog before close() — so do it manually.
-        this.button.setAttribute('aria-expanded', 'false')
-        this.button.focus()
-
-        ClickablePerspectiveCard._activeCard = null
-        this._dispatch('closed')
-
-        setTimeout(() => {
-          this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
-        }, 100)
-
-        // Restore the ambient state to whatever it was before opening
-        this.ambient = this._wasAmbient
-        // Only stop playing for hover-only cards (ambient < 0) when the
-        // pointer isn't over the card — ambient cards keep running
-        if (this._wasAmbient < 0 && this.pointerControlled === false) {
-          this.playing = false
-        }
+        this._teardownModal()
       }
     }
   }
