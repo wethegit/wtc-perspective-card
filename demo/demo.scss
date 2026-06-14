@@ -12,7 +12,7 @@
   --text: #e8e8f0;
   --text-muted: #6b6b80;
   --accent: #7c6af7;
-  --card-width: 220px;
+  --card-width: clamp(140px, 20vw, 280px);
   --radius: 12px;
 }
 
