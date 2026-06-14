@@ -62,7 +62,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       'Close'
 
     // The modifier class routes all pointer interaction to the trigger
-    // button — the transformer is made pointer-transparent in CSS so the
+    // button - the transformer is made pointer-transparent in CSS so the
     // tilting plane can't intercept clicks meant for the button behind it.
     this.element.classList.add('perspective-card--clickable')
 
@@ -72,7 +72,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.dialog.className = 'perspective-card__dialog'
 
     // Find or create the trigger button. This is a real, transparent button
-    // covering the card through which all open/close activation runs —
+    // covering the card through which all open/close activation runs -
     // pointer, keyboard and assistive technology alike.
     this.button = this.element.querySelector('button.perspective-card__button')
     if (!this.button) {
@@ -123,7 +123,10 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     super.updatePosition()
 
     // When fully open, re-centre in the current viewport after resize or scroll
-    if (this.enlarged && this.element.classList.contains('perspective-card--is-open')) {
+    if (
+      this.enlarged &&
+      this.element.classList.contains('perspective-card--is-open')
+    ) {
       const w = parseFloat(this.element.style.width)
       const h = parseFloat(this.element.style.height)
       this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
@@ -210,7 +213,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
 
   /**
    * The event listener for the trigger button's click event. This is the
-   * single path through which the card is opened and closed — the browser
+   * single path through which the card is opened and closed - the browser
    * normalises pointer, keyboard and assistive-technology activation into
    * click events for us, including cancelling presses that drag away from
    * the button or turn into scrolls.
@@ -221,7 +224,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    */
   onButtonClick(e) {
     if (this._tweenBuffer === true) return
-    // Only one card may be open at a time — ignore activation while
+    // Only one card may be open at a time - ignore activation while
     // another card holds the modal.
     if (
       ClickablePerspectiveCard._activeCard !== null &&
@@ -264,11 +267,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   onDialogCancel(e) {
     // Prevent the native immediate-close so we can run the close animation instead.
     // Note: browsers fire a second, non-cancelable cancel event on repeated Escape
-    // presses as a safety valve — preventDefault() will silently fail for those.
+    // presses as a safety valve - preventDefault() will silently fail for those.
     // onDialogClose handles that case.
     e.preventDefault()
     if (this.tweening) {
-      // Can't start the close tween yet — record the intent and honour it
+      // Can't start the close tween yet - record the intent and honour it
       // once the current tween's onEndTween has fully committed its state.
       this._pendingClose = true
     } else {
@@ -277,7 +280,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   onDialogClose() {
-    // Fires whenever the dialog closes — either via our own sequence or the browser
+    // Fires whenever the dialog closes - either via our own sequence or the browser
     // force-closing it (non-cancelable cancel event on repeated Escape). If enlarged
     // is still true here the browser bypassed our animation; clear state and teardown.
     if (!this.enlarged) return
@@ -292,6 +295,12 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this._closeButton.removeEventListener('click', this.onCloseButtonClick)
       this._closeButton = null
     }
+
+    if (this._placeholderObserver) {
+      this._placeholderObserver.disconnect()
+      this._placeholderObserver = null
+    }
+    this._currentPlaceholderWidth = null
 
     if (this._placeholder && this._placeholder.parentNode) {
       this._placeholder.replaceWith(this.element)
@@ -312,8 +321,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.dialog.classList.remove('perspective-card__dialog--closing')
     document.body.removeChild(this.dialog)
 
-    // The browser can't restore focus itself here — the focused button was
-    // moved out of the dialog before close() — so do it manually.
+    // The browser can't restore focus itself here - the focused button was
+    // moved out of the dialog before close() - so do it manually.
     this.button.setAttribute('aria-expanded', 'false')
     this.button.focus()
 
@@ -323,7 +332,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     // Restore the ambient state to whatever it was before opening
     this.ambient = this._wasAmbient
     // Only stop playing for hover-only cards (ambient < 0) when the
-    // pointer isn't over the card — ambient cards keep running
+    // pointer isn't over the card - ambient cards keep running
     if (this._wasAmbient < 0 && this.pointerControlled === false) {
       this.playing = false
     }
@@ -365,7 +374,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.ambient = 0
 
       // Insert a placeholder in the card's original slot so the layout is
-      // maintained and we can read its current viewport position on close —
+      // maintained and we can read its current viewport position on close -
       // even if the page has been scrolled or resized since opening.
       this._originalParent = this.element.parentNode
       this._placeholder = document.createElement('div')
@@ -373,10 +382,22 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this._placeholder.setAttribute('aria-hidden', 'true')
       this._originalParent.insertBefore(this._placeholder, this.element)
 
-      // Fix the card in place, move it into the dialog, then open the dialog.
-      // The dialog's showModal() puts it in the top layer, so the card must be
-      // inside it — position:fixed elements in the normal document sit below the top layer.
+      // Track placeholder size changes (viewport resize while open) so the
+      // close tween can target the correct scale even if the slot has changed.
+      this._currentPlaceholderWidth = this.startingDimensions[0]
+      this._placeholderObserver = new ResizeObserver((entries) => {
+        const cr = entries[0]?.contentRect
+        if (cr) this._currentPlaceholderWidth = cr.width
+      })
+      this._placeholderObserver.observe(this._placeholder)
+
+      // Fix the card in place at its current rendered size, then move it into
+      // the dialog. Explicit width/height must be set before the move - once
+      // inside the dialog the element loses its layout context (fluid vw/grid
+      // widths no longer apply) and would otherwise reflow to a wrong size.
       this.element.style.position = 'fixed'
+      this.element.style.width = `${this.startingDimensions[0]}px`
+      this.element.style.height = `${this.startingDimensions[1]}px`
       this.element.classList.add('perspective-card--modal')
       document.body.appendChild(this.dialog)
       this.dialog.appendChild(this.element)
@@ -475,12 +496,16 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.dialog.classList.add('perspective-card__dialog--closing')
 
       // We converted scale() to real dimensions when opening; restore the
-      // scale transform now so the close tween can animate it back to 1.
+      // scale transform now so the close tween can animate it back down.
+      // Keep explicit width/height pinned to startingDimensions - the card is
+      // still inside the dialog without a layout context, so clearing them
+      // here would cause a reflow. _teardownModal clears them after the element
+      // is back in the document.
       const resolvedScale = this._resolvedScale || 1
       this._screenScale = resolvedScale
       this.element.style.transform = `scale(${resolvedScale})`
-      this.element.style.width = ''
-      this.element.style.height = ''
+      this.element.style.width = `${this.startingDimensions[0]}px`
+      this.element.style.height = `${this.startingDimensions[1]}px`
       this.element.style.left = `${window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5}px`
       this.element.style.top = `${window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5}px`
 
@@ -495,9 +520,17 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.startingPosition = this.targetPosition
       this.targetPosition = [placeholderOffset.left, placeholderOffset.top]
 
-      // Set up our scaling properties
+      // Set up our scaling properties. For fluid layouts the placeholder may
+      // now be a different size than when we opened (viewport was resized), so
+      // derive targetScale from the current placeholder width rather than
+      // hardcoding 1. The ResizeObserver keeps _currentPlaceholderWidth fresh;
+      // fall back to a live getBCR read or startingDimensions if unavailable.
+      const currentPlaceholderWidth =
+        this._currentPlaceholderWidth ??
+        placeholderOffset.width ??
+        this.startingDimensions[0]
       this.startingScale = this.screenScale
-      this.targetScale = 1
+      this.targetScale = currentPlaceholderWidth / this.startingDimensions[0]
 
       // Set up the amount of rotation that needs to happen
       // We want this to be opposite to the previous one
@@ -506,6 +539,8 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // At the end of this tween we clean everything up
       this.onEndTween = function () {
         this.dialog.close()
+        // this._paused = true
+        // console.warn('Card paused. Unpause: cardInstance._paused = false')
         this._teardownModal()
       }
     }
@@ -640,7 +675,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     return this._targetDimensions || [0, 0]
   }
 
-  // The card currently holding (or animating to/from) the modal — only one
+  // The card currently holding (or animating to/from) the modal - only one
   // card may be open at a time.
   static _activeCard = null
 }
