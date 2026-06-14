@@ -39,6 +39,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
    * @param {String}      settings.buttonLabel 	The accessible label for the trigger button. Falls back to the `data-button-label` attribute, then to "Expand"
    * @param {Boolean}     settings.closeButton 	Show a dedicated close button inside the modal. Defaults to true. Set false or add data-close-button="false" to opt out.
    * @param {String}      settings.closeButtonLabel Accessible label for the close button. Falls back to the `data-close-button-label` attribute, then to "Close"
+   * @param {Number}      settings.duration 	Open animation duration in milliseconds. Falls back to the `data-duration` attribute, then to 1500. The close animation runs at ⅔ of this value.
    */
   constructor(element, settings = {}) {
     // Call the superfunction
@@ -52,6 +53,11 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onCloseButtonClick = this.onCloseButtonClick.bind(this)
     this.onTouchMove = this.onTouchMove.bind(this)
     this._tweenBuffer = false
+
+    this._openDuration =
+      settings.duration ||
+      parseInt(this.element.getAttribute('data-duration')) ||
+      1500
 
     this._showCloseButton =
       settings.closeButton !== false &&
@@ -428,7 +434,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.playing = true
       this.tweening = true
       this.tweenTime = 0
-      this.tweenDuration = 1500 // 1.5 seconds
+      this.tweenDuration = this._openDuration
 
       // Set up our positional arrays
       // Start position
@@ -512,7 +518,7 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       // Initialise our tween timing variables
       this.tweening = true
       this.tweenTime = 0
-      this.tweenDuration = 1000 // 1 second
+      this.tweenDuration = Math.round(this._openDuration * (2 / 3))
 
       // Read the placeholder's current viewport position so the close tween
       // targets the right place even if the page was scrolled or resized while open.
