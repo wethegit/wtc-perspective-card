@@ -18,12 +18,15 @@
     "document": "{ cat USAGE.md; npx jsdoc2md src/perspective-card.js src/clickable-perspective-card.js; } > README.md",
     "format": "prettier --write --ignore-unknown ./src/*.{js,scss}"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "jsdoc-to-markdown": "^8.0.3",
-    "postcss": "^8.4.47",
-    "prettier": "~3.3.3",
-    "sass": "~1.80.4",
-    "vite": "^6.0.0"
+    "autoprefixer": "^10.5.0",
+    "jsdoc-to-markdown": "^9.1.3",
+    "postcss": "^8.5.15",
+    "prettier": "~3.8.4",
+    "sass": "~1.101.0",
+    "vite": "^8.0.16"
   }
 }
