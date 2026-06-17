@@ -24,7 +24,7 @@ const easeInOutSine = function (time, start, change, duration) {
  * cancel event.
  *
  * @author Liam Egan <liam@wethecollective.com>
- * @version 2.0.0
+ * @version 3.0.0
  * @created Jan 28, 2020
  * @extends PerspectiveCard
  */
@@ -54,18 +54,16 @@ class ClickablePerspectiveCard extends PerspectiveCard {
     this.onTouchMove = this.onTouchMove.bind(this)
     this._tweenBuffer = false
 
-    this._openDuration =
-      settings.duration ||
-      parseInt(this.element.getAttribute('data-duration')) ||
-      1500
+    this._openDuration = 'duration' in settings
+      ? settings.duration
+      : (parseInt(this.element.getAttribute('data-duration')) || 1500)
 
-    this._showCloseButton =
-      settings.closeButton !== false &&
-      this.element.getAttribute('data-close-button') !== 'false'
-    this._closeButtonLabel =
-      settings.closeButtonLabel ||
-      this.element.getAttribute('data-close-button-label') ||
-      'Close'
+    this._showCloseButton = 'closeButton' in settings
+      ? settings.closeButton !== false
+      : this.element.getAttribute('data-close-button') !== 'false'
+    this._closeButtonLabel = 'closeButtonLabel' in settings
+      ? settings.closeButtonLabel
+      : (this.element.getAttribute('data-close-button-label') || 'Close')
 
     // The modifier class routes all pointer interaction to the trigger
     // button - the transformer is made pointer-transparent in CSS so the
@@ -87,9 +85,9 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.button.className = 'perspective-card__button'
       this.button.setAttribute(
         'aria-label',
-        settings.buttonLabel ||
-          this.element.getAttribute('data-button-label') ||
-          'Expand'
+        'buttonLabel' in settings
+          ? settings.buttonLabel
+          : (this.element.getAttribute('data-button-label') || 'Expand')
       )
       this.element.appendChild(this.button)
     }

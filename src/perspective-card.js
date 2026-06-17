@@ -38,14 +38,15 @@ class PerspectiveCard {
     this.element = element
 
     // set settings
-    this.debug =
-      settings.debug || this.element.hasAttribute('data-debug') || false
-    this.zoomSize =
-      settings.zoom || parseInt(this.element.getAttribute('data-zoom')) || 40
-    this.intensity =
-      settings.intensity ||
-      parseInt(this.element.getAttribute('data-intensity')) ||
-      10
+    this.debug = 'debug' in settings
+      ? settings.debug
+      : this.element.hasAttribute('data-debug')
+    this.zoomSize = 'zoom' in settings
+      ? settings.zoom
+      : (parseInt(this.element.getAttribute('data-zoom')) || 40)
+    this.intensity = 'intensity' in settings
+      ? settings.intensity
+      : (parseInt(this.element.getAttribute('data-intensity')) || 10)
 
     this.ambient = -1
 
@@ -482,7 +483,7 @@ class PerspectiveCard {
     if (!isNaN(value)) this._zoomSize = value
   }
   get zoomSize() {
-    return this._zoomSize || 40
+    return this._zoomSize ?? 40
   }
 
   /**
@@ -495,7 +496,7 @@ class PerspectiveCard {
     if (!isNaN(value)) this._intensity = value
   }
   get intensity() {
-    return this._intensity || 10
+    return this._intensity ?? 10
   }
 
   /**
