@@ -1,168 +1,170 @@
-.perspective-card {
-  perspective: 1000px;
-  position: relative;
-  touch-action: none;
-  transform-style: preserve-3d;
-  border-radius: 20px;
-}
-
-.perspective-card__button {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  // border-radius: inherit;
-  color: inherit; // Focus ring reset
-  cursor: pointer;
-  height: 100%;
-  left: 0;
-  padding: 0;
-  position: absolute;
-  top: 0;
-  transform-style: preserve-3d;
-  width: 100%;
-
-  &:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 4px;
+@layer wtc-perspective-card {
+  .perspective-card {
+    perspective: 1000px;
+    position: relative;
+    touch-action: none;
+    transform-style: preserve-3d;
+    border-radius: 20px;
   }
-}
 
-.perspective-card__shine {
-  border-bottom-left-radius: 4.25% 3%;
-  border-bottom-right-radius: 4.25% 3%;
-  border-top-left-radius: 4.35% 3%;
-  border-top-right-radius: 4.25% 3%;
-  height: 100%;
-  left: 0px;
-  overflow: hidden;
-  position: absolute;
-  top: 0px;
-  transform: translateZ(0.5px);
-  width: 100%;
-  will-change: background;
-}
+  .perspective-card__button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    // border-radius: inherit;
+    color: inherit; // Focus ring reset
+    cursor: pointer;
+    height: 100%;
+    left: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    transform-style: preserve-3d;
+    width: 100%;
 
-.perspective-card__artwork {
-  backface-visibility: hidden;
-  box-shadow: 5px 5px 0px rgba(0, 0, 0, 0);
-  transition: 0.5s linear box-shadow;
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 4px;
+    }
+  }
 
-  img {
-    display: block;
+  .perspective-card__shine {
+    border-bottom-left-radius: 4.25% 3%;
+    border-bottom-right-radius: 4.25% 3%;
+    border-top-left-radius: 4.35% 3%;
+    border-top-right-radius: 4.25% 3%;
+    height: 100%;
+    left: 0px;
+    overflow: hidden;
+    position: absolute;
+    top: 0px;
+    transform: translateZ(0.5px);
+    width: 100%;
+    will-change: background;
+  }
+
+  .perspective-card__artwork {
+    backface-visibility: hidden;
+    box-shadow: 5px 5px 0px rgba(0, 0, 0, 0);
+    transition: 0.5s linear box-shadow;
+
+    img {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  .perspective-card__artwork--back {
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: rotateY(180deg);
     width: 100%;
   }
-}
 
-.perspective-card__artwork--back {
-  left: 0;
-  position: absolute;
-  top: 0;
-  transform: rotateY(180deg);
-  width: 100%;
-}
-
-.perspective-card__artwork--front {
-  position: relative;
-}
-
-.perspective-card__transformer {
-  position: relative;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-// On clickable cards all interaction runs through the trigger button.
-// The tilting transformer sits in front of the flat button in the 3D
-// rendering context, so it must be pointer-transparent or it would
-// intercept clicks before they reach the button.
-.perspective-card--clickable .perspective-card__transformer {
-  pointer-events: none;
-}
-
-.perspective-card--over {
-  .perspective-card__artwork {
-    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
-  }
-}
-
-@keyframes perspective-card-backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes perspective-card-backdrop-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-.perspective-card__close-button {
-  appearance: none;
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  color: #fff;
-  cursor: pointer;
-  display: grid;
-  height: 2.5rem;
-  padding: 0;
-  place-items: center;
-  position: fixed;
-  right: 1rem;
-  top: 1rem;
-  width: 2.5rem;
-
-  span {
-    font-size: 1rem;
-    line-height: 1;
+  .perspective-card__artwork--front {
+    position: relative;
   }
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  &:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 3px;
-  }
-}
-
-dialog.perspective-card__dialog {
-  background: transparent;
-  border: none;
-  max-height: none;
-  max-width: none;
-  overflow: visible;
-  padding: 0;
-
-  &::backdrop {
-    animation: perspective-card-backdrop-in 0.5s linear forwards;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-
-  &.perspective-card__dialog--closing::backdrop {
-    animation: perspective-card-backdrop-out 0.5s linear forwards;
-  }
-}
-
-.perspective-card--is-open {
   .perspective-card__transformer {
-    transform-style: flat;
+    position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
 
-  [class*='front'] {
-    transform: initial;
+  // On clickable cards all interaction runs through the trigger button.
+  // The tilting transformer sits in front of the flat button in the 3D
+  // rendering context, so it must be pointer-transparent or it would
+  // intercept clicks before they reach the button.
+  .perspective-card--clickable .perspective-card__transformer {
+    pointer-events: none;
   }
-}
 
-.intersection-off {
-  display: none !important;
+  .perspective-card--over {
+    .perspective-card__artwork {
+      box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  @keyframes perspective-card-backdrop-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes perspective-card-backdrop-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  .perspective-card__close-button {
+    appearance: none;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    height: 2.5rem;
+    padding: 0;
+    place-items: center;
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    width: 2.5rem;
+
+    span {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 3px;
+    }
+  }
+
+  dialog.perspective-card__dialog {
+    background: transparent;
+    border: none;
+    max-height: none;
+    max-width: none;
+    overflow: visible;
+    padding: 0;
+
+    &::backdrop {
+      animation: perspective-card-backdrop-in 0.5s linear forwards;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    &.perspective-card__dialog--closing::backdrop {
+      animation: perspective-card-backdrop-out 0.5s linear forwards;
+    }
+  }
+
+  .perspective-card--is-open {
+    .perspective-card__transformer {
+      transform-style: flat;
+    }
+
+    [class*='front'] {
+      transform: initial;
+    }
+  }
+
+  .intersection-off {
+    display: none !important;
+  }
 }
