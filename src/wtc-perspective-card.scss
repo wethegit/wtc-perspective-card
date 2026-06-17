@@ -39,6 +39,7 @@
   top: 0px;
   transform: translateZ(0.5px);
   width: 100%;
+  will-change: background;
 }
 
 .perspective-card__artwork {
@@ -67,6 +68,7 @@
 .perspective-card__transformer {
   position: relative;
   transform-style: preserve-3d;
+  will-change: transform;
 }
 
 // On clickable cards all interaction runs through the trigger button.
