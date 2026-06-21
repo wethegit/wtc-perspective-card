@@ -25,7 +25,7 @@ const EPSILON = 0.001
  * per-frame effects like holographic foils can be driven from pure CSS on
  * any element placed inside the card.
  */
-class PerspectiveCard {
+export class PerspectiveCard {
   /**
    * The PerspectiveCard constructor. Creates and initialises the perspective card component.
    *
@@ -38,15 +38,18 @@ class PerspectiveCard {
     this.element = element
 
     // set settings
-    this.debug = 'debug' in settings
-      ? settings.debug
-      : this.element.hasAttribute('data-debug')
-    this.zoomSize = 'zoom' in settings
-      ? settings.zoom
-      : (parseInt(this.element.getAttribute('data-zoom')) || 40)
-    this.intensity = 'intensity' in settings
-      ? settings.intensity
-      : (parseInt(this.element.getAttribute('data-intensity')) || 10)
+    this.debug =
+      'debug' in settings
+        ? settings.debug
+        : this.element.hasAttribute('data-debug')
+    this.zoomSize =
+      'zoom' in settings
+        ? settings.zoom
+        : parseInt(this.element.getAttribute('data-zoom')) || 40
+    this.intensity =
+      'intensity' in settings
+        ? settings.intensity
+        : parseInt(this.element.getAttribute('data-intensity')) || 10
 
     this.ambient = -1
 
@@ -733,5 +736,3 @@ class PerspectiveCard {
     }
   }
 }
-
-export default PerspectiveCard
