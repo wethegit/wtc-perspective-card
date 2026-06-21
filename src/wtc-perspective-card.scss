@@ -86,24 +86,6 @@
     }
   }
 
-  @keyframes perspective-card-backdrop-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes perspective-card-backdrop-out {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-
   .perspective-card__close-button {
     appearance: none;
     backdrop-filter: blur(8px);
@@ -145,12 +127,32 @@
     padding: 0;
 
     &::backdrop {
-      animation: perspective-card-backdrop-in 0.5s linear forwards;
       background-color: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition:
+        display 0.5s allow-discrete,
+        overlay 0.5s allow-discrete,
+        opacity 0.5s;
     }
 
+    // Fade the backdrop in once the dialog is open.
+    &:open::backdrop {
+      opacity: 1;
+    }
+
+    // Animate from transparent on open rather than snapping to opaque.
+    @starting-style {
+      &:open::backdrop {
+        opacity: 0;
+      }
+    }
+
+    // The JS close sequence adds this class so the backdrop fades out
+    // concurrently with the card's down-animation. allow-discrete above also
+    // keeps the fade graceful when the browser force-closes the dialog
+    // (e.g. a repeated Escape press), which the old keyframe approach couldn't.
     &.perspective-card__dialog--closing::backdrop {
-      animation: perspective-card-backdrop-out 0.5s linear forwards;
+      opacity: 0;
     }
   }
 

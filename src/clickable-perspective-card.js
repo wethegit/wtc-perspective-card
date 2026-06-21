@@ -45,13 +45,9 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // Call the superfunction
     super(element, settings)
 
-    // Bind the extra handlers
+    // Bind the handlers
     this.onButtonClick = this.onButtonClick.bind(this)
-    this.onDialogClick = this.onDialogClick.bind(this)
-    this.onDialogCancel = this.onDialogCancel.bind(this)
-    this.onDialogClose = this.onDialogClose.bind(this)
     this.onCloseButtonClick = this.onCloseButtonClick.bind(this)
-    this.onTouchMove = this.onTouchMove.bind(this)
     this._tweenBuffer = false
 
     this._openDuration =
@@ -73,11 +69,6 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // tilting plane can't intercept clicks meant for the button behind it.
     this.element.classList.add('perspective-card--clickable')
 
-    // Create the dialog that acts as the modal backdrop.
-    // The card element is moved into it on open so it lives in the top layer.
-    this.dialog = document.createElement('dialog')
-    this.dialog.className = 'perspective-card__dialog'
-
     // Find or create the trigger button. This is a real, transparent button
     // covering the card through which all open/close activation runs -
     // pointer, keyboard and assistive technology alike.
@@ -97,12 +88,38 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     this.button.setAttribute('aria-haspopup', 'dialog')
     this.button.setAttribute('aria-expanded', 'false')
     this.button.addEventListener('click', this.onButtonClick)
+  }
 
-    // Add the dialog listeners
-    this.dialog.addEventListener('click', this.onDialogClick)
-    this.dialog.addEventListener('touchmove', this.onTouchMove)
-    this.dialog.addEventListener('cancel', this.onDialogCancel)
-    this.dialog.addEventListener('close', this.onDialogClose)
+  /**
+   * (getter) The shared modal dialog. A single `<dialog>` is created lazily
+   * on first open and reused by every card on the page - only one card can be
+   * open at a time (enforced by `_activeCard`). Keeping one persistent element
+   * in the DOM also lets the backdrop fade out via CSS (`allow-discrete`) on
+   * every close path.
+   * Future TBD: update to allow injection of dialog in userland markup for more
+   * control, and support pathing of next/prev cards.
+   *
+   * @type {HTMLDialogElement}
+   */
+  get dialog() {
+    if (ClickablePerspectiveCard._dialog)
+      return ClickablePerspectiveCard._dialog
+
+    const dialog = document.createElement('dialog')
+    dialog.className = 'perspective-card__dialog'
+
+    // Listeners are bound once and delegate to whichever card is currently
+    // active. Invoking as `card.onDialogX(e)` preserves the correct `this`.
+    // These are anon, so not removable at the moment, maybe need to revisit.
+    const active = () => ClickablePerspectiveCard._activeCard
+    dialog.addEventListener('click', (e) => active()?.onDialogClick(e))
+    dialog.addEventListener('touchmove', (e) => active()?.onTouchMove(e))
+    dialog.addEventListener('cancel', (e) => active()?.onDialogCancel(e))
+    dialog.addEventListener('close', (e) => active()?.onDialogClose(e))
+
+    document.body.appendChild(dialog)
+    ClickablePerspectiveCard._dialog = dialog
+    return dialog
   }
 
   /**
@@ -287,10 +304,9 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   onDialogClose() {
-    // Fires whenever the dialog closes - either via our own sequence or the browser
-    // force-closing it (non-cancelable cancel event on repeated Escape). If enlarged
-    // is still true here the browser bypassed our animation; clear state and teardown.
-    if (!this.enlarged) return
+    // Fires whenever the dialog closes - via our own end-of-tween close() or a
+    // browser force-close (e.g. a repeated Escape, whose second, non-cancelable
+    // cancel event bypasses our animation).
     this.tweening = false
     this._pendingClose = false
     this._enlarged = false
@@ -298,8 +314,17 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   _teardownModal() {
+    // The dialog persists and can close through several paths (scripted tween
+    // end, backdrop click, browser force-close), each of which routes here.
+    // Guard so the work runs exactly once per open.
+    if (!this._modalActive) return
+    this._modalActive = false
+
     if (this._closeButton) {
       this._closeButton.removeEventListener('click', this.onCloseButtonClick)
+      // The dialog persists between opens, so the button must be removed from
+      // it explicitly - otherwise close buttons would accumulate in the dialog.
+      this._closeButton.remove()
       this._closeButton = null
     }
 
@@ -325,8 +350,10 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     this.element.style.left = ''
     this.element.style.top = ''
 
+    // The shared dialog stays in the DOM between opens - it is closed, not
+    // removed - so `allow-discrete` can fade the backdrop out on every close
+    // path, including a browser force-close that bypasses our own sequence.
     this.dialog.classList.remove('perspective-card__dialog--closing')
-    document.body.removeChild(this.dialog)
 
     // The browser can't restore focus itself here - the focused button was
     // moved out of the dialog before close() - so do it manually.
@@ -371,6 +398,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this._dispatch('open')
 
       ClickablePerspectiveCard._activeCard = this
+      // Marks that there is modal state to clean up; cleared by _teardownModal.
+      this._modalActive = true
       this.button.setAttribute('aria-expanded', 'true')
 
       // Get the current bounding client rectangle before touching the DOM
@@ -406,7 +435,9 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.element.style.width = `${this.startingDimensions[0]}px`
       this.element.style.height = `${this.startingDimensions[1]}px`
       this.element.classList.add('perspective-card--modal')
-      document.body.appendChild(this.dialog)
+      // Accessing `this.dialog` lazily creates the shared dialog (and appends
+      // it to the body) on first use. The card is moved into it so it lives in
+      // the top layer.
       this.dialog.appendChild(this.element)
 
       // Label the dialog from the trigger so screen readers announce it with
@@ -685,4 +716,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   // The card currently holding (or animating to/from) the modal - only one
   // card may be open at a time.
   static _activeCard = null
+
+  // The single shared modal dialog, created lazily on first open and reused by
+  // every card on the page. See the `dialog` getter.
+  static _dialog = null
 }
