@@ -224,14 +224,6 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
 
       // Run our end function.
       this.onEndTween()
-
-      // Honour a close that was requested while this tween was running.
-      // Checked here (after onEndTween) so that _resolvedScale and all
-      // other tween-end state are committed before the close sequence reads them.
-      if (this._pendingClose) {
-        this._pendingClose = false
-        this.enlarged = false
-      }
     }
   }
 
@@ -247,7 +239,6 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    * @listens click
    */
   onButtonClick(e) {
-    if (this._tweenBuffer === true) return
     // Only one card may be open at a time - ignore activation while
     // another card holds the modal.
     if (
@@ -256,8 +247,18 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     )
       return
 
+    // Re-activating the trigger while open (or mid-open-tween) is a dismiss
+    // request - route it through the shared close path.
+    if (this.enlarged === true) {
+      this._requestClose()
+      return
+    }
+
+    // Opening: the buffer prevents an instant re-open immediately after a close.
+    if (this._tweenBuffer === true) return
+
     this.resize(null, true)
-    this.enlarged = !this.enlarged
+    this.enlarged = true
   }
 
   /**
@@ -272,9 +273,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    */
   onDialogClick(e) {
     if (e.target !== this.dialog) return
-    if (this._tweenBuffer === true) return
 
-    this.enlarged = false
+    this._requestClose()
   }
 
   onTouchMove(e) {
@@ -284,8 +284,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   onCloseButtonClick() {
-    if (this._tweenBuffer === true) return
-    this.enlarged = false
+    this._requestClose()
   }
 
   onDialogCancel(e) {
@@ -294,21 +293,30 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // presses as a safety valve - preventDefault() will silently fail for those.
     // onDialogClose handles that case.
     e.preventDefault()
-    if (this.tweening) {
-      // Can't start the close tween yet - record the intent and honour it
-      // once the current tween's onEndTween has fully committed its state.
-      this._pendingClose = true
-    } else {
-      this.enlarged = false
-    }
+    this._requestClose()
+  }
+
+  /**
+   * The single entry point for every user-initiated close (backdrop click,
+   * close button, Escape, re-activating the trigger).
+   *
+   * While a tween is running the animated close can't start - the `enlarged`
+   * setter is locked on `tweening` - so we go straight to the force-close path:
+   * close()ing the dialog fires `close`, which onDialogClose turns into an
+   * idempotent teardown. Otherwise we run the normal animated close.
+   *
+   * @private
+   */
+  _requestClose() {
+    if (this.tweening === true) this.dialog.close()
+    else this.enlarged = false
   }
 
   onDialogClose() {
     // Fires whenever the dialog closes - via our own end-of-tween close() or a
     // browser force-close (e.g. a repeated Escape, whose second, non-cancelable
-    // cancel event bypasses our animation).
+    // cancel event bypasses our animation, or a close requested mid-tween).
     this.tweening = false
-    this._pendingClose = false
     this._enlarged = false
     this._teardownModal()
   }
