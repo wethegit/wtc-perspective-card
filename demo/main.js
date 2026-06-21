@@ -1,4 +1,4 @@
-import PerspectiveCard, { ClickablePerspectiveCard } from '../src/wtc-perspective-card.js'
+import { PerspectiveCard, ClickablePerspectiveCard } from '../src/index.js'
 import '../src/wtc-perspective-card.scss'
 import './demo.scss'
 

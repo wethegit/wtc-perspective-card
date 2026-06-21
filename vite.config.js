@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     return {
       build: {
         lib: {
-          entry: resolve(__dirname, 'src/wtc-perspective-card.js'),
+          entry: resolve(__dirname, 'src/index.js'),
           name: 'WTCPerspectiveCard',
           formats: ['es', 'umd'],
           fileName: (format) =>

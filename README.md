@@ -17,7 +17,7 @@ https://codepen.io/shubniggurath/pen/99df48ac9073736b0bbf5bd0e062a096?editors=01
 Import it into your project.
 
 ```javascript
-import PerspectiveCard from 'wtc-perspective-card'
+import { PerspectiveCard } from 'wtc-perspective-card'
 ```
 
 Import the stylesheet with sass or use the css file.
