@@ -1,6 +1,16 @@
 const EPSILON = 0.001
 
 /**
+ * Centralised CSS class names used by the base card.
+ */
+export const CSSCLASSES = {
+  transformer: 'perspective-card__transformer',
+  shine: 'perspective-card__shine',
+  over: 'perspective-card--over',
+  intersectionOff: 'intersection-off'
+}
+
+/**
  * This sets up the basic perspective card. This class expects markup at least
  * conforming to:
  * ```
@@ -112,10 +122,8 @@ export class PerspectiveCard {
 
     // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
-    this.transformer = this.element.querySelector(
-      '.perspective-card__transformer'
-    )
-    this.shine = this.element.querySelector('.perspective-card__shine')
+    this.transformer = this.element.querySelector(`.${CSSCLASSES.transformer}`)
+    this.shine = this.element.querySelector(`.${CSSCLASSES.shine}`)
 
     // Bind our event listeners
     this.resize = this.resize.bind(this)
@@ -146,7 +154,7 @@ export class PerspectiveCard {
       this.observer.observe(this.element)
     } else {
       // Set up and bind the hiding intersection observer
-      this.element.classList.add('intersection-off')
+      this.element.classList.add(CSSCLASSES.intersectionOff)
       this.observer = new IntersectionObserver(this.hideIntersect, {
         rootMargin: '100px'
       })
@@ -314,7 +322,7 @@ export class PerspectiveCard {
 
     this.pointerControlled = true
     this.zoom = this.zoomSize
-    this.element.classList.add('perspective-card--over')
+    this.element.classList.add(CSSCLASSES.over)
 
     if (this.ambient < 0) this.playing = true
   }
@@ -331,7 +339,7 @@ export class PerspectiveCard {
   pointerLeave(e) {
     this.pointerControlled = false
     this.zoom = 0
-    this.element.classList.remove('perspective-card--over')
+    this.element.classList.remove(CSSCLASSES.over)
 
     if (this.ambient < 0) {
       this.playing = false
@@ -404,9 +412,9 @@ export class PerspectiveCard {
     // Loop through the entries and set up the playing state based on whether the element is onscreen or not.
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
-        this.element.classList.remove('intersection-off')
+        this.element.classList.remove(CSSCLASSES.intersectionOff)
       } else {
-        this.element.classList.add('intersection-off')
+        this.element.classList.add(CSSCLASSES.intersectionOff)
       }
     })
   }
