@@ -1,4 +1,19 @@
-import { PerspectiveCard } from './perspective-card.js'
+import { PerspectiveCard, CSSCLASSES as BASE_CSSCLASSES } from './perspective-card.js'
+
+/**
+ * The base card's class names extended with the ones the clickable card adds
+ * (the trigger button, dialog, modal/open states and close button).
+ */
+export const CSSCLASSES = {
+  ...BASE_CSSCLASSES,
+  clickable: 'perspective-card--clickable',
+  button: 'perspective-card__button',
+  dialog: 'perspective-card__dialog',
+  modal: 'perspective-card--modal',
+  open: 'perspective-card--is-open',
+  closing: 'perspective-card__dialog--closing',
+  closeButton: 'perspective-card__close-button'
+}
 
 const easeInOutCubic = function (time, start, change, duration) {
   if ((time /= duration / 2) < 1)
@@ -78,16 +93,16 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // The modifier class routes all pointer interaction to the trigger
     // button - the transformer is made pointer-transparent in CSS so the
     // tilting plane can't intercept clicks meant for the button behind it.
-    this.element.classList.add('perspective-card--clickable')
+    this.element.classList.add(CSSCLASSES.clickable)
 
     // Find or create the trigger button. This is a real, transparent button
     // covering the card through which all open/close activation runs -
     // pointer, keyboard and assistive technology alike.
-    this.button = this.element.querySelector('button.perspective-card__button')
+    this.button = this.element.querySelector(`button.${CSSCLASSES.button}`)
     if (!this.button) {
       this.button = document.createElement('button')
       this.button.type = 'button'
-      this.button.className = 'perspective-card__button'
+      this.button.className = CSSCLASSES.button
       this.button.setAttribute('aria-label', buttonLabel)
       this.element.appendChild(this.button)
     }
@@ -112,7 +127,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       return ClickablePerspectiveCard._dialog
 
     const dialog = document.createElement('dialog')
-    dialog.className = 'perspective-card__dialog'
+    dialog.className = CSSCLASSES.dialog
 
     // Listeners are bound once and delegate to whichever card is currently
     // active. Invoking as `card.onDialogX(e)` preserves the correct `this`.
@@ -155,7 +170,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // When fully open, re-centre in the current viewport after resize or scroll
     if (
       this.enlarged &&
-      this.element.classList.contains('perspective-card--is-open')
+      this.element.classList.contains(CSSCLASSES.open)
     ) {
       const w = parseFloat(this.element.style.width)
       const h = parseFloat(this.element.style.height)
@@ -355,8 +370,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     }
     this._placeholder = null
 
-    this.element.classList.remove('perspective-card--modal')
-    this.element.classList.remove('perspective-card--is-open')
+    this.element.classList.remove(CSSCLASSES.modal)
+    this.element.classList.remove(CSSCLASSES.open)
     this.element.style.position = ''
     this.element.style.transform = ''
     this.element.style.width = ''
@@ -367,7 +382,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // The shared dialog stays in the DOM between opens - it is closed, not
     // removed - so `allow-discrete` can fade the backdrop out on every close
     // path, including a browser force-close that bypasses our own sequence.
-    this.dialog.classList.remove('perspective-card__dialog--closing')
+    this.dialog.classList.remove(CSSCLASSES.closing)
 
     // The browser can't restore focus itself here - the focused button was
     // moved out of the dialog before close() - so do it manually.
@@ -448,7 +463,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.element.style.position = 'fixed'
       this.element.style.width = `${this.startingDimensions[0]}px`
       this.element.style.height = `${this.startingDimensions[1]}px`
-      this.element.classList.add('perspective-card--modal')
+      this.element.classList.add(CSSCLASSES.modal)
       // Accessing `this.dialog` lazily creates the shared dialog (and appends
       // it to the body) on first use. The card is moved into it so it lives in
       // the top layer.
@@ -468,7 +483,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       if (this._showCloseButton) {
         this._closeButton = document.createElement('button')
         this._closeButton.type = 'button'
-        this._closeButton.className = 'perspective-card__close-button'
+        this._closeButton.className = CSSCLASSES.closeButton
         this._closeButton.setAttribute('aria-label', this._closeButtonLabel)
         this._closeButton.innerHTML = '<span aria-hidden="true">&#x2715;</span>'
         this._closeButton.addEventListener('click', this.onCloseButtonClick)
@@ -533,7 +548,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
         this.element.style.transform = 'none'
         this._screenScale = 1
 
-        this.element.classList.add('perspective-card--is-open')
+        this.element.classList.add(CSSCLASSES.open)
         this._dispatch('opened')
       }
 
@@ -542,10 +557,10 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this._dispatch('close')
 
       // Adds 3d transforms back in on close.
-      this.element.classList.remove('perspective-card--is-open')
+      this.element.classList.remove(CSSCLASSES.open)
 
       // Trigger the backdrop fade-out
-      this.dialog.classList.add('perspective-card__dialog--closing')
+      this.dialog.classList.add(CSSCLASSES.closing)
 
       // We converted scale() to real dimensions when opening; restore the
       // scale transform now so the close tween can animate it back down.
