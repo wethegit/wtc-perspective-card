@@ -35,7 +35,6 @@ export class PerspectiveCard {
    * @static
    */
   static SETTINGS = {
-    debug: { type: 'bool', default: false },
     zoom: { type: 'int', default: 40 },
     intensity: { type: 'int', default: 10 },
     ambient: { type: 'ambient', default: -1 }
@@ -102,12 +101,11 @@ export class PerspectiveCard {
     // Set the element
     this.element = element
 
-    const { debug, zoom, intensity, ambient } = PerspectiveCard.parseSettings(
+    const { zoom, intensity, ambient } = PerspectiveCard.parseSettings(
       element,
       settings,
       PerspectiveCard.SETTINGS
     )
-    this.debug = debug
     this.zoomSize = zoom
     this.intensity = intensity
     this.ambient = ambient
@@ -561,19 +559,6 @@ export class PerspectiveCard {
   }
   get size() {
     return this._size || [0, 0]
-  }
-
-  /**
-   * (getter/setter) Debug setting.
-   *
-   * @type {Boolean}
-   * @default false
-   */
-  set debug(value) {
-    this._debug = value
-  }
-  get debug() {
-    return this._debug || false
   }
 
   /**
