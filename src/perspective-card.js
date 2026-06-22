@@ -27,6 +27,71 @@ const EPSILON = 0.001
  */
 export class PerspectiveCard {
   /**
+   * The settings schema. Each entry declares a setting's coercion `type` (a key
+   * of `PerspectiveCard.coerce`) and its `default`. This is the single source
+   * of truth for what `parseSettings` resolves from constructor settings and
+   * `data-*` attributes; subclasses declare their own `SETTINGS`.
+   *
+   * @static
+   */
+  static SETTINGS = {
+    debug: { type: 'bool', default: false },
+    zoom: { type: 'int', default: 40 },
+    intensity: { type: 'int', default: 10 },
+    ambient: { type: 'ambient', default: -1 }
+  }
+
+  /**
+   * Coercion functions keyed by setting type. Each receives the resolved raw
+   * value (a real type from settings, or a string from a data-* attribute) and
+   * the setting's default, and returns the final value.
+   *
+   * @static
+   */
+  static coerce = {
+    // Truthy unless explicitly false / "false".
+    bool: (v) => v !== false && v !== 'false',
+    // Integer; a non-numeric or absent value falls back to the default.
+    int: (v, def) => (isNaN(parseInt(v)) ? def : parseInt(v)),
+    // String; an empty / nullish value falls back to the default.
+    string: (v, def) => (v === '' || v == null ? def : String(v)),
+    // Off (false / "false") -> default; on (true / "" / "true") -> 0; else the number.
+    ambient: (v, def) =>
+      v === false || v === 'false'
+        ? def
+        : v === true || v === '' || v === 'true'
+          ? 0
+          : parseInt(v)
+  }
+
+  /**
+   * Walks a settings schema and resolves every key into a plain config object
+   * ready to destructure. Each value follows the precedence: explicit
+   * constructor setting -> `data-*` attribute -> default. `dataset` is the
+   * native camelCase<->data-kebab bridge, so `dataset.closeButton` reads
+   * `data-close-button` with no manual conversion.
+   *
+   * @static
+   * @param {HTMLElement} element   The card element (source of `data-*` attrs)
+   * @param {Object}      settings  The constructor settings object
+   * @param {Object}      schema    A SETTINGS-shaped schema
+   * @returns {Object}
+   */
+  static parseSettings(element, settings, schema) {
+    const dataset = element.dataset
+    const config = {}
+    for (const key in schema) {
+      const { type, default: def } = schema[key]
+      if (settings[key] !== undefined)
+        config[key] = this.coerce[type](settings[key], def)
+      else if (dataset[key] !== undefined)
+        config[key] = this.coerce[type](dataset[key], def)
+      else config[key] = def
+    }
+    return config
+  }
+
+  /**
    * The PerspectiveCard constructor. Creates and initialises the perspective card component.
    *
    * @constructor
@@ -37,34 +102,15 @@ export class PerspectiveCard {
     // Set the element
     this.element = element
 
-    // set settings
-    this.debug =
-      'debug' in settings
-        ? settings.debug
-        : this.element.hasAttribute('data-debug')
-    this.zoomSize =
-      'zoom' in settings
-        ? settings.zoom
-        : parseInt(this.element.getAttribute('data-zoom')) || 40
-    this.intensity =
-      'intensity' in settings
-        ? settings.intensity
-        : parseInt(this.element.getAttribute('data-intensity')) || 10
-
-    this.ambient = -1
-
-    if (settings.ambient !== undefined && settings.ambient !== false) {
-      const settingsVal = settings.ambient
-      if (settingsVal === true) this.ambient = 0
-      else this.ambient = settingsVal
-    } else if (this.element.hasAttribute('data-ambient')) {
-      const dataVal = this.element.getAttribute('data-ambient')
-
-      if (dataVal !== 'false') {
-        if (dataVal === '' || dataVal === 'true') this.ambient = 0
-        else this.ambient = parseInt(dataVal)
-      }
-    }
+    const { debug, zoom, intensity, ambient } = PerspectiveCard.parseSettings(
+      element,
+      settings,
+      PerspectiveCard.SETTINGS
+    )
+    this.debug = debug
+    this.zoomSize = zoom
+    this.intensity = intensity
+    this.ambient = ambient
 
     // Find the transformer and shine elements. We save these so we
     // don't waste proc time doing it every frame
