@@ -30,6 +30,19 @@ const easeInOutSine = function (time, start, change, duration) {
  */
 export class ClickablePerspectiveCard extends PerspectiveCard {
   /**
+   * The settings schema for the clickable card. Resolved by
+   * `PerspectiveCard.parseSettings` the same way as the base settings.
+   *
+   * @static
+   */
+  static SETTINGS = {
+    duration: { type: 'int', default: 800 },
+    closeButton: { type: 'bool', default: true },
+    closeButtonLabel: { type: 'string', default: 'Close' },
+    buttonLabel: { type: 'string', default: 'Expand' }
+  }
+
+  /**
    * The ClickablePerspectiveCard constructor. Creates and initialises the perspective
    * card component.
    *
@@ -50,19 +63,17 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     this.onCloseButtonClick = this.onCloseButtonClick.bind(this)
     this._tweenBuffer = false
 
-    this._openDuration =
-      'duration' in settings
-        ? settings.duration
-        : parseInt(this.element.getAttribute('data-duration')) || 1500
-
-    this._showCloseButton =
-      'closeButton' in settings
-        ? settings.closeButton !== false
-        : this.element.getAttribute('data-close-button') !== 'false'
-    this._closeButtonLabel =
-      'closeButtonLabel' in settings
-        ? settings.closeButtonLabel
-        : this.element.getAttribute('data-close-button-label') || 'Close'
+    // Resolve the clickable card's settings (constructor settings -> data-*
+    // attributes -> defaults, per ClickablePerspectiveCard.SETTINGS).
+    const { duration, closeButton, closeButtonLabel, buttonLabel } =
+      PerspectiveCard.parseSettings(
+        element,
+        settings,
+        ClickablePerspectiveCard.SETTINGS
+      )
+    this._openDuration = duration
+    this._showCloseButton = closeButton
+    this._closeButtonLabel = closeButtonLabel
 
     // The modifier class routes all pointer interaction to the trigger
     // button - the transformer is made pointer-transparent in CSS so the
@@ -77,12 +88,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.button = document.createElement('button')
       this.button.type = 'button'
       this.button.className = 'perspective-card__button'
-      this.button.setAttribute(
-        'aria-label',
-        'buttonLabel' in settings
-          ? settings.buttonLabel
-          : this.element.getAttribute('data-button-label') || 'Expand'
-      )
+      this.button.setAttribute('aria-label', buttonLabel)
       this.element.appendChild(this.button)
     }
     this.button.setAttribute('aria-haspopup', 'dialog')
