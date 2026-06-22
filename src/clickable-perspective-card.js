@@ -52,7 +52,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    * @param {String}      settings.buttonLabel 	The accessible label for the trigger button. Falls back to the `data-button-label` attribute, then to "Expand"
    * @param {Boolean}     settings.closeButton 	Show a dedicated close button inside the modal. Defaults to true. Set false or add data-close-button="false" to opt out.
    * @param {String}      settings.closeButtonLabel Accessible label for the close button. Falls back to the `data-close-button-label` attribute, then to "Close"
-   * @param {Number}      settings.duration 	Open animation duration in milliseconds. Falls back to the `data-duration` attribute, then to 1500. The close animation runs at ⅔ of this value.
+   * @param {Number}      settings.duration 	Open animation duration in milliseconds. Falls back to the `data-duration` attribute, then to 800. The close animation runs at ⅔ of this value.
    */
   constructor(element, settings = {}) {
     // Call the superfunction
