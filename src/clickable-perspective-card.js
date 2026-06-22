@@ -224,7 +224,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       // around the card and gives the illusion that the card is flipping
       const r = easeInOutSine(
         this.tweenTime,
-        Math.PI * 0.5,
+        this._rotationStart,
         this.rotationAmount,
         this.tweenDuration
       )
@@ -275,6 +275,12 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       return
     }
 
+    // Re-activating while a close tween is still running reverses it back open.
+    if (this.tweening === true) {
+      this._reverseTween(true)
+      return
+    }
+
     // Opening: the buffer prevents an instant re-open immediately after a close.
     if (this._tweenBuffer === true) return
 
@@ -319,18 +325,98 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
 
   /**
    * The single entry point for every user-initiated close (backdrop click,
-   * close button, Escape, re-activating the trigger).
+   * close button, Escape).
    *
-   * While a tween is running the animated close can't start - the `enlarged`
-   * setter is locked on `tweening` - so we go straight to the force-close path:
-   * close()ing the dialog fires `close`, which onDialogClose turns into an
-   * idempotent teardown. Otherwise we run the normal animated close.
+   * If the open tween is still running we reverse it in place so the card
+   * animates smoothly back to its start state rather than snapping. If a close
+   * tween is already running we let it finish. Otherwise we run the normal
+   * animated close.
    *
    * @private
    */
   _requestClose() {
-    if (this.tweening === true) this.dialog.close()
-    else this.enlarged = false
+    if (this.tweening === true) {
+      // Only reverse an in-flight open; a running close is already heading home.
+      if (this.enlarged === true) this._reverseTween(false)
+    } else {
+      this.enlarged = false
+    }
+  }
+
+  /**
+   * End-of-tween handler for an open. Converts the CSS scale() to real
+   * dimensions so the browser renders at the actual display size rather than
+   * upscaling a small raster (this also fixes SVG filter blurriness, since
+   * feImage is rasterised at the element's intrinsic size).
+   *
+   * @private
+   */
+  _onOpenEnd() {
+    const scale = this.screenScale
+    this._resolvedScale = scale
+
+    const w = this.startingDimensions[0] * scale
+    const h = this.startingDimensions[1] * scale
+
+    this.element.style.width = `${w}px`
+    this.element.style.height = `${h}px`
+    this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
+    this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
+    this.element.style.transform = 'none'
+    this._screenScale = 1
+
+    this.element.classList.add(CSSCLASSES.open)
+    this._dispatch('opened')
+  }
+
+  /**
+   * End-of-tween handler for a close. Closes the dialog and tears down the
+   * modal state.
+   *
+   * @private
+   */
+  _onCloseEnd() {
+    this.dialog.close()
+    this._teardownModal()
+  }
+
+  /**
+   * Reverses the in-flight tween in place. Because position, scale and the flip
+   * rotation are all functions of `tweenTime` over a symmetric easing, mirroring
+   * the time (`tweenDuration - tweenTime`) and swapping the start/target
+   * endpoints keeps every value continuous - the card simply animates back the
+   * way it came, spin included. Used to send a cancelled open back to its start
+   * (or a cancelled close back open).
+   *
+   * @private
+   * @param {Boolean} toOpen  Whether we're reversing toward the open state.
+   */
+  _reverseTween(toOpen) {
+    // Mirror progress so the current rendered frame is preserved, then swap the
+    // endpoints so the remaining time animates toward where we started.
+    this.tweenTime = this.tweenDuration - this.tweenTime
+    ;[this.startingPosition, this.targetPosition] = [
+      this.targetPosition,
+      this.startingPosition
+    ]
+    ;[this.startingScale, this.targetScale] = [
+      this.targetScale,
+      this.startingScale
+    ]
+    this._rotationStart += this.rotationAmount
+    this.rotationAmount = -this.rotationAmount
+
+    this._enlarged = toOpen
+
+    if (toOpen) {
+      this.dialog.classList.remove(CSSCLASSES.closing) // fade the backdrop back in
+      this.onEndTween = this._onOpenEnd
+      this._dispatch('open')
+    } else {
+      this.dialog.classList.add(CSSCLASSES.closing) // fade the backdrop out
+      this.onEndTween = this._onCloseEnd
+      this._dispatch('close')
+    }
   }
 
   onDialogClose() {
@@ -527,30 +613,12 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
         window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5
       ]
 
-      // Set up the amount of rotation that needs to happen
+      // Set up the rotation. The flip is a function of tweenTime, so reversing
+      // the tween (see _reverseTween) un-winds the spin for free.
+      this._rotationStart = Math.PI * 0.5
       this.rotationAmount = Math.PI * -2
 
-      this.onEndTween = function () {
-        // Convert the CSS scale() to real dimensions so the browser renders
-        // at the actual display size rather than upscaling a small raster.
-        // This also fixes SVG filter blurriness (feImage is rasterised at the
-        // element's intrinsic size and gets blurry when scale() upscalesit).
-        const scale = this.screenScale
-        this._resolvedScale = scale
-
-        const w = this.startingDimensions[0] * scale
-        const h = this.startingDimensions[1] * scale
-
-        this.element.style.width = `${w}px`
-        this.element.style.height = `${h}px`
-        this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
-        this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
-        this.element.style.transform = 'none'
-        this._screenScale = 1
-
-        this.element.classList.add(CSSCLASSES.open)
-        this._dispatch('opened')
-      }
+      this.onEndTween = this._onOpenEnd
 
       // If we're going from enlarged to unenlarged
     } else if (this.enlarged === false && wasEnlarged === true) {
@@ -599,17 +667,12 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.startingScale = this.screenScale
       this.targetScale = currentPlaceholderWidth / this.startingDimensions[0]
 
-      // Set up the amount of rotation that needs to happen
-      // We want this to be opposite to the previous one
+      // Set up the rotation. We want this to be opposite to the open spin.
+      this._rotationStart = Math.PI * 0.5
       this.rotationAmount = Math.PI * 2
 
       // At the end of this tween we clean everything up
-      this.onEndTween = function () {
-        this.dialog.close()
-        // this._paused = true
-        // console.warn('Card paused. Unpause: cardInstance._paused = false')
-        this._teardownModal()
-      }
+      this.onEndTween = this._onCloseEnd
     }
   }
   get enlarged() {
