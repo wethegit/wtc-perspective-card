@@ -293,6 +293,23 @@ export class PerspectiveCard {
   }
 
   /**
+   * (getter/setter) The transform applied to the transformer when the card is
+   * at rest (i.e. not actively tilting). The base card rests face-on, so this
+   * defaults to the identity matrix; consumers (or subclasses) can assign
+   * another `matrix3d(...)` to rest in a different orientation — e.g. the
+   * clickable card resting back-to-camera.
+   *
+   * @type {String}
+   * @default the identity matrix
+   */
+  set restTransform(value) {
+    if (typeof value === 'string') this._restTransform = value
+  }
+  get restTransform() {
+    return this._restTransform || `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
+  }
+
+  /**
    * Event Listeners
    */
 
@@ -357,7 +374,7 @@ export class PerspectiveCard {
     if (this.ambient < 0) {
       this.playing = false
       setTimeout(() => {
-        this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
+        this.transformer.style.transform = this.restTransform
         this.shine.style.background = `none`
       }, 100)
     }

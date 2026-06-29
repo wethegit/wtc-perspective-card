@@ -54,8 +54,21 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     duration: { type: 'int', default: 800 },
     closeButton: { type: 'bool', default: true },
     closeButtonLabel: { type: 'string', default: 'Close' },
-    buttonLabel: { type: 'string', default: 'Expand' }
+    buttonLabel: { type: 'string', default: 'Expand' },
+    startFlipped: { type: 'bool', default: false }
   }
+
+  // The two faces of the flip expressed as look-point angles (see `play`): the
+  // look point swings on a circle and the card shows its front at PI/2 and its
+  // back at -PI/2. A start-flipped card rests on the back and reveals the front
+  // on open by sweeping half a turn between the two.
+  static FRONT_ANGLE = Math.PI * 0.5
+  static BACK_ANGLE = Math.PI * -0.5
+
+  // The resting look-point depth for each face. The base card rests its look
+  // point at z = -800 (front-on); mirroring the sign rests it back-to-camera.
+  static FRONT_DEPTH = -800
+  static BACK_DEPTH = 800
 
   /**
    * The ClickablePerspectiveCard constructor. Creates and initialises the perspective
@@ -68,6 +81,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    * @param {Boolean}     settings.closeButton 	Show a dedicated close button inside the modal. Defaults to true. Set false or add data-close-button="false" to opt out.
    * @param {String}      settings.closeButtonLabel Accessible label for the close button. Falls back to the `data-close-button-label` attribute, then to "Close"
    * @param {Number}      settings.duration 	Open animation duration in milliseconds. Falls back to the `data-duration` attribute, then to 800. The close animation runs at ⅔ of this value.
+   * @param {Boolean}     settings.startFlipped Start the card back-to-camera and reveal the front when it opens (flipping back on close). Falls back to the `data-start-flipped` attribute, then to false.
    */
   constructor(element, settings = {}) {
     // Call the superfunction
@@ -80,7 +94,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Resolve the clickable card's settings (constructor settings -> data-*
     // attributes -> defaults, per ClickablePerspectiveCard.SETTINGS).
-    const { duration, closeButton, closeButtonLabel, buttonLabel } =
+    const { duration, closeButton, closeButtonLabel, buttonLabel, startFlipped } =
       PerspectiveCard.parseSettings(
         element,
         settings,
@@ -89,6 +103,19 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     this._openDuration = duration
     this._showCloseButton = closeButton
     this._closeButtonLabel = closeButtonLabel
+    this._startFlipped = startFlipped
+
+    // A start-flipped card lives back-to-camera until it's opened. Rest its
+    // look point on the back side so the ambient/hover tilt plays around the
+    // back face, point the at-rest transform at the back, and render it now so
+    // there's no front-facing flash before the first animation frame.
+    if (this._startFlipped) {
+      const depth = ClickablePerspectiveCard.BACK_DEPTH
+      this.tPoint = [0, 0, depth]
+      this.lookPoint = [0, 0, depth]
+      this.restTransform = `matrix3d(-1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1)`
+      this.transformer.style.transform = this.restTransform
+    }
 
     // The modifier class routes all pointer interaction to the trigger
     // button - the transformer is made pointer-transparent in CSS so the
@@ -406,6 +433,20 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     this._rotationStart += this.rotationAmount
     this.rotationAmount = -this.rotationAmount
 
+    // Keep the resting look-point depth in step with where the reversal is now
+    // heading, so a start-flipped card settles on the right face (front when
+    // ending open, back when ending closed) once the tween hands back to the
+    // ambient animation.
+    if (this._startFlipped) {
+      this.tPoint = [
+        this.tPoint[0],
+        this.tPoint[1],
+        toOpen
+          ? ClickablePerspectiveCard.FRONT_DEPTH
+          : ClickablePerspectiveCard.BACK_DEPTH
+      ]
+    }
+
     this._enlarged = toOpen
 
     if (toOpen) {
@@ -487,7 +528,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     }
 
     setTimeout(() => {
-      this.transformer.style.transform = `matrix3d(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)`
+      this.transformer.style.transform = this.restTransform
     }, 100)
   }
 
@@ -614,9 +655,24 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       ]
 
       // Set up the rotation. The flip is a function of tweenTime, so reversing
-      // the tween (see _reverseTween) un-winds the spin for free.
-      this._rotationStart = Math.PI * 0.5
-      this.rotationAmount = Math.PI * -2
+      // the tween (see _reverseTween) un-winds the spin for free. A normal card
+      // spins a full turn and lands on the same (front) face; a start-flipped
+      // card rests on its back, so it sweeps a half turn from back to front to
+      // reveal the face as it opens.
+      if (this._startFlipped) {
+        this._rotationStart = ClickablePerspectiveCard.BACK_ANGLE
+        this.rotationAmount = Math.PI
+        // Rest the look point on the front now so the open modal settles
+        // face-on once the flip tween hands back to the ambient animation.
+        this.tPoint = [
+          this.tPoint[0],
+          this.tPoint[1],
+          ClickablePerspectiveCard.FRONT_DEPTH
+        ]
+      } else {
+        this._rotationStart = ClickablePerspectiveCard.FRONT_ANGLE
+        this.rotationAmount = Math.PI * -2
+      }
 
       this.onEndTween = this._onOpenEnd
 
@@ -667,9 +723,23 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.startingScale = this.screenScale
       this.targetScale = currentPlaceholderWidth / this.startingDimensions[0]
 
-      // Set up the rotation. We want this to be opposite to the open spin.
-      this._rotationStart = Math.PI * 0.5
-      this.rotationAmount = Math.PI * 2
+      // Set up the rotation. A normal card spins a full turn back the opposite
+      // way to the open spin; a start-flipped card sweeps the half turn back
+      // from front to its resting back face.
+      if (this._startFlipped) {
+        this._rotationStart = ClickablePerspectiveCard.FRONT_ANGLE
+        this.rotationAmount = -Math.PI
+        // Rest the look point back on the rear face so the card settles
+        // back-to-camera once it's home in the grid.
+        this.tPoint = [
+          this.tPoint[0],
+          this.tPoint[1],
+          ClickablePerspectiveCard.BACK_DEPTH
+        ]
+      } else {
+        this._rotationStart = ClickablePerspectiveCard.FRONT_ANGLE
+        this.rotationAmount = Math.PI * 2
+      }
 
       // At the end of this tween we clean everything up
       this.onEndTween = this._onCloseEnd

@@ -103,7 +103,8 @@ body {
 
 // Card A — hover (indigo/violet → amber)
 .card-art--a-front {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 30% 25%,
       rgba(150, 120, 255, 0.6) 0%,
       transparent 55%
@@ -150,7 +151,8 @@ body {
 }
 
 .card-art--a-back {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 60% 30%,
       rgba(255, 190, 80, 0.5) 0%,
       transparent 50%
@@ -165,7 +167,8 @@ body {
 
 // Card B — ambient (teal/green → purple)
 .card-art--b-front {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 50% 20%,
       rgba(60, 220, 180, 0.45) 0%,
       transparent 55%
@@ -179,7 +182,8 @@ body {
 }
 
 .card-art--b-back {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 40% 35%,
       rgba(180, 80, 255, 0.5) 0%,
       transparent 55%
@@ -283,7 +287,8 @@ body {
 
 // Card C — clickable (rose/gold → midnight)
 .card-art--c-front {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 35% 30%,
       rgba(255, 100, 150, 0.45) 0%,
       transparent 55%
@@ -297,7 +302,8 @@ body {
 }
 
 .card-art--c-back {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 55% 25%,
       rgba(255, 215, 80, 0.45) 0%,
       transparent 55%
@@ -312,7 +318,8 @@ body {
 
 // Card D — custom button (deep-sea teal/cyan → dark navy)
 .card-art--d-front {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 40% 30%,
       rgba(0, 210, 200, 0.45) 0%,
       transparent 55%
@@ -322,18 +329,19 @@ body {
       rgba(0, 140, 160, 0.4) 0%,
       transparent 50%
     ),
-    linear-gradient(155deg, #001a20 0%, #000d14 100%);
+    linear-gradient(155deg, #00201b 0%, #00140f 100%);
 }
 
 .card-art--d-back {
-  background: radial-gradient(
+  background:
+    radial-gradient(
       ellipse at 60% 35%,
-      rgba(80, 180, 255, 0.45) 0%,
+      rgba(80, 255, 109, 0.45) 0%,
       transparent 55%
     ),
     radial-gradient(
       ellipse at 25% 70%,
-      rgba(30, 100, 200, 0.4) 0%,
+      rgba(30, 200, 84, 0.4) 0%,
       transparent 50%
     ),
     linear-gradient(155deg, #000e1e 0%, #000812 100%);
