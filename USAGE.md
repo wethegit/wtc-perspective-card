@@ -77,6 +77,7 @@ Both classes read configuration from data attributes on the card element. Attrib
 | `data-close-button`       | `"false"` | —          | Set to `"false"` to suppress the close button injected into the modal dialog.                                                                       |
 | `data-close-button-label` | string    | `"Close"`  | Accessible label for the modal close button.                                                                                                        |
 | `data-duration`           | integer   | `1500`     | Open animation duration in milliseconds. The close animation runs at ⅔ of this value (default 1000ms).                                              |
+| `data-start-flipped`      | boolean (presence) | `false` | When present, the card rests back-to-camera (showing its back face) and flips over to reveal its front as it opens, flipping back on close. Requires distinct front/back artwork to be visible. |
 
 ## Accessibility
 
