@@ -30,10 +30,12 @@ export const CSSCLASSES = {
  * ```
  *
  * While animating, the card publishes its tilt as CSS custom properties on
- * the element — `--perspective-card-angle` (the tilt direction, in radians)
- * and `--perspective-card-tilt` (the tilt magnitude, unitless) — so custom
- * per-frame effects like holographic foils can be driven from pure CSS on
- * any element placed inside the card.
+ * the element — `--perspective-card-angle` (the tilt direction, in radians),
+ * `--perspective-card-tilt` (the tilt magnitude, unitless), and
+ * `--perspective-card-x` / `--perspective-card-y` (the same tilt in normalized
+ * card space, ~[-1, 1] with 0 at the centre; in pointer mode these track the
+ * normalized pointer position) — so custom per-frame effects like holographic
+ * foils can be driven from pure CSS on any element placed inside the card.
  */
 export class PerspectiveCard {
   /**
@@ -258,11 +260,22 @@ export class PerspectiveCard {
       Math.abs(len * 0.002)
     )}) 5%, rgba(255,255,255,0) 80%)`
 
-    // Publish the tilt's polar coordinates as CSS custom properties so
-    // consumers can drive their own per-frame effects — holographic foil,
-    // glints, texture shifts — from pure CSS on any element inside the card.
+    // The tilt in normalized card space: the Cartesian form of the polar
+    // values above, relative to the card centre. ~[-1, 1] across the card
+    // (0 = centre), so in pointer mode it tracks the normalized pointer
+    // position, and it keeps animating in ambient mode like the polar values.
+    // Saves consumers re-deriving cos/sin in CSS; `(var(--x) + 1) / 2` gives
+    // box coordinates for `background-position` / `radial-gradient(at …)`.
+    const nx = this.size[0] > 0 ? this.lookPoint[0] / (this.size[0] * 0.5) : 0
+    const ny = this.size[1] > 0 ? this.lookPoint[1] / (this.size[1] * 0.5) : 0
+
+    // Publish the tilt as CSS custom properties so consumers can drive their
+    // own per-frame effects — holographic foil, glints, texture shifts — from
+    // pure CSS on any element inside the card.
     this.element.style.setProperty('--perspective-card-angle', `${angle}rad`)
     this.element.style.setProperty('--perspective-card-tilt', len)
+    this.element.style.setProperty('--perspective-card-x', nx)
+    this.element.style.setProperty('--perspective-card-y', ny)
   }
 
   /**

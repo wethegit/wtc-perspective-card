@@ -94,6 +94,8 @@ body {
 
 .card-art {
   display: block;
+  position: relative;
+  overflow: hidden;
   width: 100%;
   aspect-ratio: 5 / 7;
   border-radius: var(--radius);
@@ -112,6 +114,39 @@ body {
       transparent 50%
     ),
     linear-gradient(155deg, #1a1040 0%, #0e0828 100%);
+
+  // Specular glare driven by the normalized pointer position the card
+  // publishes. The card gives --perspective-card-x / -y as ~[-1, 1] with 0 at
+  // the centre; (var(--x) + 1) / 2 maps that to a 0–1 box coordinate for the
+  // gradient centre. Fades in on hover (the library adds .perspective-card--over).
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    background: radial-gradient(
+      circle at calc((var(--perspective-card-x, 0) + 1) * 50%)
+        calc((var(--perspective-card-y, 0) + 1) * 50%),
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0) 45%
+    );
+  }
+}
+
+.perspective-card--over .card-art--a-front::after {
+  opacity: 1;
+}
+
+// The library's .perspective-card__shine overlay sits at translateZ(0.5px) in
+// the card's preserve-3d space, so it paints in front of this front face (Z 0)
+// and masks the glare above. Lift this card's front face just past the shine
+// so the ::after specular reads. Scoped with :has() so the other demo cards
+// keep the library's default shine stacking.
+.perspective-card__artwork--front:has(.card-art--a-front) {
+  transform: translateZ(0.6px);
 }
 
 .card-art--a-back {
@@ -158,10 +193,12 @@ body {
 }
 
 // ─── Custom foil (recipe) ─────────────────────────────────────────────────────
-// The card publishes --perspective-card-angle (tilt direction, radians) and
-// --perspective-card-tilt (tilt magnitude) on the element every animation
-// frame. This foil swings a rainbow gradient with the tilt angle, etched by
-// the SVG displacement filter defined in the card's markup.
+// The card publishes --perspective-card-angle (tilt direction, radians),
+// --perspective-card-tilt (tilt magnitude) and --perspective-card-x /
+// --perspective-card-y (the tilt in normalized card space, ~[-1, 1], 0 =
+// centre) on the element every animation frame. This foil swings a rainbow
+// gradient with the tilt angle (etched by the SVG displacement filter in the
+// markup) and adds a specular glare that follows --x / --y.
 
 .card-foil {
   height: 100%;
@@ -175,6 +212,23 @@ body {
   transform: translateZ(1px);
   width: 100%;
   z-index: 1;
+
+  // Specular glare anchored to the (normalized) pointer position. The card
+  // gives x / y as ~[-1, 1] with 0 at the centre; (var(--x) + 1) / 2 converts
+  // that to a 0–1 box coordinate for the gradient's centre. In ambient mode
+  // the values keep animating, so the glare drifts on its own.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: screen;
+    background: radial-gradient(
+      circle at calc((var(--perspective-card-x, 0) + 1) * 50%)
+        calc((var(--perspective-card-y, 0) + 1) * 50%),
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0) 35%
+    );
+  }
 }
 
 .card-foil__gradient {

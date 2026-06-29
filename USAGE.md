@@ -145,13 +145,18 @@ a button.
 While animating, the card publishes its tilt as CSS custom properties on the
 card element, updated every animation frame:
 
-| Property                   | Value                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `--perspective-card-angle` | The direction of the tilt, in radians (e.g. `1.62rad`). Matches the angle used for the shine gradient. |
-| `--perspective-card-tilt`  | The magnitude of the tilt, unitless. `0` when the card is flat, larger as it tilts further.            |
+| Property                   | Value                                                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `--perspective-card-angle` | The direction of the tilt, in radians (e.g. `1.62rad`). Matches the angle used for the shine gradient.                       |
+| `--perspective-card-tilt`  | The magnitude of the tilt, unitless. `0` when the card is flat, larger as it tilts further.                                  |
+| `--perspective-card-x`     | The tilt in normalized card space on the X axis, unitless. `~[-1, 1]` with `0` at the centre; in pointer mode it tracks the normalized pointer position. |
+| `--perspective-card-y`     | The tilt in normalized card space on the Y axis, unitless. `~[-1, 1]` with `0` at the centre; in pointer mode it tracks the normalized pointer position. |
 
 These let you drive your own per-frame effects — holographic foils, glints,
 texture shifts — from pure CSS on any element you place inside the card.
+`--x` / `--y` are the Cartesian form of `--angle` / `--tilt` (so you don't need
+`sin()` / `cos()` in CSS); `calc((var(--perspective-card-x) + 1) / 2)` converts
+to a `0–1` box coordinate for `background-position` or `radial-gradient(at …)`.
 
 ### Recipe: holographic foil
 
