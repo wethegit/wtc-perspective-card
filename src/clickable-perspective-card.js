@@ -194,15 +194,18 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   updatePosition() {
     super.updatePosition()
 
-    // When fully open, re-centre in the current viewport after resize or scroll
+    // When fully open, re-anchor on the open target after resize or scroll (the
+    // target - viewport centre by default, or a moved layout slot - is
+    // recomputed live by openTargetRect).
     if (
       this.enlarged &&
       this.element.classList.contains(CSSCLASSES.open)
     ) {
       const w = parseFloat(this.element.style.width)
       const h = parseFloat(this.element.style.height)
-      this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
-      this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
+      const target = this.openTargetRect
+      this.element.style.left = `${target.left + target.width * 0.5 - w * 0.5}px`
+      this.element.style.top = `${target.top + target.height * 0.5 - h * 0.5}px`
     }
   }
 
@@ -371,6 +374,44 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   /**
+   * (overridable) The on-screen rectangle the card animates to when it opens —
+   * the final visual position and size of the enlarged card, in viewport
+   * coordinates. The base card fills 70% of the smaller viewport axis, centred
+   * in the viewport.
+   *
+   * Override this to land the card somewhere other than the viewport centre
+   * (e.g. a column slot inside a custom dialog). The open tween, the open-end
+   * pin, the close tween's start frame and the resize re-position all derive
+   * from this single rect, so one override redirects the whole animation.
+   *
+   * Getter-only by design: the target is recomputed on every access (the slot
+   * can move on resize/scroll), so there's no stored rect to assign — override
+   * the getter to change where the card lands.
+   *
+   * @type {{left: Number, top: Number, width: Number, height: Number}}
+   */
+  get openTargetRect() {
+    const w0 = this.startingDimensions[0]
+    const h0 = this.startingDimensions[1]
+    const fscale = 0.7
+    // Scale up to 70% of the viewport width *or* height, whichever is smaller.
+    const screenRatio = window.innerWidth / window.innerHeight
+    const cardRatio = w0 / h0
+    const scale =
+      screenRatio < cardRatio
+        ? (window.innerWidth * fscale) / w0
+        : (window.innerHeight * fscale) / h0
+    const width = w0 * scale
+    const height = h0 * scale
+    return {
+      left: window.innerWidth * 0.5 - width * 0.5,
+      top: window.innerHeight * 0.5 - height * 0.5,
+      width,
+      height
+    }
+  }
+
+  /**
    * End-of-tween handler for an open. Converts the CSS scale() to real
    * dimensions so the browser renders at the actual display size rather than
    * upscaling a small raster (this also fixes SVG filter blurriness, since
@@ -385,10 +426,17 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     const w = this.startingDimensions[0] * scale
     const h = this.startingDimensions[1] * scale
 
+    // Pin to the real (scaled) size, centred on the open target. Using the
+    // current screenScale (not the exact target) keeps this continuous with the
+    // last tween frame; centring on openTargetRect keeps it target-aware.
+    const target = this.openTargetRect
+    const cx = target.left + target.width * 0.5
+    const cy = target.top + target.height * 0.5
+
     this.element.style.width = `${w}px`
     this.element.style.height = `${h}px`
-    this.element.style.left = `${window.innerWidth * 0.5 - w * 0.5}px`
-    this.element.style.top = `${window.innerHeight * 0.5 - h * 0.5}px`
+    this.element.style.left = `${cx - w * 0.5}px`
+    this.element.style.top = `${cy - h * 0.5}px`
     this.element.style.transform = 'none'
     this._screenScale = 1
 
@@ -633,25 +681,19 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.startingScale = 1
       // current scale
       this.screenScale = 1
-      let fscale = 0.7
-      // Then we need to determine the target position based on the ratio of the screen to the card
-      // This basically ensures that we scale up to 70% width *or* 70% height. Whichever is smaller
-      const screenRatio = window.innerWidth / window.innerHeight
-      const cardRatio = this.startingDimensions[0] / this.startingDimensions[1]
-      if (screenRatio < cardRatio) {
-        const width = window.innerWidth * fscale
-        this.targetScale = width / this.startingDimensions[0]
-      } else {
-        const height = window.innerHeight * fscale
-        this.targetScale = height / this.startingDimensions[1]
-      }
-
       // Current position
       this.screenPosition = [viewportOffset.left, viewportOffset.top]
-      // End position
+
+      // The target geometry comes from openTargetRect (overridable), so the
+      // card can be landed anywhere - the viewport centre by default, or e.g. a
+      // column slot in a custom dialog. Derive the tween's scale and the
+      // unscaled-box top-left from that visual rect: the card scales about its
+      // centre, so its box centre must end up at the target rect's centre.
+      const target = this.openTargetRect
+      this.targetScale = target.width / this.startingDimensions[0]
       this.targetPosition = [
-        window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5,
-        window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5
+        target.left + (target.width - this.startingDimensions[0]) * 0.5,
+        target.top + (target.height - this.startingDimensions[1]) * 0.5
       ]
 
       // Set up the rotation. The flip is a function of tweenTime, so reversing
@@ -697,8 +739,12 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.element.style.transform = `scale(${resolvedScale})`
       this.element.style.width = `${this.startingDimensions[0]}px`
       this.element.style.height = `${this.startingDimensions[1]}px`
-      this.element.style.left = `${window.innerWidth * 0.5 - this.startingDimensions[0] * 0.5}px`
-      this.element.style.top = `${window.innerHeight * 0.5 - this.startingDimensions[1] * 0.5}px`
+      // Re-anchor the unscaled box (scaled about its centre) on the open
+      // target's centre, so the close tween starts from where the card actually
+      // sits rather than snapping to the viewport centre first.
+      const openTarget = this.openTargetRect
+      this.element.style.left = `${openTarget.left + openTarget.width * 0.5 - this.startingDimensions[0] * 0.5}px`
+      this.element.style.top = `${openTarget.top + openTarget.height * 0.5 - this.startingDimensions[1] * 0.5}px`
 
       // Initialise our tween timing variables
       this.tweening = true

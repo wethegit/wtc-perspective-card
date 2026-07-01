@@ -272,3 +272,33 @@ cardElement.addEventListener('perspectivecard:play', (e) => {
 | `perspectivecard:opened` | The open animation finishes and the card is fully displayed.            |
 | `perspectivecard:close`  | The card starts its close animation (tween begins).                     |
 | `perspectivecard:closed` | The close animation finishes and the card is back in the document flow. |
+
+## Extending
+
+### Where the card opens (`openTargetRect`)
+
+`ClickablePerspectiveCard` exposes an overridable getter, `openTargetRect`, that
+returns the on-screen rectangle the enlarged card animates to — its final
+visual position and size in viewport coordinates:
+
+```javascript
+get openTargetRect() // → { left, top, width, height }
+```
+
+By default it centres the card in the viewport at 70% of the smaller viewport
+axis. The open tween, the open-end pin, the close tween's start frame and the
+resize re-position all derive from this single rect, so overriding it in a
+subclass redirects the whole animation — e.g. to land the card in a column
+beside other content instead of dead centre. It's getter-only by design: the
+target is recomputed on every access (the destination can move on
+resize/scroll), so override the computation rather than assigning a value.
+
+### Custom dialog + two-column layout
+
+The library moves the open card into a single shared `<dialog>` by default. To
+let the card share its modal with your own content, subclass the card, override
+the `dialog` getter to return your own `<dialog>` element (attaching the same
+delegated listeners the base class uses), and override `openTargetRect` to
+target a slot inside it. See `demo/custom-modal-card.js` for a complete,
+commented example that opens the card into a two-column dialog (card on one
+side, a content panel on the other, stacking on narrow screens).
