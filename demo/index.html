@@ -191,7 +191,66 @@
           card rests back-to-camera and flips to reveal its face on open.
         </p>
       </div>
+
+      <!-- Custom dialog -->
+      <div class="demo-item">
+        <div class="demo-item__label">Custom dialog</div>
+        <div
+          class="perspective-card js-card--custom-modal"
+          data-ambient="2"
+          data-button-label="Expand info card"
+          data-dialog="#info-modal"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--e-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--e-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          Opens into a custom <code>&lt;dialog&gt;</code> supplied in the markup
+          (<code>data-dialog</code>), so the enlarged card shares its modal with
+          a content panel.
+        </p>
+      </div>
     </main>
+
+    <!--
+      A custom dialog for the "Custom dialog" card above. The CustomModalCard
+      subclass (demo/custom-modal-card.js) moves the card into this element on
+      open instead of the library's shared dialog, so the card can sit alongside
+      this panel. The component adds the perspective-card__dialog class and the
+      delegated listeners itself; everything inside is ours.
+    -->
+    <dialog id="info-modal">
+      <div class="custom-modal__layout">
+        <!--
+          Empty placeholder that reserves the card's landing area in the
+          layout. CustomModalCard reads this slot's rect (via its openTargetRect
+          override) and animates the card to fill it, so the card lands in this
+          column and the panel sits beside it.
+        -->
+        <div class="custom-modal__slot" aria-hidden="true"></div>
+        <aside class="custom-modal__panel">
+          <p class="custom-modal__eyebrow">Featured card</p>
+          <h2 class="custom-modal__title">Abyssal Wanderer</h2>
+          <p class="custom-modal__body">
+            A custom dialog lets the card share its modal with arbitrary
+            content — copy, metadata, calls to action. The card still flies in
+            and flips as usual; everything around it is your own markup and CSS.
+          </p>
+          <a class="custom-modal__cta" href="#">Learn more ↗</a>
+        </aside>
+      </div>
+    </dialog>
 
     <script type="module" src="./main.js"></script>
   </body>
