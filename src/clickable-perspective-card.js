@@ -867,13 +867,14 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    * @default false
    */
   set tweening(value) {
-    if (value !== this._tweening) {
+    const tweening = value === true
+    if (tweening !== this._tweening) {
       this._tweenBuffer = true
       setTimeout(() => {
         this._tweenBuffer = false
       }, 1000)
     }
-    this._tweening = value === true
+    this._tweening = tweening
   }
   get tweening() {
     return this._tweening === true
@@ -958,7 +959,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
    * (getter/setter) The card's current scale value.
    *
    * @type {Number}
-   * @default 0
+   * @default 1
    */
   set screenScale(value) {
     if (!isNaN(value)) {

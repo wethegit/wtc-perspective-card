@@ -283,17 +283,11 @@ export class PerspectiveCard {
     const len = Math.hypot(this.lookPoint[0], this.lookPoint[1])
 
     // Transform the transformer element using the calculated values
-    const matrix = `matrix3d(${worldMatrix[0]},${worldMatrix[1]},${worldMatrix[2]},${worldMatrix[3]},${worldMatrix[4]},${worldMatrix[5]},${worldMatrix[6]},${worldMatrix[7]},${worldMatrix[8]},${worldMatrix[9]},${worldMatrix[10]},${worldMatrix[11]},${worldMatrix[12]},${worldMatrix[13]},${worldMatrix[14]},${worldMatrix[15]})`
-    this.transformer.style.transform = matrix
+    this.transformer.style.transform = `matrix3d(${worldMatrix.join(',')})`
 
     // Draw the gradient using the polar coordinates.
-    this.shine.style.background = `linear-gradient(${angle}rad, rgba(255,255,255,${Math.max(
-      0.01,
-      Math.abs(len * 0.002)
-    )}) 0%, rgba(255,255,255,${Math.max(
-      0.01,
-      Math.abs(len * 0.002)
-    )}) 5%, rgba(255,255,255,0) 80%)`
+    const shineAlpha = Math.max(0.01, Math.abs(len * 0.002))
+    this.shine.style.background = `linear-gradient(${angle}rad, rgba(255,255,255,${shineAlpha}) 0%, rgba(255,255,255,${shineAlpha}) 5%, rgba(255,255,255,0) 80%)`
 
     // The tilt in normalized card space: the Cartesian form of the polar
     // values above, relative to the card centre. ~[-1, 1] across the card
@@ -841,5 +835,11 @@ export class PerspectiveCard {
         1
       ]
     }
+
+    // No silent undefined - a malformed vector would otherwise surface as
+    // `matrix3d(undefined)` far from the actual mistake.
+    throw new TypeError(
+      'targetTo requires eye, target and up to be vec3-like (length >= 3)'
+    )
   }
 }
