@@ -436,9 +436,6 @@ export class PerspectiveCard {
 
   updatePosition() {
     const pos = this.element.getBoundingClientRect()
-    if (this.enlarged === false) {
-      this.startingDimensions = [pos.width, pos.height]
-    }
     this.position = [pos.left, pos.top]
     this.size = [pos.width, pos.height]
     this.axis = [

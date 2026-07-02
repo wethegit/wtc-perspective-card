@@ -215,6 +215,13 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   updatePosition() {
     super.updatePosition()
 
+    // Record the card's natural (non-modal) dimensions - the open/close tween
+    // math and openTargetRect scale relative to these. Owned here rather than
+    // in the base class because only the modal tween needs it.
+    if (this.enlarged === false) {
+      this.startingDimensions = [this.size[0], this.size[1]]
+    }
+
     // When fully open, re-anchor on the open target after resize or scroll (the
     // target - viewport centre by default, or a moved layout slot - is
     // recomputed live by openTargetRect).
