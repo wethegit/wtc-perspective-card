@@ -5,11 +5,20 @@
     "type": "git",
     "url": "git+https://github.com/wethegit/wtc-perspective-card.git"
   },
-  "author": "Liam Egan <liam@wethecollectibe.com>",
+  "author": "Liam Egan <liam@wethecollective.com>",
   "license": "MIT",
   "main": "dist/wtc-perspective-card.umd.js",
   "module": "dist/wtc-perspective-card.js",
   "style": "dist/wtc-perspective-card.css",
+  "exports": {
+    ".": {
+      "import": "./dist/wtc-perspective-card.js",
+      "require": "./dist/wtc-perspective-card.umd.js"
+    },
+    "./style.css": "./dist/wtc-perspective-card.css",
+    "./dist/*": "./dist/*"
+  },
+  "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": "vite build --mode lib && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
