@@ -586,7 +586,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.playing = false
     }
 
-    setTimeout(() => {
+    clearTimeout(this._restTimer)
+    this._restTimer = setTimeout(() => {
       this.transformer.style.transform = this.restTransform
     }, 100)
   }
