@@ -342,7 +342,7 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     // Opening: the buffer prevents an instant re-open immediately after a close.
     if (this._tweenBuffer === true) return
 
-    this.resize(null, true)
+    // The enlarged setter forces a fresh measure itself, so no resize here.
     this.enlarged = true
   }
 
@@ -633,6 +633,13 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
 
     // Whether we were enlarged already
     const wasEnlarged = this.enlarged
+
+    // Make sure the geometry is fresh before the tween math reads it - the
+    // constructor's initial measure is debounced, so a programmatic open right
+    // after construction would otherwise read undefined startingDimensions.
+    // This must run before _enlarged flips: updatePosition only captures
+    // startingDimensions while un-enlarged.
+    if (value === true && wasEnlarged === false) this.resize(null, true)
 
     // Set the value
     this._enlarged = value === true
