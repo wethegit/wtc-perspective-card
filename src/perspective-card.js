@@ -160,13 +160,39 @@ export class PerspectiveCard {
       this.observer = new IntersectionObserver(this.hideIntersect, {
         rootMargin: '100px'
       })
-      setTimeout(() => {
+      this._observerTimer = setTimeout(() => {
         this.observer.observe(this.element.parentNode)
       }, 0)
     }
 
     // Initial resize to find the location and dimensions of the element
     this.resize()
+  }
+
+  /**
+   * Tears the card down: removes all window and element listeners, disconnects
+   * the intersection observer and cancels any pending timers, allowing the
+   * instance (and its element) to be garbage collected. The card is inert
+   * afterwards - create a new instance to reactivate it.
+   *
+   * @public
+   */
+  destroy() {
+    this.playing = false
+    this.pointerControlled = false // removes the window pointermove listener
+    clearTimeout(this.debounceTimer)
+    clearTimeout(this._restTimer)
+    clearTimeout(this._observerTimer)
+    window.removeEventListener('resize', this.resize)
+    window.removeEventListener('scroll', this.resize)
+    this.element.removeEventListener('pointerenter', this.pointerEnter)
+    this.element.removeEventListener('pointerleave', this.pointerLeave)
+    this.element.removeEventListener('touchstart', this.touchStart)
+    this.element.removeEventListener('touchend', this.touchEnd)
+    if (this.observer) {
+      this.observer.disconnect()
+      this.observer = null
+    }
   }
 
   /**
