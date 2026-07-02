@@ -185,8 +185,10 @@ export class PerspectiveCard {
       requestAnimationFrame(this.play)
     }
 
-    // Set the last frame time in order to derive the sensible delta
-    this.lastFrameTime = Math.max(16, Math.min(32, delta - this.lastDelta))
+    // Set the last frame time in order to derive the sensible delta. Real
+    // frame durations are used so animation speed doesn't scale with the
+    // display's refresh rate; the 50ms cap absorbs tab-switch/hitch spikes.
+    this.lastFrameTime = Math.max(1, Math.min(50, delta - this.lastDelta))
 
     if (this.motionOff) {
       return
@@ -195,8 +197,10 @@ export class PerspectiveCard {
     this.lastDelta = delta
     this.delta += this.lastFrameTime
 
-    // Set the divisor for animations based on the last frame time
-    let divisor = 1 / this.lastFrameTime
+    // Frame-rate-independent damping factor for the zoom / look-point lerps:
+    // two 8ms steps move exactly as far as one 16ms step. k = 0.008 is tuned
+    // to match the pre-existing feel at 60Hz (~0.12 per 16.7ms frame).
+    const damp = 1 - Math.exp(-0.008 * this.lastFrameTime)
 
     // If this element is not pointer controlled then we want to animate
     // the ambient target point value around somehow. Here we use a simple
@@ -216,7 +220,7 @@ export class PerspectiveCard {
       this.center = [
         this.center[0],
         this.center[1],
-        this.center[2] + (this.zoom - this.center[2]) * (divisor * 2)
+        this.center[2] + (this.zoom - this.center[2]) * damp
       ]
     }
 
@@ -227,11 +231,9 @@ export class PerspectiveCard {
     // unecessary calculation) here.
     if (this._lookDifferential > 2) {
       this.lookPoint = [
-        this.lookPoint[0] +
-          (this.tPoint[0] - this.lookPoint[0]) * (divisor * 2),
-        this.lookPoint[1] +
-          (this.tPoint[1] - this.lookPoint[1]) * (divisor * 2),
-        this.lookPoint[2] + (this.tPoint[2] - this.lookPoint[2]) * (divisor * 2)
+        this.lookPoint[0] + (this.tPoint[0] - this.lookPoint[0]) * damp,
+        this.lookPoint[1] + (this.tPoint[1] - this.lookPoint[1]) * damp,
+        this.lookPoint[2] + (this.tPoint[2] - this.lookPoint[2]) * damp
       ]
     }
 
