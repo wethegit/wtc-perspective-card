@@ -161,7 +161,14 @@ export class PerspectiveCard {
         rootMargin: '100px'
       })
       this._observerTimer = setTimeout(() => {
-        this.observer.observe(this.element.parentNode)
+        if (this.element.parentNode) {
+          this.observer.observe(this.element.parentNode)
+        } else {
+          // Constructed detached: there's no parent to watch, so fail open
+          // rather than leaving the card display:none forever. The card just
+          // loses the offscreen-hide optimisation.
+          this.element.classList.remove(CSSCLASSES.intersectionOff)
+        }
       }, 0)
     }
 
