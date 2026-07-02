@@ -545,6 +545,17 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
     }
     this._placeholder = null
 
+    // Resume the observer paused on open, now that the card is back in its
+    // slot. Re-observing fires the callback with the current intersection
+    // state, so an offscreen slot re-hides the card (hover-only) or re-pauses
+    // the animation (ambient) correctly.
+    if (this._wasAmbient < 0) {
+      if (this.element.parentNode)
+        this.observer.observe(this.element.parentNode)
+    } else {
+      this.observer.observe(this.element)
+    }
+
     this.element.classList.remove(CSSCLASSES.modal)
     this.element.classList.remove(CSSCLASSES.open)
     this.element.style.position = ''
@@ -612,6 +623,18 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       // This makes it so that, when the card is enlarged that it runs ambiently by default
       this._wasAmbient = this.ambient
       this.ambient = 0
+
+      // Both observer flavours from the base constructor are hazardous while
+      // the modal owns the card. The hide-observer (hover-only cards) watches
+      // the original slot and would display:none the open card when the slot
+      // scrolls offscreen. The play-observer (ambient cards) watches the card
+      // itself and would set playing=false as the close tween carries the card
+      // toward an offscreen slot - freezing the tween before it can close the
+      // dialog. Pause it while open; _teardownModal resumes it.
+      this.observer.disconnect()
+      if (this._wasAmbient < 0) {
+        this.element.classList.remove(CSSCLASSES.intersectionOff)
+      }
 
       // Insert a placeholder in the card's original slot so the layout is
       // maintained and we can read its current viewport position on close -
@@ -741,10 +764,16 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       this.element.style.height = `${this.startingDimensions[1]}px`
       // Re-anchor the unscaled box (scaled about its centre) on the open
       // target's centre, so the close tween starts from where the card actually
-      // sits rather than snapping to the viewport centre first.
+      // sits rather than snapping to the viewport centre first. This is
+      // recomputed from the live openTargetRect (not the open-time
+      // targetPosition), so a viewport resize while open can't make the first
+      // tween frame jump. Assigning screenPosition writes left/top.
       const openTarget = this.openTargetRect
-      this.element.style.left = `${openTarget.left + openTarget.width * 0.5 - this.startingDimensions[0] * 0.5}px`
-      this.element.style.top = `${openTarget.top + openTarget.height * 0.5 - this.startingDimensions[1] * 0.5}px`
+      this.startingPosition = [
+        openTarget.left + (openTarget.width - this.startingDimensions[0]) * 0.5,
+        openTarget.top + (openTarget.height - this.startingDimensions[1]) * 0.5
+      ]
+      this.screenPosition = this.startingPosition
 
       // Initialise our tween timing variables
       this.tweening = true
@@ -754,7 +783,6 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
       // Read the placeholder's current viewport position so the close tween
       // targets the right place even if the page was scrolled or resized while open.
       const placeholderOffset = this._placeholder.getBoundingClientRect()
-      this.startingPosition = this.targetPosition
       this.targetPosition = [placeholderOffset.left, placeholderOffset.top]
 
       // Set up our scaling properties. For fluid layouts the placeholder may
