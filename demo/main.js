@@ -1,6 +1,6 @@
-import { PerspectiveCard, ClickablePerspectiveCard } from '../src/index.js'
+import { PerspectiveCard, ClickablePerspectiveCard } from 'wtc-perspective-card'
 import { CustomModalCard } from './custom-modal-card.js'
-import '../src/wtc-perspective-card.scss'
+import 'wtc-perspective-card/style.css'
 import './demo.scss'
 
 document.querySelectorAll('.js-card').forEach((el) => new PerspectiveCard(el))

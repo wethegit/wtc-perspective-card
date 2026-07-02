@@ -1,7 +1,4 @@
-import {
-  ClickablePerspectiveCard,
-  CSSCLASSES
-} from '../src/clickable-perspective-card.js'
+import { ClickablePerspectiveCard, CSSCLASSES } from 'wtc-perspective-card'
 
 /**
  * Demo extension: a clickable card that opens into a *custom* `<dialog>`

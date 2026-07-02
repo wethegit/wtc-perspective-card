@@ -1,0 +1,14 @@
+{
+  "name": "demo",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "sass": "~1.101.0",
+    "vite": "^8.0.16",
+    "wtc-perspective-card": "workspace:*"
+  }
+}

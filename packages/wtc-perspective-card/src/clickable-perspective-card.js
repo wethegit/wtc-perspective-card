@@ -43,7 +43,7 @@ const easeInOutSine = function (time, start, change, duration) {
  * @created Jan 28, 2020
  * @extends PerspectiveCard
  */
-export class ClickablePerspectiveCard extends PerspectiveCard {
+class ClickablePerspectiveCard extends PerspectiveCard {
   /**
    * The settings schema for the clickable card. Resolved by
    * `PerspectiveCard.parseSettings` the same way as the base settings.
@@ -994,3 +994,8 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   // every card on the page. See the `dialog` getter.
   static _dialog = null
 }
+
+// Exported here rather than inline - jsdoc drops `export class` declarations
+// entirely (the class doclet becomes a member of itself), which silently
+// empties the generated API.md.
+export { ClickablePerspectiveCard }

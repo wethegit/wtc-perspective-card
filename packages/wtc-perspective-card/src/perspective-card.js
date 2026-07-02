@@ -37,7 +37,7 @@ export const CSSCLASSES = {
  * normalized pointer position) — so custom per-frame effects like holographic
  * foils can be driven from pure CSS on any element placed inside the card.
  */
-export class PerspectiveCard {
+class PerspectiveCard {
   /**
    * The settings schema. Each entry declares a setting's coercion `type` (a key
    * of `PerspectiveCard.coerce`) and its `default`. This is the single source
@@ -843,3 +843,8 @@ export class PerspectiveCard {
     )
   }
 }
+
+// Exported here rather than inline - jsdoc drops `export class` declarations
+// entirely (the class doclet becomes a member of itself), which silently
+// empties the generated API.md.
+export { PerspectiveCard }
