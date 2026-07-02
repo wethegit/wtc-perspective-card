@@ -352,6 +352,11 @@ export class PerspectiveCard {
   pointerEnter(e) {
     if (this.touching === true) return
 
+    // Cancel any pending snap-to-rest (scheduled by pointerLeave or a modal
+    // teardown) so re-entering within its 100ms window doesn't snap the card
+    // to rest mid-hover.
+    clearTimeout(this._restTimer)
+
     this.pointerControlled = true
     this.zoom = this.zoomSize
     this.element.classList.add(CSSCLASSES.over)
@@ -375,7 +380,8 @@ export class PerspectiveCard {
 
     if (this.ambient < 0) {
       this.playing = false
-      setTimeout(() => {
+      clearTimeout(this._restTimer)
+      this._restTimer = setTimeout(() => {
         this.transformer.style.transform = this.restTransform
         this.shine.style.background = `none`
       }, 100)
