@@ -139,6 +139,27 @@ export class ClickablePerspectiveCard extends PerspectiveCard {
   }
 
   /**
+   * Tears the clickable card down. If this card currently holds the modal it
+   * is force-closed and cleaned up first, then the trigger button's listener
+   * and everything the base card registered are removed. The shared dialog is
+   * deliberately left in the DOM (other cards may be using it, and its
+   * delegating listeners hold no card references once no card is active), as
+   * is the trigger button.
+   *
+   * @public
+   */
+  destroy() {
+    if (ClickablePerspectiveCard._activeCard === this) {
+      this.tweening = false
+      this._enlarged = false
+      this.dialog.close()
+      this._teardownModal() // guarded by _modalActive, so it runs exactly once
+    }
+    this.button.removeEventListener('click', this.onButtonClick)
+    super.destroy()
+  }
+
+  /**
    * (getter) The shared modal dialog. A single `<dialog>` is created lazily
    * on first open and reused by every card on the page - only one card can be
    * open at a time (enforced by `_activeCard`). Keeping one persistent element
