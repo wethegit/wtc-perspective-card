@@ -1,6 +1,4 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
+# Publishes the library package to npm when its source changes on master.
 name: Publish NPM
 
 on:
@@ -8,7 +6,7 @@ on:
     branches:
       - master
     paths:
-      - src/**
+      - packages/wtc-perspective-card/**
 
 jobs:
   publish:
@@ -17,21 +15,27 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup python
-        uses: actions/setup-python@v5
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org/
+          cache: 'pnpm'
 
-      - run: npm install
+      - run: pnpm install --frozen-lockfile
+
       # Publish prereleases (e.g. 3.0.0-beta.0) under their own dist-tag (beta)
       # instead of `latest`, so `npm install <pkg>` keeps returning the last
       # stable. Stable versions (no prerelease suffix) resolve to `latest`.
       - name: Resolve dist-tag from version
         id: disttag
-        run: echo "tag=$(node -p "(require('./package.json').version.split('-')[1]||'latest').split('.')[0]")" >> "$GITHUB_OUTPUT"
-      - run: npm publish --access public --tag ${{ steps.disttag.outputs.tag }}
+        run: echo "tag=$(node -p "(require('./packages/wtc-perspective-card/package.json').version.split('-')[1]||'latest').split('.')[0]")" >> "$GITHUB_OUTPUT"
+
+      # prepublishOnly builds dist; --no-git-checks is needed because
+      # actions/checkout leaves a detached HEAD, which pnpm's git checks reject.
+      - name: Publish
+        run: pnpm --filter wtc-perspective-card publish --access public --tag ${{ steps.disttag.outputs.tag }} --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

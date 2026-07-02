@@ -1,0 +1,49 @@
+{
+  "name": "wtc-perspective-card",
+  "version": "3.0.0-beta.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wethegit/wtc-perspective-card.git",
+    "directory": "packages/wtc-perspective-card"
+  },
+  "author": "Liam Egan <liam@wethecollective.com>",
+  "license": "MIT",
+  "main": "dist/wtc-perspective-card.umd.js",
+  "module": "dist/wtc-perspective-card.js",
+  "style": "dist/wtc-perspective-card.css",
+  "exports": {
+    ".": "./src/index.js",
+    "./style.css": "./src/wtc-perspective-card.scss",
+    "./dist/*": "./dist/*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/wtc-perspective-card.js",
+        "require": "./dist/wtc-perspective-card.umd.js"
+      },
+      "./style.css": "./dist/wtc-perspective-card.css",
+      "./dist/*": "./dist/*"
+    }
+  },
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
+    "prepublishOnly": "pnpm run build",
+    "document": "{ echo '# API reference'; echo; echo '> Generated from the source JSDoc by `pnpm document` - do not edit by hand.'; echo; jsdoc2md src/perspective-card.js src/clickable-perspective-card.js; } > API.md"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "jsdoc-to-markdown": "^9.1.3",
+    "sass": "~1.101.0",
+    "vite": "^8.0.16"
+  }
+}
