@@ -31,8 +31,11 @@ Both classes read configuration from data attributes on the card element. Attrib
 
 `ClickablePerspectiveCard` is operated through a real `<button>` element that
 invisibly covers the card — all activation (mouse, touch, keyboard and
-assistive technology) runs through it. If your markup doesn't include one,
-the component creates it for you:
+assistive technology) runs through it. The component places the button inside
+the card's transformer (moving it there if you supplied your own), so it
+tilts with the card and the clickable area always matches the card as
+rendered rather than its untransformed bounds. If your markup doesn't
+include a button, the component creates it for you:
 
 ```html
 <button
@@ -69,6 +72,15 @@ new ClickablePerspectiveCard(element, {
     <button type="button" class="perspective-card__button" aria-label="Expand">
       <span class="my-badge" aria-hidden="true">View ↗</span>
     </button>
+    ```
+    Because the button lives inside the card's 3D space, on a *start-flipped*
+    card (which rests rotated 180°) visible button content faces away from the
+    viewer. Counter-rotate it so it reads while the card is face-down — the
+    flip and the rotation cancel out:
+    ```css
+    [data-start-flipped] .my-badge {
+      transform: rotateY(180deg) translateZ(70px);
+    }
     ```
   - **Rich accessible name** — the auto-created button uses a plain
     `aria-label`. If you need `aria-labelledby`, an SVG `<title>`, or a more
@@ -134,7 +146,7 @@ texture:
             height="180%"
           >
             <feImage
-              href="./assets/etch.png"
+              href="./assets/etch.webp"
               result="etch"
               preserveAspectRatio="xMidYMid slice"
               x="0"
@@ -172,6 +184,13 @@ Then swing a gradient with the card's tilt:
   pointer-events: none;
   transform: translateZ(1px);
   z-index: 1;
+
+  /* Optional - confine the foil to parts of the artwork with a greyscale
+     mask (white = full foil, black = none). mask-mode: luminance is required
+     for an opaque image, which would otherwise pass the alpha mask fully. */
+  mask-image: url('./assets/mask.webp');
+  mask-mode: luminance;
+  mask-size: 100% 100%;
 }
 
 .card-foil__gradient {
