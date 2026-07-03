@@ -166,6 +166,15 @@ $card-faces: (
     #1a1400,
     #0e0c00
   ),
+  // Foil - image-artwork card's back (deep navy, electric echo of the front)
+  'foil-back': (
+      50% 28%,
+      rgba(90, 140, 255, 0.5),
+      50% 82%,
+      rgba(40, 80, 200, 0.4),
+      #0a1440,
+      #050a24
+    ),
   // D - custom button (deep-sea teal -> green/navy)
   'd-front': (
       40% 30%,
@@ -225,6 +234,42 @@ $card-faces: (
         transparent 50%
       ),
       linear-gradient(155deg, list.nth($face, 5) 0%, list.nth($face, 6) 100%);
+  }
+}
+
+// The foil card's front is an image (734x1024), so its back must match that
+// ratio exactly - the shared 5 / 7 is a couple of pixels short and would let
+// the front peek past the edge mid-flip. Dressed with an inset frame and a
+// central gold orb so it reads as a trading-card back.
+.card-art--foil-back {
+  aspect-ratio: 734 / 1024;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: calc(var(--radius) - 6px);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    background:
+      radial-gradient(
+        circle at 35% 30%,
+        rgba(255, 255, 255, 0.35),
+        transparent 45%
+      ),
+      linear-gradient(160deg, #ffd94d 0%, #f7a940 50%, #b86a1e 100%);
+    box-shadow: 0 0 40px rgba(255, 200, 80, 0.35);
   }
 }
 
@@ -478,5 +523,207 @@ $card-faces: (
   &:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 3px;
+  }
+}
+
+// ─── Markup viewer (demo chrome) ──────────────────────────────────────────────
+// Injected by markup-dialog.js: a button under each demo opens a dialog with
+// the card's authored markup and a glossary of which parts are the library's
+// contract and which are userland. Library tokens tint purple, userland teal -
+// the same pair used by the legend chips.
+
+$markup-library: #a89bff;
+$markup-userland: #5fe3c0;
+
+.demo-item__markup-button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0.9rem;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    color: var(--text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+// Fullscreen: the dialog covers the viewport (so there's no visible backdrop)
+// and the content sits in a centred column for a comfortable reading measure.
+.markup-modal {
+  background: var(--surface);
+  border: none;
+  color: var(--text);
+  height: 100dvh;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  overflow: auto;
+  padding: 2.5rem clamp(1rem, 6vw, 4rem) 3.5rem;
+  width: 100dvw;
+
+  > * {
+    margin-inline: auto;
+    max-width: 720px;
+  }
+
+  // Fade in and out; allow-discrete keeps display: none from cutting the
+  // close fade short (same pattern as the library dialog's backdrop).
+  opacity: 1;
+  transition:
+    opacity 0.2s ease,
+    display 0.2s allow-discrete,
+    overlay 0.2s allow-discrete;
+
+  &:not(:open) {
+    opacity: 0;
+  }
+}
+
+@starting-style {
+  .markup-modal:open {
+    opacity: 0;
+  }
+}
+
+.markup-modal__header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+
+.markup-modal__title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+// Pinned to the viewport corner (the same spot as the library's own modal
+// close button) so it stays reachable while the dialog scrolls.
+.markup-modal__close {
+  appearance: none;
+  background: rgba(22, 22, 31, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: grid;
+  flex: none;
+  height: 2.5rem;
+  place-items: center;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  width: 2.5rem;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.markup-modal__legend {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.markup-modal__chip {
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+
+  &--library {
+    background: rgba(124, 106, 247, 0.16);
+    color: $markup-library;
+  }
+
+  &--userland {
+    background: rgba(63, 214, 175, 0.12);
+    color: $markup-userland;
+  }
+}
+
+.markup-modal__subhead {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.markup-modal__code {
+  background: var(--bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  padding: 1rem;
+
+  .mk-lib {
+    color: $markup-library;
+  }
+
+  .mk-user {
+    color: $markup-userland;
+  }
+}
+
+.markup-modal__entry {
+  padding: 0.6rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  dt {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+
+    code {
+      color: var(--text);
+    }
+  }
+
+  dd {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+
+    code {
+      font-size: 0.9em;
+    }
   }
 }
