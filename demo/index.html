@@ -163,6 +163,7 @@
               class="perspective-card__artwork perspective-card__artwork--back"
             >
               <div class="card-art card-art--foil-back"></div>
+              <div class="perspective-card__shine"></div>
             </div>
             <div class="perspective-card__shine"></div>
           </div>
@@ -232,7 +233,11 @@
       </div>
     </dialog>
 
-    <!-- The etch displacement filter used by the holographic foil card. -->
+    <!--
+      The etch displacement filter used by the holographic foil card. Vite
+      doesn't rewrite feImage hrefs, so etch.webp lives in public/assets/
+      (copied into the build verbatim) rather than assets/ with the others.
+    -->
     <svg width="0" height="0" aria-hidden="true">
       <defs>
         <filter
