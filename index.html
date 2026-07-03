@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wtc-perspective-card</title>
+    <script type="module" crossorigin src="/wtc-perspective-card/assets/index-DeqR0Hh8.js"></script>
+    <link rel="stylesheet" crossorigin href="/wtc-perspective-card/assets/index-CO7A_PcU.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="site-header__title">wtc-perspective-card</h1>
+      <p class="site-header__desc">
+        A vanilla JS perspective card with hover, ambient, and clickable modes.
+      </p>
+      <p class="site-header__links">
+        <a href="https://github.com/wethegit/wtc-perspective-card">GitHub</a>
+        <span aria-hidden="true">·</span>
+        <a
+          href="https://github.com/wethegit/wtc-perspective-card/blob/master/packages/wtc-perspective-card/USAGE.md"
+          >Docs</a
+        >
+      </p>
+    </header>
+
+    <!--
+      Every demo below uses the same card pattern - configuration varies only
+      through the data-* attributes on the root:
+
+        .perspective-card                 component root
+          .perspective-card__transformer
+            .perspective-card__artwork--front
+            .perspective-card__artwork--back
+            .perspective-card__shine
+
+      main.js instantiates each card by its js-* class, and markup-dialog.js
+      injects a "View markup" button under each demo that opens this markup,
+      annotated, in a dialog.
+    -->
+    <main class="demo-grid">
+      <section class="demo-item">
+        <h2 class="demo-item__label">Hover</h2>
+        <div class="perspective-card js-card">
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--a-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--a-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">Tilts toward the cursor on hover.</p>
+      </section>
+
+      <section class="demo-item">
+        <h2 class="demo-item__label">Ambient</h2>
+        <div class="perspective-card js-card" data-ambient>
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--b-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--b-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          <code>data-ambient</code>: animates continuously while in view.
+        </p>
+      </section>
+
+      <section class="demo-item">
+        <h2 class="demo-item__label">Clickable</h2>
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+          data-button-label="Expand card"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--c-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--c-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          Flips and zooms into a modal. Click or Enter opens; Esc closes.
+        </p>
+      </section>
+
+      <!--
+        Holographic foil recipe: .card-foil is extra markup layered into the
+        card, driven from the CSS custom properties the card publishes each
+        frame (see demo.scss). The displacement filter it references is
+        defined once, at the bottom of the page.
+      -->
+      <section class="demo-item">
+        <h2 class="demo-item__label">Holographic foil</h2>
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+          data-button-label="Expand holographic card"
+          data-duration="1200"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <img src="/wtc-perspective-card/assets/matte-DZGPqBU5.png" alt="Pikachu trading card" />
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--foil-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+            <div class="card-foil" aria-hidden="true">
+              <div class="card-foil__gradient"></div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          A custom foil over image artwork, swung by the tilt custom properties
+          the card publishes.
+        </p>
+      </section>
+
+      <!--
+        A button already in the markup is used instead of the auto-created
+        one - here to add a visible "View" badge (aria-hidden, so the button
+        keeps its own accessible label).
+      -->
+      <section class="demo-item">
+        <h2 class="demo-item__label">Custom button</h2>
+        <div
+          class="perspective-card js-card--clickable"
+          data-ambient="2"
+          data-start-flipped
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <img src="/wtc-perspective-card/assets/matte2-CnhSyild.png" alt="Pikachu VMAX trading card" />
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--foil-back"></div>
+              <div class="perspective-card__shine"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+          <button
+            type="button"
+            class="perspective-card__button"
+            aria-label="Expand deep-sea card"
+          >
+            <span class="card-badge" aria-hidden="true">View ↗</span>
+          </button>
+        </div>
+        <p class="demo-item__desc">
+          Brings its own button, and rests face-down
+          (<code>data-start-flipped</code>) until opened.
+        </p>
+      </section>
+
+      <section class="demo-item">
+        <h2 class="demo-item__label">Custom dialog</h2>
+        <div
+          class="perspective-card js-card--custom-modal"
+          data-ambient="2"
+          data-button-label="Expand info card"
+          data-dialog="#info-modal"
+        >
+          <div class="perspective-card__transformer">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <div class="card-art card-art--e-front"></div>
+            </div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--e-back"></div>
+            </div>
+            <div class="perspective-card__shine"></div>
+          </div>
+        </div>
+        <p class="demo-item__desc">
+          Opens into its own <code>&lt;dialog&gt;</code>
+          (<code>data-dialog</code>) and shares the modal with a content panel.
+        </p>
+      </section>
+    </main>
+
+    <!--
+      Custom dialog for the last card. CustomModalCard (custom-modal-card.js)
+      opens the card into this <dialog> instead of the library's shared one:
+      the empty slot reserves the card's landing area (via an openTargetRect
+      override) and the panel sits beside it. The component adds the
+      perspective-card__dialog class and its listeners itself.
+    -->
+    <dialog id="info-modal">
+      <div class="custom-modal__layout">
+        <div class="custom-modal__slot" aria-hidden="true"></div>
+        <aside class="custom-modal__panel">
+          <p class="custom-modal__eyebrow">Featured card</p>
+          <h2 class="custom-modal__title">Abyssal Wanderer</h2>
+          <p class="custom-modal__body">
+            A custom dialog lets the card share its modal with arbitrary content
+            — copy, metadata, calls to action. The card still flies in and flips
+            as usual; everything around it is your own markup and CSS.
+          </p>
+          <a class="custom-modal__cta" href="#">Learn more ↗</a>
+        </aside>
+      </div>
+    </dialog>
+
+    <!--
+      The etch displacement filter used by the holographic foil card. Vite
+      doesn't rewrite feImage hrefs, so etch.webp lives in public/assets/
+      (copied into the build verbatim) rather than assets/ with the others.
+    -->
+    <svg width="0" height="0" aria-hidden="true">
+      <defs>
+        <filter
+          id="foil-etch"
+          color-interpolation-filters="sRGB"
+          x="-40%"
+          y="-40%"
+          width="180%"
+          height="180%"
+        >
+          <feImage
+            href="./assets/etch.webp"
+            result="etch"
+            preserveAspectRatio="xMidYMid slice"
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="etch"
+            scale="130"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </defs>
+    </svg>
+
+  </body>
+</html>
