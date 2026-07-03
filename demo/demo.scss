@@ -323,7 +323,9 @@ $card-faces: (
   mask-image: url('./assets/mask.webp');
   mask-mode: luminance;
   mask-size: 100% 100%;
-  mix-blend-mode: color-dodge;
+  mix-blend-mode: hard-light;
+  // Full strength: dodge divides by the foil value, so it responds
+  // non-linearly - even a small opacity cut collapses the effect.
   opacity: 0.8;
   overflow: hidden;
   pointer-events: none;
@@ -350,7 +352,9 @@ $card-faces: (
 .card-foil__gradient {
   position: absolute;
   inset: -40%; // overdraw so the displacement never samples outside the layer
-  filter: url('#foil-etch');
+  // CSS filters chain after the SVG etch: push saturation and brightness so
+  // the color-dodge blend has more to bite on in the artwork's mid-tones.
+  filter: url('#foil-etch') saturate(1.6) brightness(1.15);
   background: linear-gradient(
     var(--perspective-card-angle, 0rad),
     rgba(253, 29, 29, 1) 0%,
@@ -381,7 +385,10 @@ $card-faces: (
   letter-spacing: 0.1em;
   opacity: 1;
   padding: 4px 10px;
-  pointer-events: none;
+  // Clickable: the 70px lift projects the badge outside the button's tilted
+  // hit quad, so a click-transparent badge would fall through to the page
+  // background. It lives inside the button, so its clicks bubble to it.
+  pointer-events: auto;
   position: absolute;
   right: 20px;
   text-transform: uppercase;
