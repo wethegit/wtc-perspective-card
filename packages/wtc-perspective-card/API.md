@@ -34,9 +34,11 @@ the card by clicking on it. In doing so the card flips and animates up to a
 modal style display.</p>
 <p>For accessibility, the card is operated through a real <code>button</code> element
 that covers the card. If the markup doesn&#39;t already contain a
-<code>button.perspective-card__button</code>, one is created and appended
-automatically, labelled from <code>settings.buttonLabel</code> or the
-<code>data-button-label</code> attribute. The button exposes <code>aria-haspopup=&quot;dialog&quot;</code>
+<code>button.perspective-card__button</code>, one is created automatically, labelled
+from <code>settings.buttonLabel</code> or the <code>data-button-label</code> attribute. The
+button is placed inside the card&#39;s transformer so it tilts with the card -
+the clickable area is always the card as rendered, not the untransformed
+bounds. The button exposes <code>aria-haspopup=&quot;dialog&quot;</code>
 and <code>aria-expanded</code>, can be operated with Enter/Space, and receives focus
 back when the card closes. Escape closes the open card via the dialog&#39;s
 cancel event.</p>
@@ -469,9 +471,11 @@ modal style display.
 
 For accessibility, the card is operated through a real `button` element
 that covers the card. If the markup doesn't already contain a
-`button.perspective-card__button`, one is created and appended
-automatically, labelled from `settings.buttonLabel` or the
-`data-button-label` attribute. The button exposes `aria-haspopup="dialog"`
+`button.perspective-card__button`, one is created automatically, labelled
+from `settings.buttonLabel` or the `data-button-label` attribute. The
+button is placed inside the card's transformer so it tilts with the card -
+the clickable area is always the card as rendered, not the untransformed
+bounds. The button exposes `aria-haspopup="dialog"`
 and `aria-expanded`, can be operated with Enter/Space, and receives focus
 back when the card closes. Escape closes the open card via the dialog's
 cancel event.

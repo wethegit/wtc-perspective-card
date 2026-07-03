@@ -16,6 +16,11 @@
     height: 100%;
     left: 0;
     padding: 0;
+    // Re-enable pointer events inside the pointer-transparent transformer
+    // (see below): the button is the card's only hit surface, and because it
+    // lives in the transformer it tilts with the card - the clickable area is
+    // the card as rendered, not the untransformed bounds.
+    pointer-events: auto;
     position: absolute;
     top: 0;
     transform-style: preserve-3d;
@@ -71,10 +76,11 @@
     will-change: transform;
   }
 
-  // On clickable cards all interaction runs through the trigger button.
-  // The tilting transformer sits in front of the flat button in the 3D
-  // rendering context, so it must be pointer-transparent or it would
-  // intercept clicks before they reach the button.
+  // On clickable cards all interaction runs through the trigger button, which
+  // the component moves inside the transformer. The transformer (and, by
+  // inheritance, the artwork, shine and any custom layers) is made
+  // pointer-transparent so none of them can steal clicks from the button,
+  // which re-enables pointer-events on itself above.
   .perspective-card--clickable .perspective-card__transformer {
     pointer-events: none;
   }

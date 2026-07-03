@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 *,
 *::before,
 *::after {
@@ -50,6 +52,21 @@ body {
   line-height: 1.6;
 }
 
+.site-header__links {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 // ─── Demo grid ────────────────────────────────────────────────────────────────
 
 .demo-grid {
@@ -81,9 +98,11 @@ body {
   color: var(--text-muted);
   text-align: center;
   line-height: 1.5;
-}
 
-// ─── Perspective card sizing ───────────────────────────────────────────────────
+  code {
+    font-size: 0.9em;
+  }
+}
 
 .perspective-card {
   width: var(--card-width);
@@ -91,6 +110,97 @@ body {
 }
 
 // ─── Card artwork ─────────────────────────────────────────────────────────────
+// Every face is the same recipe - two radial glows over a dark diagonal base -
+// in its own palette: (glow-1 position, glow-1, glow-2 position, glow-2,
+// base-from, base-to).
+
+$card-faces: (
+  // A - hover (indigo/violet -> amber)
+  'a-front': (
+      30% 25%,
+      rgba(150, 120, 255, 0.6),
+      75% 70%,
+      rgba(90, 60, 220, 0.5),
+      #1a1040,
+      #0e0828
+    ),
+  'a-back': (
+    60% 30%,
+    rgba(255, 190, 80, 0.5),
+    25% 75%,
+    rgba(220, 100, 50, 0.4),
+    #2a1500,
+    #1a0e00
+  ),
+  // B - ambient (teal -> purple)
+  'b-front': (
+      50% 20%,
+      rgba(60, 220, 180, 0.45),
+      80% 80%,
+      rgba(20, 160, 130, 0.4),
+      #001a18,
+      #000e0c
+    ),
+  'b-back': (
+    40% 35%,
+    rgba(180, 80, 255, 0.5),
+    70% 75%,
+    rgba(120, 40, 200, 0.4),
+    #120020,
+    #0a0014
+  ),
+  // C - clickable (rose -> gold)
+  'c-front': (
+      35% 30%,
+      rgba(255, 100, 150, 0.45),
+      70% 70%,
+      rgba(200, 60, 100, 0.4),
+      #200010,
+      #110008
+    ),
+  'c-back': (
+    55% 25%,
+    rgba(255, 215, 80, 0.45),
+    30% 75%,
+    rgba(200, 160, 30, 0.4),
+    #1a1400,
+    #0e0c00
+  ),
+  // D - custom button (deep-sea teal -> green/navy)
+  'd-front': (
+      40% 30%,
+      rgba(0, 210, 200, 0.45),
+      75% 75%,
+      rgba(0, 140, 160, 0.4),
+      #00201b,
+      #00140f
+    ),
+  'd-back': (
+    60% 35%,
+    rgba(80, 255, 109, 0.45),
+    25% 70%,
+    rgba(30, 200, 84, 0.4),
+    #000e1e,
+    #000812
+  ),
+  // E - custom dialog (magenta/violet -> cyan)
+  'e-front': (
+      35% 25%,
+      rgba(255, 90, 200, 0.5),
+      75% 75%,
+      rgba(150, 60, 230, 0.45),
+      #2a0a2e,
+      #14061a
+    ),
+  'e-back': (
+    55% 30%,
+    rgba(80, 220, 255, 0.45),
+    25% 75%,
+    rgba(40, 150, 220, 0.4),
+    #001a26,
+    #000e16
+  )
+);
 
 .card-art {
   display: block;
@@ -101,113 +211,74 @@ body {
   border-radius: var(--radius);
 }
 
-// Card A — hover (indigo/violet → amber)
-.card-art--a-front {
-  background:
-    radial-gradient(
-      ellipse at 30% 25%,
-      rgba(150, 120, 255, 0.6) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 75% 70%,
-      rgba(90, 60, 220, 0.5) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #1a1040 0%, #0e0828 100%);
-
-  // Specular glare driven by the normalized pointer position the card
-  // publishes. The card gives --perspective-card-x / -y as ~[-1, 1] with 0 at
-  // the centre; (var(--x) + 1) / 2 maps that to a 0–1 box coordinate for the
-  // gradient centre. Fades in on hover (the library adds .perspective-card--over).
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    background: radial-gradient(
-      circle at calc((var(--perspective-card-x, 0) + 1) * 50%)
-        calc((var(--perspective-card-y, 0) + 1) * 50%),
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0) 45%
-    );
+@each $name, $face in $card-faces {
+  .card-art--#{$name} {
+    background:
+      radial-gradient(
+        ellipse at list.nth($face, 1),
+        list.nth($face, 2) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse at list.nth($face, 3),
+        list.nth($face, 4) 0%,
+        transparent 50%
+      ),
+      linear-gradient(155deg, list.nth($face, 5) 0%, list.nth($face, 6) 100%);
   }
+}
+
+// ─── Hover card: specular glare ───────────────────────────────────────────────
+// Driven by the normalized tilt the card publishes: --perspective-card-x / -y
+// are ~[-1, 1] with 0 at the centre, so (v + 1) / 2 maps them to a 0-1 box
+// coordinate for the gradient centre. Fades in via the library's
+// .perspective-card--over class.
+
+.card-art--a-front::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: radial-gradient(
+    circle at calc((var(--perspective-card-x, 0) + 1) * 50%)
+      calc((var(--perspective-card-y, 0) + 1) * 50%),
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0) 45%
+  );
 }
 
 .perspective-card--over .card-art--a-front::after {
   opacity: 1;
 }
 
-// The library's .perspective-card__shine overlay sits at translateZ(0.5px) in
-// the card's preserve-3d space, so it paints in front of this front face (Z 0)
-// and masks the glare above. Lift this card's front face just past the shine
-// so the ::after specular reads. Scoped with :has() so the other demo cards
-// keep the library's default shine stacking.
+// The library's shine overlay sits at translateZ(0.5px), in front of this
+// front face (Z 0), and would mask the glare - lift the face just past it.
+// Scoped with :has() so the other cards keep the default shine stacking.
 .perspective-card__artwork--front:has(.card-art--a-front) {
   transform: translateZ(0.6px);
 }
 
-.card-art--a-back {
-  background:
-    radial-gradient(
-      ellipse at 60% 30%,
-      rgba(255, 190, 80, 0.5) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 25% 75%,
-      rgba(220, 100, 50, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #2a1500 0%, #1a0e00 100%);
-}
-
-// Card B — ambient (teal/green → purple)
-.card-art--b-front {
-  background:
-    radial-gradient(
-      ellipse at 50% 20%,
-      rgba(60, 220, 180, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 80% 80%,
-      rgba(20, 160, 130, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #001a18 0%, #000e0c 100%);
-}
-
-.card-art--b-back {
-  background:
-    radial-gradient(
-      ellipse at 40% 35%,
-      rgba(180, 80, 255, 0.5) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 70% 75%,
-      rgba(120, 40, 200, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #120020 0%, #0a0014 100%);
-}
-
-// ─── Custom foil (recipe) ─────────────────────────────────────────────────────
-// The card publishes --perspective-card-angle (tilt direction, radians),
-// --perspective-card-tilt (tilt magnitude) and --perspective-card-x /
-// --perspective-card-y (the tilt in normalized card space, ~[-1, 1], 0 =
-// centre) on the element every animation frame. This foil swings a rainbow
-// gradient with the tilt angle (etched by the SVG displacement filter in the
-// markup) and adds a specular glare that follows --x / --y.
+// ─── Holographic foil (recipe) ────────────────────────────────────────────────
+// Swings a rainbow gradient with --perspective-card-angle (the tilt direction
+// the card publishes every frame), etched by the #foil-etch displacement
+// filter defined in index.html, plus a specular glare that follows the
+// normalized tilt as above. In ambient mode the values keep animating, so the
+// foil drifts on its own.
 
 .card-foil {
   height: 100%;
   left: 0;
-  mix-blend-mode: overlay;
+  // Confine the foil to the artwork: the mask is white over the subject and
+  // card frame, engraved linework over the background and black over areas
+  // that should stay foil-free. mask-mode: luminance is required - the image
+  // is opaque, so the default alpha mode would show the foil everywhere.
+  mask-image: url('./assets/mask.webp');
+  mask-mode: luminance;
+  mask-size: 100% 100%;
+  mix-blend-mode: color-dodge;
   opacity: 0.8;
   overflow: hidden;
   pointer-events: none;
@@ -217,10 +288,6 @@ body {
   width: 100%;
   z-index: 1;
 
-  // Specular glare anchored to the (normalized) pointer position. The card
-  // gives x / y as ~[-1, 1] with 0 at the centre; (var(--x) + 1) / 2 converts
-  // that to a 0–1 box coordinate for the gradient's centre. In ambient mode
-  // the values keep animating, so the glare drifts on its own.
   &::after {
     content: '';
     position: absolute;
@@ -237,7 +304,7 @@ body {
 
 .card-foil__gradient {
   position: absolute;
-  inset: -40%;
+  inset: -40%; // overdraw so the displacement never samples outside the layer
   filter: url('#foil-etch');
   background: linear-gradient(
     var(--perspective-card-angle, 0rad),
@@ -254,8 +321,8 @@ body {
 }
 
 // ─── Custom-button badge ──────────────────────────────────────────────────────
-// The badge lives inside the user-supplied button so it's part of the
-// interactive target, but is aria-hidden so it doesn't clobber the label.
+// Lives inside the user-supplied button (part of the interactive target) but
+// aria-hidden so it doesn't clobber the button's label.
 
 .card-badge {
   background: rgba(255, 255, 255, 0.12);
@@ -274,117 +341,30 @@ body {
   right: 20px;
   text-transform: uppercase;
   // Lift the badge above the 3D-rotating transformer (max z-displacement is
-  // ~34 px at extreme tilt with perspective: 1000px on the parent).
+  // ~34px at extreme tilt with perspective: 1000px on the parent).
   transform: translateZ(70px);
   transition: opacity 0.3s ease;
 }
 
-// Fade the badge out as soon as the card starts opening (aria-expanded is
-// set to "true" at the top of the open tween, "false" at close-end).
+// The button lives inside the transformer, so on a start-flipped card (resting
+// back-to-camera, i.e. rotated 180°) the badge would face away, buried behind
+// the card. Counter-rotate it: the flip and the rotateY cancel out, leaving a
+// clean 70px lift toward the viewer.
+[data-start-flipped] .card-badge {
+  transform: rotateY(180deg) translateZ(70px);
+}
+
+// Fade the badge out as soon as the card starts opening (aria-expanded flips
+// to "true" at the top of the open tween, back to "false" at close-end).
 .perspective-card__button[aria-expanded='true'] .card-badge {
   opacity: 0;
 }
 
-// Card C — clickable (rose/gold → midnight)
-.card-art--c-front {
-  background:
-    radial-gradient(
-      ellipse at 35% 30%,
-      rgba(255, 100, 150, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 70% 70%,
-      rgba(200, 60, 100, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #200010 0%, #110008 100%);
-}
-
-.card-art--c-back {
-  background:
-    radial-gradient(
-      ellipse at 55% 25%,
-      rgba(255, 215, 80, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 30% 75%,
-      rgba(200, 160, 30, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #1a1400 0%, #0e0c00 100%);
-}
-
-// Card D — custom button (deep-sea teal/cyan → dark navy)
-.card-art--d-front {
-  background:
-    radial-gradient(
-      ellipse at 40% 30%,
-      rgba(0, 210, 200, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 75% 75%,
-      rgba(0, 140, 160, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #00201b 0%, #00140f 100%);
-}
-
-.card-art--d-back {
-  background:
-    radial-gradient(
-      ellipse at 60% 35%,
-      rgba(80, 255, 109, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 25% 70%,
-      rgba(30, 200, 84, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #000e1e 0%, #000812 100%);
-}
-
-// Card E — custom dialog (magenta/violet → cyan)
-.card-art--e-front {
-  background:
-    radial-gradient(
-      ellipse at 35% 25%,
-      rgba(255, 90, 200, 0.5) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 75% 75%,
-      rgba(150, 60, 230, 0.45) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #2a0a2e 0%, #14061a 100%);
-}
-
-.card-art--e-back {
-  background:
-    radial-gradient(
-      ellipse at 55% 30%,
-      rgba(80, 220, 255, 0.45) 0%,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse at 25% 75%,
-      rgba(40, 150, 220, 0.4) 0%,
-      transparent 50%
-    ),
-    linear-gradient(155deg, #001a26 0%, #000e16 100%);
-}
-
 // ─── Custom dialog (recipe) ───────────────────────────────────────────────────
-// CustomModalCard (demo/custom-modal-card.js) moves the card into the
-// #info-modal <dialog> instead of the library's shared one, and overrides
-// openTargetRect to land the card in the .custom-modal__slot below rather than
-// the viewport centre. The <dialog> centres this layout; the empty slot
-// reserves the card's space so the panel sits beside it. The card itself is
-// position: fixed (set by the library) and animates on top of the slot.
+// CustomModalCard (custom-modal-card.js) opens the card into #info-modal
+// instead of the library's shared dialog, and overrides openTargetRect to land
+// the card in the empty .custom-modal__slot rather than the viewport centre.
+// The slot reserves the card's space in this layout; the panel sits beside it.
 
 .custom-modal__layout {
   display: flex;
@@ -413,11 +393,9 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: var(--text);
 
-  // Resting (open) state. The panel is revealed from the dialog's display:none
-  // subtree when it opens, so a plain opacity 0 -> 1 won't animate: there's no
-  // prior value to transition from, so it just pops in. @starting-style (below)
-  // supplies that "before-open" value, so the fade actually runs. The delay
-  // lets the card animate in first.
+  // The panel is revealed from the dialog's display:none subtree on open, so
+  // a plain 0 -> 1 fade has no prior value to transition from; @starting-style
+  // (below) supplies it. The delay lets the card animate in first.
   opacity: 1;
   translate: 0 0;
   transition:
@@ -433,9 +411,8 @@ body {
   }
 }
 
-// Fade back out in step with the library's close sequence: it adds this class
-// to the dialog while the card animates down, before calling dialog.close().
-// No delay here so the panel leaves promptly rather than 0.3s late.
+// Fade back out in step with the library's close sequence (it adds this class
+// to the dialog while the card animates down). No delay on the way out.
 .perspective-card__dialog--closing .custom-modal__panel {
   opacity: 0;
   translate: 0 1rem;
@@ -444,7 +421,7 @@ body {
     translate 0.3s ease;
 }
 
-// Stack the panel below the card on narrow screens (chosen behaviour).
+// Stack the panel below the card on narrow screens.
 @media (max-width: 720px) {
   .custom-modal__layout {
     flex-direction: column;

@@ -31,9 +31,11 @@ const easeInOutSine = function (time, start, change, duration) {
  *
  * For accessibility, the card is operated through a real `button` element
  * that covers the card. If the markup doesn't already contain a
- * `button.perspective-card__button`, one is created and appended
- * automatically, labelled from `settings.buttonLabel` or the
- * `data-button-label` attribute. The button exposes `aria-haspopup="dialog"`
+ * `button.perspective-card__button`, one is created automatically, labelled
+ * from `settings.buttonLabel` or the `data-button-label` attribute. The
+ * button is placed inside the card's transformer so it tilts with the card -
+ * the clickable area is always the card as rendered, not the untransformed
+ * bounds. The button exposes `aria-haspopup="dialog"`
  * and `aria-expanded`, can be operated with Enter/Space, and receives focus
  * back when the card closes. Escape closes the open card via the dialog's
  * cancel event.
@@ -131,8 +133,13 @@ class ClickablePerspectiveCard extends PerspectiveCard {
       this.button.type = 'button'
       this.button.className = CSSCLASSES.button
       this.button.setAttribute('aria-label', buttonLabel)
-      this.element.appendChild(this.button)
     }
+    // The button lives inside the transformer (pre-supplied buttons are moved
+    // here) so it tilts with the card: its hit area is the card as rendered,
+    // not the untransformed bounds. Hover enter/leave stays on the flat
+    // element rect - a hit area that tilted away from the pointer would
+    // leave/re-enter in a feedback loop.
+    this.transformer.appendChild(this.button)
     this.button.setAttribute('aria-haspopup', 'dialog')
     this.button.setAttribute('aria-expanded', 'false')
     this.button.addEventListener('click', this.onButtonClick)
