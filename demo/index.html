@@ -31,17 +31,23 @@
             .perspective-card__artwork--back
             .perspective-card__shine
 
-      main.js instantiates each card by its js-* class.
+      main.js instantiates each card by its js-* class, and markup-dialog.js
+      injects a "View markup" button under each demo that opens this markup,
+      annotated, in a dialog.
     -->
     <main class="demo-grid">
       <section class="demo-item">
         <h2 class="demo-item__label">Hover</h2>
         <div class="perspective-card js-card">
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
               <div class="card-art card-art--a-front"></div>
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
               <div class="card-art card-art--a-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
@@ -54,10 +60,14 @@
         <h2 class="demo-item__label">Ambient</h2>
         <div class="perspective-card js-card" data-ambient>
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
               <div class="card-art card-art--b-front"></div>
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
               <div class="card-art card-art--b-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
@@ -76,10 +86,14 @@
           data-button-label="Expand card"
         >
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
               <div class="card-art card-art--c-front"></div>
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
               <div class="card-art card-art--c-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
@@ -102,13 +116,18 @@
           class="perspective-card js-card--clickable"
           data-ambient="2"
           data-button-label="Expand holographic card"
+          data-duration="1200"
         >
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
               <img src="./assets/matte.png" alt="Pikachu trading card" />
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
-              <img src="./assets/matte.png" alt="Pikachu trading card" />
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--foil-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
             <div class="card-foil" aria-hidden="true">
@@ -135,11 +154,15 @@
           data-start-flipped
         >
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
-              <div class="card-art card-art--d-front"></div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
+              <img src="./assets/matte2.png" alt="Pikachu VMAX trading card" />
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
-              <div class="card-art card-art--d-back"></div>
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
+              <div class="card-art card-art--foil-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
           </div>
@@ -166,10 +189,14 @@
           data-dialog="#info-modal"
         >
           <div class="perspective-card__transformer">
-            <div class="perspective-card__artwork perspective-card__artwork--front">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--front"
+            >
               <div class="card-art card-art--e-front"></div>
             </div>
-            <div class="perspective-card__artwork perspective-card__artwork--back">
+            <div
+              class="perspective-card__artwork perspective-card__artwork--back"
+            >
               <div class="card-art card-art--e-back"></div>
             </div>
             <div class="perspective-card__shine"></div>
@@ -196,9 +223,9 @@
           <p class="custom-modal__eyebrow">Featured card</p>
           <h2 class="custom-modal__title">Abyssal Wanderer</h2>
           <p class="custom-modal__body">
-            A custom dialog lets the card share its modal with arbitrary
-            content — copy, metadata, calls to action. The card still flies in
-            and flips as usual; everything around it is your own markup and CSS.
+            A custom dialog lets the card share its modal with arbitrary content
+            — copy, metadata, calls to action. The card still flies in and flips
+            as usual; everything around it is your own markup and CSS.
           </p>
           <a class="custom-modal__cta" href="#">Learn more ↗</a>
         </aside>
