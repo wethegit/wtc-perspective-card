@@ -34,7 +34,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
+    "build": "rm -rf ./dist && vite build && sass src/wtc-perspective-card.scss dist/wtc-perspective-card.css --no-source-map --style compressed",
     "prepublishOnly": "pnpm run build",
     "document": "{ echo '# API reference'; echo; echo '> Generated from the source JSDoc by `pnpm document` - do not edit by hand.'; echo; jsdoc2md src/perspective-card.js src/clickable-perspective-card.js; } > API.md"
   },
