@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       prettier:
-        specifier: ~3.8.4
-        version: 3.8.5
+        specifier: ~3.9.6
+        version: 3.9.6
 
   demo:
     devDependencies:
@@ -621,8 +621,8 @@ packages:
     resolution: {integrity: sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.8.5:
-    resolution: {integrity: sha512-zxcTTCedNGJM4R8sj/Cq/F0W/c4iE0afWBcBwMTRtw4WHYP9TWkYjdiH3npPRUYsXQCPR0hTU9yjovOu+E6EQA==}
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -1258,7 +1258,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  prettier@3.8.5: {}
+  prettier@3.9.6: {}
 
   punycode.js@2.3.1: {}
 
